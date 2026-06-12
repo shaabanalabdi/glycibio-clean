@@ -1,0 +1,200 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+.about {
+  max-width: 61.25rem;                     // 980 → 61.25rem
+  margin: 0 auto;
+  padding-block: $space-fluid-lg;
+  padding-inline: $container-pad;
+
+  // ============================================================
+  // Hero header
+  // ============================================================
+  &__hero {
+    text-align: center;
+    margin-bottom: $space-fluid-xl;
+
+    h1 {
+      font-size: $fs-2xl;
+      color: $primary;
+      line-height: $lh-tight;
+      margin-bottom: $space-sm;
+      text-wrap: balance;
+    }
+  }
+
+  &__lede {
+    font-size: $fs-md;
+    color: $text-muted;
+    max-width: 45rem;
+    margin: 0 auto;
+    line-height: $lh-base;
+    text-wrap: pretty;
+  }
+
+  // ============================================================
+  // Pillars — fluid auto-grid
+  // ============================================================
+  &__pillars {
+    @include auto-grid(16rem, $space-md);
+    margin-bottom: $space-fluid-xl;
+  }
+
+  &__pillar {
+    background: $surface;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    padding: $space-lg $space-md;
+    text-align: center;
+    transition: transform $t-base $ease, box-shadow $t-base $ease, background-color $t-base $ease;
+
+    @include hover {
+      transform: translateY(-0.125rem);
+      box-shadow: $shadow-md;
+    }
+
+    svg {
+      color: $primary;
+      margin-bottom: $space-sm;
+    }
+
+    h2 {
+      font-size: $fs-md;
+      color: $text-strong;
+      margin-bottom: $space-2xs;
+    }
+
+    p {
+      color: $text-muted;
+      font-size: $fs-sm;
+      line-height: $lh-base;
+      margin: 0;
+    }
+  }
+
+  // ============================================================
+  // Values — engagement list with checkmarks
+  // ============================================================
+  &__values {
+    background: rgba($primary, 0.04);
+    border-left: 4px solid $primary;
+    border-radius: $radius-lg;
+    padding: $space-md $space-lg;
+    margin-bottom: $space-fluid-xl;
+
+    @include breakpoint(md) {
+      padding: $space-lg $space-xl;
+    }
+
+    h2 {
+      font-size: $fs-xl;
+      color: $primary;
+      margin-bottom: $space-md;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: $space-md;
+
+      @include breakpoint(md) {
+        grid-template-columns: 1fr 1fr;
+        gap: $space-md $space-lg;
+      }
+    }
+
+    li {
+      color: $text;
+      line-height: $lh-base;
+      padding-inline-start: $space-lg;
+      position: relative;
+
+      strong { color: $text-strong; }
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0;
+        top: 0.2em;
+        width: 1.125rem;
+        height: 1.125rem;
+        border-radius: 50%;
+        background: $primary;
+        // Inline SVG checkmark — sharper than text glyph
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 8.5l3.5 3.5L13 5'/></svg>");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 0.75rem;
+      }
+    }
+  }
+
+  // ============================================================
+  // CTA — premium gradient callout
+  // ============================================================
+  &__cta {
+    position: relative;
+    text-align: center;
+    background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+    color: $white;
+    border-radius: $radius-xl;
+    padding: $space-fluid-lg $space-fluid-md;
+    box-shadow: $shadow-md;
+    overflow: hidden;
+
+    // Decorative blurred shapes (premium feel) — purely visual
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 16rem;
+      height: 16rem;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba($secondary-light, 0.35), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    &::before { top: -6rem; inset-inline-end: -4rem; }
+    &::after  { bottom: -8rem; inset-inline-start: -4rem; opacity: 0.6; }
+
+    > * { position: relative; z-index: 1; }
+
+    h2 {
+      font-size: $fs-xl;
+      color: $white;
+      margin-bottom: $space-2xs;
+      text-wrap: balance;
+    }
+
+    p {
+      color: rgba($white, 0.92);
+      font-size: $fs-base;
+      line-height: $lh-base;
+      max-width: 38rem;
+      margin-inline: auto;
+      text-wrap: pretty;
+    }
+
+    a {
+      color: $white;
+      font-weight: $fw-semibold;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.25em;
+      text-decoration-color: rgba($white, 0.5);
+      transition: text-decoration-color $t-fast $ease;
+
+      @include hover { text-decoration-color: $white; }
+      &:focus-visible {
+        outline: 2px solid $white;
+        outline-offset: 4px;
+        border-radius: $radius-sm;
+      }
+    }
+  }
+}

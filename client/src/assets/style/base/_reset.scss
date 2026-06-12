@@ -1,0 +1,349 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/theme' as *;
+@use '../abstracts/mixins' as *;
+
+// ============================================================
+// Reset + base typography (rem + clamp fluid scale)
+// ============================================================
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: $font-size-base;    // 100% — respects browser zoom + user preference
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%; // prevent iOS landscape text inflation
+  text-size-adjust: 100%;
+  hanging-punctuation: first last;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  font-family: $font-primary;
+  font-size: $fs-base;
+  color: $text;
+  background-color: $bg;
+  line-height: $lh-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  // Premium font features : ligatures + chiffres proportionnels par defaut
+  // (les tabulaires sont activees ponctuellement pour les prix via la regle
+  // .product-card__price, etc.)
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
+  font-variant-ligatures: common-ligatures contextual;
+  -webkit-text-rendering: optimizeLegibility;
+  letter-spacing: -0.005em;            // tres subtil tightening pour les UI modernes
+  min-height: 100dvh; // dynamic viewport — fixes mobile address-bar gap
+  transition: background-color $t-base $ease, color $t-base $ease;
+}
+
+// Respecte le theme aussi sur color-scheme natif (scrollbars, formulaires)
+:root[data-theme='dark'] { color-scheme: dark; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) { color-scheme: dark; }
+}
+
+// Links
+a {
+  text-decoration: none;
+  color: inherit;
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+}
+
+// Lists
+ul, ol { list-style: none; }
+
+// Media
+img, picture, video, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Form controls
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+// Headings — fluid scale (override per-component as needed)
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-heading;
+  font-weight: $fw-semibold;
+  line-height: $lh-tight;
+  text-wrap: balance; // headlines wrap to balanced lines (no orphans)
+  // Tightening progressif sur les gros titres - convention typographique
+  // premium (Apple, Linear, Stripe) : plus le texte est gros, plus on serre.
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: $fs-3xl; letter-spacing: -0.035em; }
+h2 { font-size: $fs-2xl; letter-spacing: -0.025em; }
+h3 { font-size: $fs-xl;  letter-spacing: -0.015em; }
+h4 { font-size: $fs-lg; }
+h5 { font-size: $fs-md; }
+h6 { font-size: $fs-base; }
+
+p {
+  text-wrap: pretty; // better paragraph wrapping (modern browsers)
+  max-width: 70ch;   // optimal reading length (default — can be overridden)
+}
+
+// Selection
+::selection {
+  background: rgba($primary, 0.2);
+  color: $gray-900;
+}
+
+// ============================================================
+// Utility classes (used across pages)
+// ============================================================
+.page-loading {
+  text-align: center;
+  padding: $space-fluid-lg $space-sm;
+  color: $text-muted;
+  font-size: $fs-md;
+}
+
+.sr-only {
+  @include sr-only;
+}
+
+.sr-only-focusable {
+  position: absolute;
+  inset-inline-start: $space-2xs;
+  top: $space-2xs;
+  padding: $space-2xs $space-sm;
+  background: $primary;
+  color: $white;
+  border-radius: $radius-sm;
+  font-weight: $fw-semibold;
+  z-index: 1000;
+  transform: translateY(-200%);
+  transition: transform $t-base $ease;
+
+  &:focus { transform: translateY(0); }
+}
+
+// ============================================================
+// TopProgressBar - indicateur 2px haut pendant les transitions
+// ============================================================
+.top-progress {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  height: 2px;
+  z-index: 9999;          // au-dessus de tout, navbar + modals compris
+  pointer-events: none;
+  background: transparent;
+}
+
+.top-progress__bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, $primary 0%, $secondary-dark 100%);
+  transform-origin: left center;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 300ms ease;
+  box-shadow: 0 0 8px rgba(36, 157, 223, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-progress__bar {
+    transition: opacity 200ms ease;
+    box-shadow: none;
+  }
+}
+
+// ============================================================
+// ScrollReveal - fade + lift subtil a l'entree dans le viewport
+// ============================================================
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+
+  &--visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.error-boundary {
+  max-width: 35rem;
+  margin: $space-fluid-xl auto;
+  padding: $space-fluid-md;
+  text-align: center;
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+
+  h1 { color: $error; margin-bottom: $space-sm; }
+  p { color: $gray-700; margin: 0 auto $space-md; }
+}
+
+.withdrawal-form__signature-space {
+  height: 3.75rem;
+}
+
+.withdrawal-form__footnote {
+  margin-top: $space-md;
+  font-size: $fs-sm;
+  color: $gray-600;
+}
+
+// ============================================================
+// View Transitions (React Router v7 <Link viewTransition>)
+// Cross-fade 200ms entre pages. Sans effet sur les navigateurs
+// qui ne supportent pas startViewTransition (Firefox < 124 etc.).
+// ============================================================
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: $ease;
+}
+
+::view-transition-old(root) {
+  animation-name: vt-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: vt-fade-in;
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+// ============================================================
+// Theme toggle - rotation subtile au switch
+// ============================================================
+.theme-toggle {
+  svg {
+    transition: transform $t-base $ease;
+  }
+  &:hover svg { transform: rotate(12deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle:hover svg { transform: none; }
+}
+
+// ============================================================
+// Skeleton - placeholders animes pendant le chargement
+// ============================================================
+.skeleton {
+  display: block;
+  background-color: $skeleton-base;
+  background-image: linear-gradient(
+    90deg,
+    $skeleton-base 0%,
+    $skeleton-shine 50%,
+    $skeleton-base 100%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: $radius-sm;
+
+  // Lignes de texte
+  &--line {
+    height: 0.875rem;
+    margin-bottom: $space-3xs;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
+
+// ============================================================
+// EmptyState - utilitaire reutilisable
+// ============================================================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $space-2xs;
+  padding: $space-fluid-md $space-sm;
+  color: $text-muted;
+
+  &__icon {
+    color: $text-faint;
+    margin-bottom: $space-2xs;
+  }
+
+  &__title {
+    font-size: $fs-md;
+    color: $text-strong;
+    font-weight: $fw-semibold;
+    margin: 0;
+  }
+
+  &__hint {
+    font-size: $fs-sm;
+    color: $text-faint;
+    max-width: 36ch;
+    margin: 0;
+  }
+
+  &__action {
+    margin-top: $space-2xs;
+  }
+
+  // Variante compacte pour les cellules de tableau / panneaux
+  &--sm {
+    padding: $space-md $space-sm;
+    .empty-state__title { font-size: $fs-base; }
+  }
+}

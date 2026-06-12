@@ -1,0 +1,101 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/theme' as *;
+@use '../abstracts/mixins' as *;
+
+// ============================================================
+// Legal pages (mentions, CGV, privacy, cookies, retractation)
+// ============================================================
+.legal-page {
+  max-width: 54rem;                          // 860px -> rem
+  margin: 0 auto;
+  padding: $space-fluid-lg $space-fluid-md;
+
+  h1 {
+    color: $primary;
+    font-size: $fs-2xl;
+    margin-bottom: $space-2xs;
+  }
+
+  &__updated {
+    color: $text-muted;
+    font-size: $fs-sm;
+    margin-bottom: $space-lg;
+  }
+
+  &__container {
+    background: $surface;
+    padding: $space-fluid-md;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    transition: background-color $t-base $ease;
+  }
+
+  &__section {
+    margin-bottom: $space-lg;
+    padding-bottom: $space-lg;
+    border-bottom: 1px solid $border;
+
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    h2 {
+      color: $text-strong;
+      font-size: $fs-lg;
+      margin-bottom: $space-sm;
+    }
+
+    p, li {
+      color: $text-muted;
+      line-height: $lh-loose;
+      margin-bottom: $space-2xs;
+    }
+
+    ol, ul {
+      padding-inline-start: $space-lg;
+      margin-bottom: $space-sm;
+    }
+
+    a {
+      color: $primary;
+      text-decoration: underline;
+      @include hover { color: $primary-dark; }
+      &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+    }
+  }
+}
+
+.withdrawal-form {
+  &__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: $space-md;
+  }
+
+  &__fields {
+    background: $gray-100;
+    padding: $space-md;
+    border-radius: $radius;
+    margin: $space-md 0;
+    font-family: monospace;
+    font-size: $fs-sm;
+    line-height: 2.2;
+  }
+}
+
+@media print {
+  .navbar,
+  .footer,
+  .top-bar,
+  .cookie-banner,
+  .print-hide {
+    display: none !important;
+  }
+
+  .legal-page,
+  .withdrawal-form { padding: 0; }
+
+  body { background: $white; color: $gray-900; }
+}

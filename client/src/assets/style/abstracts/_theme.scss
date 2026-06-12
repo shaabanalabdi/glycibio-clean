@@ -1,0 +1,162 @@
+@use 'variables' as *;
+@forward 'theme-tokens';
+
+// ============================================================
+// Theme tokens — CSS custom properties resolved at runtime.
+//
+// Strategie :
+//   - :root          -> mode clair par defaut
+//   - data-theme="dark" sur <html>   -> bascule manuelle (toggle utilisateur)
+//   - data-theme="light" sur <html>  -> opt-out explicite du dark systeme
+//   - @media (prefers-color-scheme: dark) -> bascule auto si pas d'opt-out
+//   - @media (prefers-contrast: more) -> palette ultra-contraste
+//
+// Les composants n'utilisent QUE les tokens semantiques ($bg, $surface,
+// $text, etc.) — jamais les hex bruts. Cela permet de changer la palette
+// sans toucher le code des composants.
+// ============================================================
+
+:root {
+  // Surfaces (du plus arriere au plus avant)
+  --color-bg:               #{$gray-100};   // body
+  --color-surface:          #{$white};      // cards, navbar, footer
+  --color-surface-alt:      #{$gray-100};   // hover/secondary surface
+  --color-surface-elevated: #{$white};      // modals, drawers
+  --color-overlay:          rgba(0, 0, 0, 0.5);
+
+  // Texte
+  --color-text:             #{$gray-800};
+  --color-text-strong:      #{$gray-900};
+  --color-text-muted:       #{$gray-700};
+  --color-text-faint:       #{$gray-600};
+  --color-text-on-primary:  #{$white};
+
+  // Bordures
+  --color-border:           #{$gray-200};
+  --color-border-strong:    #{$gray-300};
+
+  // Inputs
+  --color-input-bg:         #{$white};
+  --color-input-border:     #{$gray-300};
+  --color-input-disabled:   #{$gray-100};
+
+  // Boutons icone / surface tactile
+  --color-button-ghost-hover: #{$gray-100};
+
+  // Etats semantiques (background tints utilises dans .toast, banners, etc.)
+  --color-success-bg:       #d4edda;
+  --color-success-fg:       #155724;
+  --color-error-bg:         #f8d7da;
+  --color-error-fg:         #{$error};
+  --color-warning-bg:       #fff3cd;
+  --color-warning-fg:       #856404;
+  --color-info-bg:          #d1ecf1;
+  --color-info-fg:          #0c5460;
+
+  // Skeleton
+  --color-skeleton-base:    #{$gray-200};
+  --color-skeleton-shine:   #{$gray-100};
+}
+
+// ============================================================
+// Mode sombre (manuel via data-theme="dark")
+// ============================================================
+:root[data-theme='dark'] {
+  // Surfaces - palette neutre froide, contrastes calibres pour AA
+  --color-bg:               #0f1419;
+  --color-surface:          #1a2026;
+  --color-surface-alt:      #232b33;
+  --color-surface-elevated: #232b33;
+  --color-overlay:          rgba(0, 0, 0, 0.7);
+
+  // Texte (>= 4.5:1 sur bg/surface)
+  --color-text:             #e8eaed;        // 14.2:1 vs #1a2026
+  --color-text-strong:      #ffffff;
+  --color-text-muted:       #aab0b6;        // 7.0:1
+  --color-text-faint:       #8a9098;        // 4.7:1
+  --color-text-on-primary:  #{$white};
+
+  --color-border:           #2a323b;
+  --color-border-strong:    #3a4350;
+
+  --color-input-bg:         #232b33;
+  --color-input-border:     #3a4350;
+  --color-input-disabled:   #1a2026;
+
+  --color-button-ghost-hover: #2a323b;
+
+  --color-success-bg:       rgba(40, 167, 69, 0.16);
+  --color-success-fg:       #6dd482;
+  --color-error-bg:         rgba(220, 53, 69, 0.18);
+  --color-error-fg:         #ff8088;
+  --color-warning-bg:       rgba(255, 193, 7, 0.18);
+  --color-warning-fg:       #ffd55a;
+  --color-info-bg:          rgba(23, 162, 184, 0.18);
+  --color-info-fg:          #6cc2d1;
+
+  --color-skeleton-base:    #232b33;
+  --color-skeleton-shine:   #2a323b;
+}
+
+// ============================================================
+// Mode sombre (auto via systeme) -- s'applique sauf si l'utilisateur
+// a explicitement choisi le mode clair via le toggle.
+// ============================================================
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    --color-bg:               #0f1419;
+    --color-surface:          #1a2026;
+    --color-surface-alt:      #232b33;
+    --color-surface-elevated: #232b33;
+    --color-overlay:          rgba(0, 0, 0, 0.7);
+    --color-text:             #e8eaed;
+    --color-text-strong:      #ffffff;
+    --color-text-muted:       #aab0b6;
+    --color-text-faint:       #8a9098;
+    --color-border:           #2a323b;
+    --color-border-strong:    #3a4350;
+    --color-input-bg:         #232b33;
+    --color-input-border:     #3a4350;
+    --color-input-disabled:   #1a2026;
+    --color-button-ghost-hover: #2a323b;
+    --color-success-bg:       rgba(40, 167, 69, 0.16);
+    --color-success-fg:       #6dd482;
+    --color-error-bg:         rgba(220, 53, 69, 0.18);
+    --color-error-fg:         #ff8088;
+    --color-warning-bg:       rgba(255, 193, 7, 0.18);
+    --color-warning-fg:       #ffd55a;
+    --color-info-bg:          rgba(23, 162, 184, 0.18);
+    --color-info-fg:          #6cc2d1;
+    --color-skeleton-base:    #232b33;
+    --color-skeleton-shine:   #2a323b;
+  }
+}
+
+// ============================================================
+// Contraste eleve (accessibilite ANSI/W3C "prefers-contrast: more")
+// Pousse les contrastes a >= 7:1 (AAA) et durcit les bordures.
+// ============================================================
+@media (prefers-contrast: more) {
+  :root {
+    --color-text:          #{$gray-900};
+    --color-text-muted:    #{$gray-800};
+    --color-text-faint:    #{$gray-700};
+    --color-border:        #{$gray-700};
+    --color-border-strong: #{$gray-900};
+  }
+
+  :root[data-theme='dark'],
+  :root:not([data-theme='light']) {
+    @media (prefers-color-scheme: dark) {
+      --color-text:          #ffffff;
+      --color-text-muted:    #f0f0f0;
+      --color-text-faint:    #d0d0d0;
+      --color-border:        #6a7280;
+      --color-border-strong: #aab0b6;
+    }
+  }
+}
+
+// Aliases SCSS ($surface, $text, etc.) : re-exportes depuis _theme-tokens.scss
+// via le @forward en tete de ce fichier (module sans CSS, utilisable par les
+// style.scss de composants sans dupliquer les blocs :root).

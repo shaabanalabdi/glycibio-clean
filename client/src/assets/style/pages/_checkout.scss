@@ -1,0 +1,363 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/theme' as *;
+@use '../abstracts/mixins' as *;
+
+// ============================================================
+// Stepper
+// ============================================================
+.checkout-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 $space-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-sm;
+  flex-wrap: wrap;
+
+  &__step {
+    display: flex;
+    align-items: center;
+    gap: $space-3xs;
+    color: $text-faint;
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    position: relative;
+
+    &:not(:last-child)::after {
+      content: '';
+      display: inline-block;
+      width: 2.5rem;
+      height: 2px;
+      background: $border;
+      margin-inline-start: $space-2xs;
+
+      @include responsive(sm) { display: none; }
+    }
+
+    &--active {
+      color: $primary;
+
+      .checkout-steps__num {
+        background: $primary;
+        color: $text-on-primary;
+        border-color: $primary;
+      }
+    }
+
+    &--done {
+      color: $success;
+
+      .checkout-steps__num {
+        background: $success;
+        color: $text-on-primary;
+        border-color: $success;
+      }
+
+      &::after { background: $success; }
+    }
+  }
+
+  &__num {
+    @include flex-center;
+    width: 1.75rem;                        // 28px — decorative, no tap
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 2px solid $border-strong;
+    background: $surface;
+    font-weight: $fw-bold;
+    font-size: $fs-sm;
+  }
+}
+
+// ============================================================
+// Confirmation
+// ============================================================
+.checkout-success {
+  @include flex-center;
+  flex-direction: column;
+  gap: $space-sm;
+  padding: $space-2xl $space-sm;
+  text-align: center;
+
+  &__icon {
+    @include flex-center;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    background: $success;
+    color: $white;
+    font-size: $fs-2xl;
+  }
+
+  h1 { color: $text-strong; font-size: $fs-2xl; }
+  p  { color: $text-muted; margin-bottom: $space-sm; }
+
+  &__error { color: $error; font-weight: $fw-medium; }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-sm;
+    justify-content: center;
+    margin-top: $space-md;
+  }
+}
+
+// ============================================================
+// Checkout main
+// ============================================================
+.checkout {
+  max-width: 47rem;                        // 750px → rem
+  margin: 0 auto;
+
+  h1 {
+    font-size: $fs-2xl;
+    color: $text-strong;
+    margin-bottom: $space-lg;
+  }
+
+  &__error {
+    background: $error-bg;
+    color: $error-fg;
+    padding: $space-2xs $space-sm;
+    border-radius: $radius-sm;
+    margin-bottom: $space-sm;
+  }
+
+  &__step {
+    background: $surface;
+    padding: $space-md;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    margin-bottom: $space-md;
+    transition: background-color $t-base $ease;
+
+    @include breakpoint(md) {
+      padding: $space-lg;
+    }
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: $space-2xs;
+      font-size: $fs-lg;
+      color: $primary;
+      margin-bottom: $space-md;
+      padding-bottom: $space-2xs;
+      border-bottom: 1px solid $border;
+
+      svg { color: $primary; }
+    }
+
+    textarea,
+    input[type='text'],
+    input[type='tel'],
+    input[type='email'],
+    select {
+      @include form-input;
+    }
+
+    textarea { resize: vertical; min-height: 5rem; }
+  }
+
+  &__field {
+    margin-bottom: $space-sm;
+
+    label {
+      @include form-label;
+
+      span[aria-hidden='true'] {
+        color: $error;
+        margin-inline-start: 2px;
+      }
+    }
+
+    &--narrow { flex: 0 0 auto; }
+  }
+
+  &__hint {
+    @include form-hint;
+  }
+
+  &__row {
+    display: grid;
+    gap: $space-sm;
+    margin-bottom: 0;
+
+    // Mobile: stack
+    grid-template-columns: 1fr;
+
+    @include breakpoint(sm) {
+      &--2 { grid-template-columns: minmax(7rem, 9rem) 1fr; }   // civility + name
+      &--3 { grid-template-columns: minmax(6rem, 7.5rem) 1fr 1fr; }
+    }
+
+    .checkout__field { margin-bottom: $space-sm; }
+  }
+
+  // Shipping options
+  &__shipping-options {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2xs;
+  }
+
+  &__shipping-option {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    padding: $space-sm;
+    border: 2px solid $border;
+    border-radius: $radius;
+    cursor: pointer;
+    min-height: $tap-target;
+    transition: border-color $t-fast $ease, background $t-fast $ease;
+
+    @include hover { border-color: $primary-light; }
+
+    &--selected {
+      border-color: $primary;
+      background: rgba($primary, 0.06);
+    }
+
+    input[type="radio"] {
+      accent-color: $primary;
+      width: 1.125rem;
+      height: 1.125rem;
+      cursor: pointer;
+    }
+
+    > div {
+      flex: 1;
+      min-width: 0;
+      strong { display: block; color: $text-strong; font-size: $fs-base; }
+      p      { color: $text-muted; font-size: $fs-sm; margin-top: 0.125rem; }
+    }
+  }
+
+  &__shipping-price {
+    font-weight: $fw-bold;
+    color: $primary;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Recap
+  &__recap {
+    margin-bottom: $space-md;
+  }
+
+  &__recap-item {
+    @include flex-between;
+    padding: $space-3xs 0;
+    color: $text-muted;
+    font-size: $fs-sm;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__recap-line {
+    @include flex-between;
+    padding: $space-2xs 0;
+    color: $text-muted;
+    font-size: $fs-sm;
+    border-top: 1px solid $border;
+    margin-top: $space-2xs;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__recap-total {
+    @include flex-between;
+    padding-top: $space-sm;
+    margin-top: $space-2xs;
+    border-top: 2px solid $border;
+    font-size: $fs-xl;
+    font-weight: $fw-bold;
+    color: $text-strong;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // CGV acceptance (legal obligation under Art. L121-19-3)
+  &__cgv {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-2xs;
+    margin: $space-sm 0;
+    padding: $space-2xs $space-sm;
+    background: $surface-alt;
+    border-radius: $radius-sm;
+    font-size: $fs-sm;
+    color: $text-strong;
+    line-height: $lh-snug;
+    cursor: pointer;
+
+    input[type='checkbox'] {
+      flex-shrink: 0;
+      margin-top: 0.25em;
+      width: 1.125rem;
+      height: 1.125rem;
+      cursor: pointer;
+    }
+
+    a {
+      color: $primary;
+      text-decoration: underline;
+      @include hover { color: $primary-dark; }
+    }
+  }
+
+  // Trust signals
+  &__trust {
+    margin-top: $space-md;
+    padding-top: $space-sm;
+    border-top: 1px solid $border;
+    text-align: center;
+  }
+
+  &__trust-headline {
+    font-size: $fs-sm;
+    color: $text-muted;
+    margin-bottom: $space-2xs;
+  }
+
+  &__trust-badges {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: $space-2xs;
+    margin-bottom: $space-sm;
+  }
+
+  &__trust-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    font-size: $fs-xs;
+    color: $text-muted;
+
+    li::before { content: '\2713  '; color: $success; font-weight: $fw-bold; }
+  }
+}
+
+// Trust badges (Stripe, Visa, etc.)
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $fs-xs;
+  font-weight: $fw-bold;
+  letter-spacing: 0.03em;
+  padding: $space-3xs $space-2xs;
+  border-radius: $radius-sm;
+  border: 1px solid $border-strong;
+  background: $surface;
+  color: $text-muted;
+
+  &--stripe { background: #635bff; color: #fff; border-color: #635bff; }
+  &--visa   { background: #1a1f71; color: #fff; border-color: #1a1f71; }
+  &--mc     { background: #eb001b; color: #fff; border-color: #eb001b; }
+  &--ssl    { background: #16a34a; color: #fff; border-color: #16a34a; }
+}

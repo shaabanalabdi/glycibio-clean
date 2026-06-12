@@ -1,0 +1,118 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+.footer {
+  position: relative;
+  // Gradient subtil pour profondeur (gray-900 -> gray-800 du haut au bas)
+  background: linear-gradient(180deg, $gray-900 0%, $gray-800 100%);
+  color: $gray-300;
+  margin-top: $space-fluid-xl;
+
+  // Top border accent - 1px ligne premium (vs bord plat)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    inset-inline: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba($primary, 0.4) 30%,
+      rgba($primary, 0.4) 70%,
+      transparent 100%
+    );
+  }
+
+  &__container {
+    @include container;
+    padding-block: $space-xl $space-md;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-lg;
+
+    // Tablet: 2 columns
+    @include breakpoint(sm) {
+      grid-template-columns: 1fr 1fr;
+      gap: $space-lg;
+    }
+
+    // Desktop: brand wider, then 3 equal link columns
+    @include breakpoint(md) {
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: $space-xl;
+    }
+  }
+
+  &__brand {
+    @include breakpoint(sm) {
+      grid-column: 1 / -1;                 // full width at sm
+    }
+    @include breakpoint(md) {
+      grid-column: auto;                   // back to first column at md
+    }
+
+    h3 {
+      color: $white;
+      font-size: $fs-xl;
+      font-weight: $fw-semibold;
+      letter-spacing: -0.015em;
+      margin-bottom: $space-2xs;
+    }
+
+    p {
+      font-size: $fs-sm;
+      line-height: $lh-snug;
+      color: $gray-300;
+    }
+  }
+
+  &__mediator {
+    margin-top: $space-sm;
+    font-size: $fs-xs;
+    color: $gray-300;                      // contrast bump from gray-400
+
+    a {
+      color: $gray-200;
+      text-decoration: underline;
+      @include hover { color: $white; }
+      &:focus-visible { outline: 2px solid $white; outline-offset: 2px; border-radius: $radius-sm; }
+    }
+  }
+
+  &__column {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3xs;
+
+    h4 {
+      color: $white;
+      font-size: $fs-xs;
+      font-weight: $fw-semibold;
+      margin-bottom: $space-2xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;        // chips de catégorie premium
+      opacity: 0.85;
+    }
+
+    a {
+      color: $gray-300;                    // contrast bump from gray-400
+      font-size: $fs-sm;
+      padding: $space-3xs 0;               // larger tap area
+      transition: color $t-fast $ease;
+      text-decoration: none;
+
+      @include hover { color: $white; text-decoration: underline; }
+      &:focus-visible { outline: 2px solid $white; outline-offset: 2px; border-radius: $radius-sm; }
+    }
+  }
+
+  &__copy {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: $gray-300;                      // contrast bump from gray-500 (was failing AA)
+    font-size: $fs-sm;
+    padding-top: $space-sm;
+    border-top: 1px solid rgba($white, 0.08);
+  }
+}

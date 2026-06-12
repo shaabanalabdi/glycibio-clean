@@ -1,0 +1,69 @@
+@use 'sass:color';
+@use '../abstracts/variables' as *;
+@use '../abstracts/theme' as *;
+
+// ============================================================
+// Buttons — em-based internal sizing (scales with font-size)
+// ============================================================
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding-block: 0.625em;        // em → scales with btn font-size
+  padding-inline: 1.25em;
+  min-height: $tap-target;       // 44px — WCAG 2.5.5
+  font-family: inherit;
+  font-size: $fs-base;
+  font-weight: $fw-semibold;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: $radius;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color $t-base $ease, color $t-base $ease, border-color $t-base $ease, transform $t-fast $ease;
+
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  &:active { transform: scale(0.98); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  // Variants ----------------------------------------------
+  &--primary {
+    background-color: $primary;
+    color: $white;
+    &:hover:not(:disabled) { background-color: $primary-dark; }
+  }
+
+  &--secondary {
+    background-color: $secondary-dark;     // AA 5.17:1 with white (was $secondary = 2.20:1 FAIL)
+    color: $white;
+    &:hover:not(:disabled) { background-color: $secondary-darker; }
+  }
+
+  &--outline {
+    border-color: $primary;
+    color: $primary;
+    background: transparent;
+    &:hover:not(:disabled) { background-color: $primary; color: $white; }
+  }
+
+  &--ghost {
+    color: $text-muted;
+    background: transparent;
+    &:hover:not(:disabled) { background: $button-ghost-hover; color: $primary; }
+  }
+
+  &--danger {
+    background-color: $error;
+    color: $white;
+    &:hover:not(:disabled) { background-color: color.adjust($error, $lightness: -10%); }
+  }
+
+  // Sizes (em-based → padding and gap scale automatically)
+  &--sm { font-size: $fs-sm;  min-height: 2.25rem; }
+  &--lg { font-size: $fs-md;  min-height: 3rem; }
+
+  // Full-width on mobile
+  &--block { width: 100%; }
+}

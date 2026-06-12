@@ -1,0 +1,324 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+// ============================================================
+// Catalog page — CSS Grid (sidebar + main)
+// ============================================================
+.catalog {
+  &__title {
+    font-size: $fs-2xl;
+    color: $text-strong;
+    margin-bottom: $space-md;
+  }
+
+  // Sidebar + main: stack on mobile/tablet, side-by-side ≥ lg (992px)
+  &__content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-md;
+
+    @include breakpoint(lg) {
+      grid-template-columns: minmax(15rem, 17.5rem) minmax(0, 1fr);
+      gap: $space-lg;
+      align-items: start;
+    }
+  }
+
+  &__main { min-width: 0; }
+
+  &__count {
+    color: $text-muted;
+    font-size: $fs-sm;
+    margin-bottom: $space-sm;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__grid {
+    @include auto-grid(14rem, $space-md);
+  }
+
+  &__loading,
+  &__empty {
+    text-align: center;
+    padding: $space-2xl $space-sm;
+    color: $text-muted;
+  }
+}
+
+// ============================================================
+// Filter sidebar — organized: header + chips + sort + sections
+// ============================================================
+.filters {
+  background: $surface;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  padding: $space-sm;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+  transition: background-color $t-base $ease;
+
+  // Desktop: sticky, internally scrollable if it overflows viewport
+  @include breakpoint(lg) {
+    position: sticky;
+    top: var(--header-offset);
+    max-height: calc(100dvh - var(--header-offset) - #{$space-md});
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    // Custom scrollbar for webkit
+    &::-webkit-scrollbar      { width: 6px; }
+    &::-webkit-scrollbar-thumb {
+      background: $border-strong;
+      border-radius: $radius-pill;
+    }
+    &::-webkit-scrollbar-thumb:hover { background: $text-faint; }
+  }
+
+  // ----------------------------------------------------------------
+  // Header — title + active-count badge + reset button
+  // ----------------------------------------------------------------
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-2xs;
+    padding-bottom: $space-2xs;
+    border-bottom: 1px solid $border;
+  }
+
+  &__title {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2xs;
+    font-size: $fs-md;
+    font-weight: $fw-bold;
+    color: $text-strong;
+    margin: 0;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 $space-3xs;
+    background: $primary;
+    color: $text-on-primary;
+    font-size: 0.7rem;
+    font-weight: $fw-bold;
+    line-height: 1;
+    border-radius: $radius-pill;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__reset {
+    color: $primary;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: $space-3xs $space-2xs;
+    border-radius: $radius-sm;
+    transition: background $t-fast $ease;
+
+    @include hover { background: rgba($primary, 0.08); }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  // ----------------------------------------------------------------
+  // Active filter chips — removable
+  // ----------------------------------------------------------------
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-3xs;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    padding: $space-3xs $space-2xs;
+    background: rgba($primary, 0.08);
+    color: $primary;
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+    line-height: 1;
+    border: 1px solid rgba($primary, 0.2);
+    border-radius: $radius-pill;
+    cursor: pointer;
+    max-width: 100%;
+    transition: background $t-fast $ease, border-color $t-fast $ease;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 9rem;
+    }
+
+    svg { opacity: 0.7; flex-shrink: 0; transition: opacity $t-fast $ease; }
+
+    @include hover {
+      background: rgba($primary, 0.15);
+      border-color: $primary;
+      svg { opacity: 1; }
+    }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  // ----------------------------------------------------------------
+  // Generic group (used for non-collapsed sections like Sort)
+  // ----------------------------------------------------------------
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3xs;
+
+    label {
+      font-size: $fs-sm;
+      font-weight: $fw-semibold;
+      color: $text-muted;
+    }
+
+    input,
+    select {
+      @include form-input;
+      font-size: $fs-sm;
+    }
+
+    // "Primary" group — sort dropdown: tinted background to mark it as the hero action
+    &--primary {
+      background: $surface-alt;
+      padding: $space-2xs;
+      border-radius: $radius;
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // Collapsible section — uses native <details>/<summary>
+  // ----------------------------------------------------------------
+  &__section {
+    border-top: 1px solid $border;
+    padding-top: $space-2xs;
+
+    &:first-of-type { border-top: none; padding-top: 0; }
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: $fs-sm;
+      font-weight: $fw-semibold;
+      color: $text-strong;
+      cursor: pointer;
+      padding: $space-2xs 0;
+      list-style: none;
+      user-select: none;
+      transition: color $t-fast $ease;
+
+      // Hide default markers
+      &::-webkit-details-marker { display: none; }
+      &::marker                 { content: ''; }
+
+      // Chevron via ::after — rotates when open
+      &::after {
+        content: '';
+        width: 0.5rem;
+        height: 0.5rem;
+        margin-inline-end: $space-3xs;
+        border-right: 2px solid $text-muted;
+        border-bottom: 2px solid $text-muted;
+        transform: rotate(45deg);
+        transition: transform $t-fast $ease;
+      }
+
+      @include hover { color: $primary; &::after { border-color: $primary; } }
+      &:focus-visible {
+        outline: 2px solid $primary;
+        outline-offset: 2px;
+        border-radius: $radius-sm;
+      }
+    }
+
+    &[open] > summary::after {
+      transform: rotate(-135deg);
+    }
+  }
+
+  &__section-body {
+    padding: $space-3xs 0 $space-2xs;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2xs;
+
+    input,
+    select {
+      @include form-input;
+      font-size: $fs-sm;
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // Price range — min/max inputs side-by-side
+  // ----------------------------------------------------------------
+  &__range {
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;
+
+    input { flex: 1; min-width: 0; }
+
+    span {
+      color: $text-muted;
+      font-weight: $fw-semibold;
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // Allergen checkbox list
+  // ----------------------------------------------------------------
+  &__checks {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  &__check {
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;
+    min-height: 2.5rem;                  // 40px — comfortable thumb target
+    padding: 0 $space-2xs;
+    margin: 0 (-$space-2xs);             // negate parent padding so hover spans full width
+    border-radius: $radius-sm;
+    font-size: $fs-sm;
+    font-weight: $fw-regular !important;
+    color: $text-muted;
+    cursor: pointer;
+    user-select: none;
+    transition: background $t-fast $ease;
+
+    @include hover { background: $button-ghost-hover; }
+
+    input[type='checkbox'] {
+      width: 1.125rem !important;
+      height: 1.125rem;
+      min-height: auto;
+      margin: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: $primary;
+    }
+
+    &:has(input:checked) {
+      color: $primary;
+      font-weight: $fw-semibold !important;
+    }
+  }
+}

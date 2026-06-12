@@ -1,0 +1,173 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+// ============================================================
+// Cookie banner — sticky bottom on all viewports
+// ============================================================
+.cookie-banner {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: $z-modal;
+  background: $surface-elevated;
+  border-top: 3px solid $primary;
+  box-shadow: $shadow-up-md;
+  padding: $space-sm $space-md;
+  padding-bottom: max($space-sm, env(safe-area-inset-bottom));
+  animation: cookie-slide-up 240ms $ease;
+  transition: background-color $t-base $ease;
+
+  &__inner {
+    @include container;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-sm;
+    align-items: center;
+
+    @include breakpoint(md) {
+      grid-template-columns: 1fr auto;
+      gap: $space-md;
+    }
+  }
+
+  &__text {
+    color: $text;
+    font-size: $fs-sm;
+    line-height: $lh-snug;
+
+    p { margin: 0; }
+    a {
+      color: $primary;
+      text-decoration: underline;
+      @include hover { color: $primary-dark; }
+    }
+  }
+
+  &__title {
+    margin: 0 0 $space-3xs;
+    font-size: $fs-md;
+    color: $text-strong;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2xs;
+
+    // CNIL: "Tout refuser" must be as visible as "Tout accepter"
+    .btn {
+      flex: 1 1 auto;
+      min-width: 8rem;
+    }
+
+    @include breakpoint(md) {
+      flex-wrap: nowrap;
+      .btn { flex: 0 0 auto; }
+    }
+
+    &--panel { justify-content: flex-end; }
+  }
+
+  // ----- Panneau detaille (consentement granulaire) -----
+  &--panel {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  &__panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $space-sm;
+  }
+
+  &__close {
+    @include flex-center;
+    width: $tap-target;
+    height: $tap-target;
+    background: transparent;
+    border: none;
+    border-radius: $radius-sm;
+    color: $gray-700;
+    font-size: $fs-xl;
+    line-height: 1;
+    cursor: pointer;
+
+    @include hover { background: $gray-100; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  &__group {
+    border: 1px solid $gray-200;
+    border-radius: $radius;
+    padding: $space-2xs $space-sm;
+    margin: 0 0 $space-2xs;
+  }
+
+  &__group-title {
+    font-weight: $fw-semibold;
+    color: $gray-800;
+    font-size: $fs-sm;
+    padding: 0 $space-3xs;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-2xs;
+    padding: $space-2xs 0;
+    font-size: $fs-sm;
+    color: $gray-700;
+    cursor: pointer;
+
+    input[type='checkbox'] {
+      margin-top: 0.25em;
+      width: 1.125rem;
+      height: 1.125rem;
+      cursor: pointer;
+    }
+
+    &--locked {
+      cursor: default;
+      input { cursor: not-allowed; opacity: 0.6; }
+    }
+  }
+}
+
+// ============================================================
+// Legal tables (cookies, privacy)
+// ============================================================
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: $space-sm 0;
+  font-size: $fs-sm;
+
+  th, td {
+    border: 1px solid $border-strong;
+    padding: $space-2xs $space-sm;
+    text-align: start;
+    vertical-align: top;
+  }
+
+  th {
+    background: $surface-alt;
+    font-weight: $fw-semibold;
+  }
+
+  code {
+    background: $surface-alt;
+    padding: 0.0625rem 0.375rem;
+    border-radius: $radius-sm;
+    font-size: 0.85em;
+  }
+}
+
+@keyframes cookie-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner { animation: none; }
+}

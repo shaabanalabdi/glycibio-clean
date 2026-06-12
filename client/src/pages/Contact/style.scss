@@ -1,0 +1,131 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+.contact {
+  max-width: 56rem;                          // 900 -> rem
+  margin: 0 auto;
+
+  &__header {
+    text-align: center;
+    margin-bottom: $space-lg;
+
+    h1 {
+      font-size: $fs-2xl;
+      color: $text-strong;
+      margin-bottom: $space-2xs;
+    }
+    p {
+      color: $text-muted;
+      max-width: 50ch;
+      margin-inline: auto;
+    }
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-lg;
+
+    @include breakpoint(md) {
+      grid-template-columns: 1fr minmax(0, 17.5rem); // form + 280px aside
+    }
+  }
+
+  &__form {
+    background: $surface;
+    padding: $space-fluid-md;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    transition: background-color $t-base $ease;
+  }
+
+  // Honeypot anti-spam : visuellement cache, mais detectable par les bots
+  // qui remplissent tous les champs <input>. NE PAS utiliser display:none
+  // (les bots filtrent ce cas).
+  &__honeypot {
+    position: absolute;
+    inset-inline-start: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    visibility: hidden;
+  }
+
+  &__success {
+    background: $success-bg;
+    color: $success-fg;
+    padding: $space-2xs $space-sm;
+    border-radius: $radius-sm;
+    margin-bottom: $space-sm;
+  }
+
+  &__error {
+    background: $error-bg;
+    color: $error-fg;
+    padding: $space-2xs $space-sm;
+    border-radius: $radius-sm;
+    margin-bottom: $space-sm;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-sm;
+
+    @include breakpoint(sm) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &__field {
+    margin-bottom: $space-sm;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: $space-3xs;
+      font-size: $fs-sm;
+      font-weight: $fw-semibold;
+      color: $text-muted;
+      margin-bottom: $space-3xs;
+
+      svg { color: $primary; }
+    }
+
+    input,
+    textarea {
+      @include form-input;
+      resize: vertical;
+    }
+
+    textarea { min-height: 7.5rem; }
+  }
+
+  // Infos sidebar
+  &__info {
+    h3 {
+      font-size: $fs-lg;
+      color: $text-strong;
+      margin-bottom: $space-md;
+    }
+  }
+
+  &__info-item {
+    display: flex;
+    gap: $space-sm;
+    margin-bottom: $space-md;
+    padding: $space-sm;
+    background: $surface;
+    border-radius: $radius;
+    box-shadow: $shadow-sm;
+
+    svg { color: $primary; flex-shrink: 0; margin-top: 0.125rem; }
+    strong { display: block; color: $text-strong; font-size: $fs-sm; }
+    p {
+      color: $text-muted;
+      font-size: $fs-sm;
+      margin-top: $space-3xs;
+    }
+  }
+}

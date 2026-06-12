@@ -1,0 +1,46 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+.breadcrumb {
+  margin-bottom: $space-sm;
+  font-size: $fs-sm;
+  color: $text-muted;
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-3xs;
+  }
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+
+    a {
+      color: $text-muted;
+      padding: $space-3xs $space-3xs;       // larger tap area
+      border-radius: $radius-sm;
+      transition: color $t-fast $ease, background $t-fast $ease;
+      text-decoration: none;
+
+      @include hover { color: $primary; background: $button-ghost-hover; }
+      &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+    }
+
+    span[aria-current='page'] {
+      color: $text-strong;
+      font-weight: $fw-semibold;
+    }
+  }
+
+  &__sep {
+    color: $text-faint;
+    user-select: none;
+  }
+}

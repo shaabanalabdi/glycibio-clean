@@ -1,0 +1,52 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+.pagination {
+  @include flex-center;
+  flex-wrap: wrap;
+  gap: $space-3xs;
+  margin-top: $space-lg;
+
+  &__btn,
+  &__item {
+    @include flex-center;
+    min-width: $tap-target;             // 44px — WCAG 2.5.5
+    min-height: $tap-target;
+    padding: 0 $space-xs;
+    border-radius: $radius-sm;
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    transition: background-color $t-fast $ease, color $t-fast $ease;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  &__btn {
+    color: $primary;
+
+    @include hover { background: $button-ghost-hover; }
+
+    &:disabled {
+      color: $text-faint;
+      cursor: not-allowed;
+      background: transparent;
+      opacity: 0.5;
+    }
+  }
+
+  &__item {
+    color: $text-muted;
+
+    @include hover { background: $button-ghost-hover; }
+
+    &--active {
+      background: $primary;
+      color: $text-on-primary;
+      @include hover { background: $primary-dark; }
+    }
+  }
+}

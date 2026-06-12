@@ -1,0 +1,848 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+.admin-console {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+
+    h1 {
+      margin: 0 0 $spacing-xs;
+      color: $primary;
+    }
+
+    p {
+      margin: 0;
+      color: $text-muted;
+    }
+  }
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    color: $text-faint;
+    font-size: 0.9rem;
+  }
+
+  &__notice {
+    margin: 0;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $border-radius;
+    border: 1px solid transparent;
+    font-weight: 600;
+
+    &--success {
+      background: $success-bg;
+      border-color: rgba($success, 0.35);
+      color: $success-fg;
+    }
+
+    &--error {
+      background: $error-bg;
+      border-color: rgba($error, 0.35);
+      color: $error-fg;
+    }
+
+    &--info {
+      background: $info-bg;
+      border-color: rgba($info, 0.35);
+      color: $info-fg;
+    }
+  }
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+
+  &__button {
+    border: 1px solid $border-strong;
+    background: $surface;
+    color: $text-muted;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $border-radius;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+
+    small {
+      background: $surface-alt;
+      color: $text-strong;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    &:hover {
+      border-color: $primary;
+      color: $primary;
+    }
+
+    &--active {
+      border-color: $primary;
+      background: rgba(36, 157, 223, 0.15);
+      color: $primary;
+    }
+  }
+}
+
+.admin-overview {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: $spacing-md;
+}
+
+.admin-kpi-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: background-color $t-base $ease, border-color $t-base $ease;
+
+  svg {
+    color: $primary;
+  }
+
+  p {
+    margin: 0;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
+
+  strong {
+    color: $primary;
+    font-size: 1.35rem;
+  }
+}
+
+.admin-data-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-lg;
+}
+
+// ============================================================
+// Revenue chart - SVG bars (zero dependency)
+// ============================================================
+.revenue-chart {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  transition: background-color $t-base $ease, border-color $t-base $ease;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $space-sm;
+    flex-wrap: wrap;
+
+    h3 {
+      margin: 0;
+      font-size: $fs-md;
+      color: $text-strong;
+    }
+  }
+
+  &__total {
+    text-align: end;
+    margin: 0;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+
+    strong {
+      display: block;
+      font-size: $fs-lg;
+      color: $primary;
+    }
+
+    span {
+      display: block;
+      font-size: $fs-xs;
+      color: $text-faint;
+    }
+  }
+
+  &__plot {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2xs;
+  }
+
+  &__bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 10rem;                       // 160px - lisible mobile + desktop
+    padding: $space-2xs $space-3xs;
+    background: $surface-alt;
+    border-radius: $radius-sm;
+    transition: background-color $t-base $ease;
+  }
+
+  &__bar {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    background: $primary;
+    border: none;
+    border-radius: 2px 2px 0 0;
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    transition: background $t-fast $ease, transform $t-fast $ease;
+
+    &--empty {
+      background: $border-strong;
+    }
+
+    @include hover { background: $primary-dark; transform: scaleY(1.02); transform-origin: bottom; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    &--hover {
+      background: $primary-dark;
+    }
+  }
+
+  &__tooltip {
+    position: absolute;
+    bottom: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: $surface-elevated;
+    color: $text-strong;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    padding: $space-3xs $space-2xs;
+    font-size: $fs-xs;
+    white-space: nowrap;
+    box-shadow: $shadow-md;
+    pointer-events: none;
+    z-index: 1;
+
+    strong {
+      display: block;
+      color: $primary;
+      font-weight: $fw-bold;
+      font-variant-numeric: tabular-nums;
+    }
+
+    span {
+      display: block;
+      color: $text-muted;
+    }
+  }
+
+  &__axis {
+    display: flex;
+    gap: 2px;
+    padding: 0 $space-3xs;
+  }
+
+  &__axis-tick {
+    flex: 1;
+    min-width: 0;
+    font-size: $fs-xs;
+    color: $text-faint;
+    text-align: start;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.admin-panel {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  transition: background-color $t-base $ease, border-color $t-base $ease;
+
+  h2 {
+    margin: 0;
+    color: $text-strong;
+  }
+
+  &__toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    color: $text-muted;
+  }
+}
+
+.admin-filter-group {
+  display: inline-flex;
+  border: 1px solid $border-strong;
+  border-radius: $border-radius;
+  overflow: hidden;
+}
+
+.admin-filter-inline {
+  display: inline-flex;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+
+  input,
+  select {
+    border: 1px solid $input-border;
+    border-radius: $border-radius-sm;
+    padding: 8px 10px;
+    background: $input-bg;
+    color: $text;
+    min-width: 160px;
+  }
+}
+
+.admin-pill {
+  border: none;
+  background: $surface;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: $text-muted;
+  font-weight: 600;
+  border-right: 1px solid $border-strong;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &--active {
+    background: $primary;
+    color: $text-on-primary;
+  }
+}
+
+.admin-split {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: $spacing-md;
+
+  &--balanced {
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  }
+}
+
+.admin-form-card {
+  border: 1px solid $border;
+  border-radius: $border-radius-lg;
+  background: $surface-alt;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  transition: background-color $t-base $ease;
+
+  h3 {
+    margin: 0;
+    color: $primary;
+    font-size: 1rem;
+  }
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-sm;
+
+  &--tight {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  span {
+    font-size: 0.82rem;
+    color: $text-muted;
+    font-weight: 600;
+  }
+
+  small {
+    color: $text-faint;
+    font-size: 0.78rem;
+  }
+
+  input,
+  select,
+  textarea {
+    border: 1px solid $input-border;
+    border-radius: $border-radius-sm;
+    background: $input-bg;
+    color: $text;
+    padding: 8px 10px;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 84px;
+  }
+
+  &--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.admin-form-subgrid {
+  border: 1px dashed $border-strong;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+
+  h4 {
+    margin: 0 0 $spacing-xs;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
+}
+
+.admin-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $text-muted;
+  font-size: 0.9rem;
+}
+
+.admin-actions {
+  display: inline-flex;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+}
+
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 920px;
+  }
+
+  th,
+  td {
+    text-align: left;
+    border-bottom: 1px solid $border;
+    padding: 10px 8px;
+    vertical-align: middle;
+    color: $text;
+  }
+
+  th {
+    color: $text-muted;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  // Aligne tous les chiffres dans les tableaux admin (prix, stock, IG,
+  // totaux, IDs). Largeurs de digit identiques -> pas de wobble lors
+  // d'un tri ou d'un refresh.
+  td { font-variant-numeric: tabular-nums; }
+}
+
+// ============================================================
+// Sortable column header (utilise dans tous les tableaux admin)
+// ============================================================
+.sortable-th {
+  padding: 0 !important;            // le bouton interne porte le padding
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    width: 100%;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    font: inherit;
+    color: $text-muted;
+    text-align: left;
+    cursor: pointer;
+    transition: color $t-fast $ease, background $t-fast $ease;
+
+    @include hover { background: $button-ghost-hover; color: $primary; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; }
+  }
+
+  &__icon {
+    color: $text-faint;
+    transition: color $t-fast $ease, transform $t-fast $ease;
+
+    &--active { color: $primary; }
+  }
+
+  &--numeric &__btn {
+    justify-content: flex-end;
+  }
+
+  &[aria-sort='ascending'],
+  &[aria-sort='descending'] {
+    .sortable-th__btn { color: $primary; }
+  }
+}
+
+.admin-inline-actions {
+  display: inline-flex;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+
+  .btn {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+}
+
+.admin-inline-editor {
+  display: inline-flex;
+  gap: $spacing-xs;
+  align-items: center;
+
+  select {
+    border: 1px solid $input-border;
+    border-radius: $border-radius-sm;
+    padding: 6px 8px;
+    background: $input-bg;
+    color: $text;
+  }
+}
+
+.admin-product-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  small {
+    color: $text-faint;
+    font-size: 0.8rem;
+  }
+}
+
+.admin-product-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: $border-radius-sm;
+  border: 1px solid $border;
+  background: $surface-alt;
+}
+
+.admin-image-preview {
+  grid-column: 1 / -1;
+  border: 1px dashed $border-strong;
+  border-radius: $border-radius-sm;
+  padding: $spacing-xs;
+  background: $surface-alt;
+
+  img {
+    width: 100%;
+    max-height: 160px;
+    border-radius: $border-radius-sm;
+    object-fit: cover;
+  }
+}
+
+.admin-user-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+
+  small {
+    display: block;
+    color: $text-faint;
+    font-size: 0.8rem;
+  }
+}
+
+.admin-row--highlight {
+  background: $warning-bg;
+}
+
+.admin-low-stock {
+  color: $error;
+  font-weight: 700;
+}
+
+.admin-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: $text-on-primary;
+
+  &--en_attente {
+    background: $warning;
+    color: $gray-900;
+  }
+
+  &--payee {
+    background: $success;
+  }
+
+  &--en_preparation {
+    background: $info;
+  }
+
+  &--expediee {
+    background: $primary;
+  }
+
+  &--livree {
+    background: $secondary-dark;
+  }
+
+  &--annulee {
+    background: $error;
+  }
+}
+
+.admin-muted {
+  color: $text-faint;
+  font-size: 0.85rem;
+}
+
+.admin-empty-cell {
+  text-align: center !important;
+  color: $text-faint;
+  padding: $spacing-md;
+}
+
+.admin-danger {
+  color: $error;
+  border-color: $error;
+
+  &:hover {
+    background: rgba(220, 53, 69, 0.08);
+  }
+}
+
+// En dessous de 2xl, le tableau large (min-width 920px) ne tient pas a cote
+// du formulaire sans rogner la derniere colonne (Actions) : on empile alors
+// formulaire au-dessus du tableau pleine largeur.
+@media (max-width: $breakpoint-2xl) {
+  .admin-split,
+  .admin-split--balanced {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .admin-console {
+    padding: $spacing-lg $spacing-md;
+  }
+
+  .admin-console__header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .admin-form-grid,
+  .admin-form-grid--tight {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-gallery {
+  margin-top: $spacing-lg;
+  padding-top: $spacing-md;
+  border-top: 1px solid $gray-200;
+
+  &__header h4 {
+    color: $gray-800;
+    margin: 0 0 $spacing-xs;
+  }
+
+  &__hint {
+    color: $gray-600;
+    font-size: 0.82rem;
+    margin: 0 0 $spacing-md;
+  }
+
+  &__error {
+    color: $error;
+    background: rgba($error, 0.08);
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $border-radius-sm;
+    font-size: 0.85rem;
+  }
+
+  &__upload {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: $spacing-md;
+
+    input[type='text'] {
+      flex: 1;
+      min-width: 200px;
+      padding: $spacing-sm;
+      border: 1px solid $gray-300;
+      border-radius: $border-radius-sm;
+    }
+  }
+
+  &__upload-label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  &__empty {
+    color: $gray-600;
+    font-style: italic;
+  }
+
+  &__grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: $spacing-sm;
+  }
+
+  &__item {
+    position: relative;
+    border: 1px solid $gray-200;
+    border-radius: $border-radius-sm;
+    overflow: hidden;
+    background: $gray-100;
+
+    img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba($white, 0.92);
+    color: $error;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: $shadow-sm;
+
+    &:hover { background: $white; }
+  }
+
+  &__alt {
+    margin: 0;
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    color: $gray-600;
+    background: rgba($white, 0.95);
+  }
+}
+
+.admin-reviews-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.admin-review {
+  padding: $spacing-md;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius;
+  background: $white;
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-xs;
+
+    strong { color: $gray-800; }
+  }
+
+  &__meta {
+    color: $gray-600;
+    font-size: 0.82rem;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $gray-800;
+    margin: $spacing-xs 0;
+  }
+
+  &__body {
+    color: $gray-700;
+    line-height: 1.5;
+    white-space: pre-line;
+    margin: 0 0 $spacing-md;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+  }
+}
+

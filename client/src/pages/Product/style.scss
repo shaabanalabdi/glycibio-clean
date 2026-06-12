@@ -1,0 +1,551 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+// ============================================================
+// Loading state
+// ============================================================
+.product-loading {
+  text-align: center;
+  padding: $space-2xl;
+  color: $text-muted;
+}
+
+// ============================================================
+// Product page — image + info grid
+// ============================================================
+.product-page {
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    color: $primary;
+    font-weight: $fw-medium;
+    margin-bottom: $space-md;
+    padding: $space-2xs;
+    border-radius: $radius-sm;
+
+    @include hover { text-decoration: underline; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-md;
+    margin-bottom: $space-2xl;
+
+    @include breakpoint(md) {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: $space-2xl;
+    }
+  }
+
+  // Image — aspect-ratio kills CLS
+  &__image {
+    background: $surface;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    @include flex-center;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    transition: background-color $t-base $ease;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__placeholder {
+    padding: $space-md;
+    text-align: center;
+    color: $text-faint;
+    font-size: $fs-base;
+  }
+
+  &__info { min-width: 0; }
+
+  &__category {
+    font-size: $fs-sm;
+    color: $text-faint;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: $space-3xs;
+  }
+
+  &__name {
+    font-size: $fs-2xl;                    // fluid 28→36
+    color: $text-strong;
+    line-height: $lh-tight;
+    margin-bottom: $space-sm;
+  }
+
+  &__ig {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    margin-bottom: $space-md;
+  }
+
+  &__ig-label {
+    color: $text-muted;
+    font-size: $fs-sm;
+  }
+
+  &__price {
+    font-size: $fs-2xl;
+    font-weight: $fw-bold;
+    color: $primary;
+    margin-bottom: $space-2xs;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__stock {
+    margin-bottom: $space-md;
+    font-size: $fs-sm;
+
+    &--available { color: $success; font-weight: $fw-semibold; }
+    &--out       { color: $error;   font-weight: $fw-semibold; }
+  }
+
+  &__description {
+    color: $text;
+    line-height: $lh-loose;
+    margin-bottom: $space-md;
+  }
+
+  &__allergens {
+    margin-bottom: $space-md;
+
+    h3 {
+      font-size: $fs-sm;
+      color: $text-muted;
+      margin-bottom: $space-2xs;
+    }
+  }
+
+  &__allergens-list {
+    display: flex;
+    gap: $space-3xs;
+    flex-wrap: wrap;
+  }
+
+  &__cart {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    flex-wrap: wrap;
+  }
+
+  &__error {
+    width: 100%;
+    background: $error-bg;
+    color: $error-fg;
+    padding: $space-2xs $space-sm;
+    border-radius: $radius-sm;
+    font-size: $fs-sm;
+  }
+
+  &__quantity {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2xs;
+    background: $surface-alt;
+    border-radius: $radius;
+    padding: $space-3xs;
+
+    button {
+      @include flex-center;
+      width: $tap-target;                  // 44 — was 36
+      height: $tap-target;
+      border-radius: 50%;
+      color: $text-muted;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background $t-fast $ease;
+
+      @include hover { background: $button-ghost-hover; }
+      &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+      &:disabled { color: $text-faint; cursor: not-allowed; opacity: 0.5; }
+    }
+
+    span {
+      min-width: 2rem;
+      text-align: center;
+      font-weight: $fw-bold;
+      font-size: $fs-md;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__login-hint {
+    color: $text-muted;
+    margin-top: $space-sm;
+
+    a {
+      color: $primary;
+      font-weight: $fw-semibold;
+      @include hover { text-decoration: underline; }
+    }
+  }
+
+  // Nutrition section
+  &__nutrition {
+    background: $surface;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    padding: $space-md;
+    transition: background-color $t-base $ease;
+
+    @include breakpoint(md) {
+      padding: $space-lg;
+    }
+
+    h2 {
+      font-size: $fs-lg;
+      margin-bottom: $space-md;
+    }
+  }
+}
+
+// Large IG badge
+.badge-ig--lg {
+  padding: $space-3xs $space-sm;
+  font-size: $fs-sm;
+}
+
+// Allergen badge
+.allergen-badge {
+  background: $warning-bg;
+  color: $warning-fg;
+  padding: 0.125rem $space-2xs;
+  border-radius: $radius-pill;
+  font-size: $fs-xs;
+  font-weight: $fw-medium;
+}
+
+// Success button state (temporary)
+.btn--success {
+  background-color: $success !important;
+  &:hover { background-color: $success !important; }
+}
+
+// Nutrition table
+.nutrition-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+
+  th, td {
+    padding: $space-2xs $space-sm;
+    text-align: left;
+    border-bottom: 1px solid $border;
+  }
+
+  th {
+    font-weight: $fw-semibold;
+    color: $text-muted;
+    background: $surface-alt;
+  }
+
+  td {
+    color: $text-muted;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// ============================================================
+// Product gallery (carousel)
+// ============================================================
+.product-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2xs;
+
+  &__main {
+    position: relative;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    background: $surface-alt;
+    aspect-ratio: 1 / 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: $tap-target;                    // 44 — was 36
+    height: $tap-target;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.45);       // always dark scrim (sits over image)
+    color: $white;
+    cursor: pointer;
+    @include flex-center;
+    box-shadow: $shadow-sm;
+    transition: background $t-fast $ease, transform $t-fast $ease;
+
+    @include hover { background: rgba(0, 0, 0, 0.65); transform: translateY(-50%) scale(1.05); }
+    &:focus-visible { outline: 2px solid $white; outline-offset: 2px; }
+
+    &--prev { inset-inline-start: $space-2xs; }
+    &--next { inset-inline-end: $space-2xs; }
+  }
+
+  &__thumbs {
+    display: flex;
+    gap: $space-3xs;
+    overflow-x: auto;
+    padding-bottom: $space-3xs;
+    scrollbar-width: thin;
+
+    // Better scroll behaviour on touch
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &__thumb {
+    flex: 0 0 4.5rem;                      // 72px
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: $radius-sm;
+    border: 2px solid transparent;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color $t-fast $ease, transform $t-fast $ease;
+    scroll-snap-align: start;
+
+    img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    @include hover { transform: translateY(-1px); }
+    &--active { border-color: $primary; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  // Fallback affiche quand une vignette echoue a charger
+  &__thumb-fallback {
+    @include flex-center;
+    width: 100%;
+    height: 100%;
+    background: $surface-alt;
+    color: $text-faint;
+    font-size: $fs-lg;
+    font-weight: $fw-bold;
+  }
+}
+
+// ============================================================
+// Cross-sell / related products
+// ============================================================
+.product-page__related {
+  margin-top: $space-xl;
+
+  h2 {
+    font-size: $fs-lg;
+    color: $text-strong;
+    margin-bottom: $space-md;
+  }
+
+  &-grid {
+    @include auto-grid(14rem, $space-md);
+  }
+}
+
+// ============================================================
+// Sticky mobile CTA
+// ============================================================
+.product-sticky-cta {
+  display: none;
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 50;
+  background: $surface-elevated;
+  border-top: 1px solid $border;
+  box-shadow: $shadow-up-sm;
+  padding: $space-2xs $space-sm;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2xs;
+  padding-bottom: max($space-2xs, env(safe-area-inset-bottom));  // notch safe
+
+  &__price {
+    font-weight: $fw-bold;
+    color: $primary;
+    font-size: $fs-md;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .btn { flex-shrink: 0; }
+
+  @include responsive(sm) { display: flex; }
+}
+
+// ============================================================
+// Reviews
+// ============================================================
+.reviews {
+  margin-top: $space-xl;
+  background: $surface;
+  padding: $space-md;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  transition: background-color $t-base $ease;
+
+  @include breakpoint(md) {
+    padding: $space-lg;
+  }
+
+  &__header {
+    margin-bottom: $space-md;
+    padding-bottom: $space-2xs;
+    border-bottom: 1px solid $border;
+
+    h2 {
+      margin: 0 0 $space-3xs;
+      font-size: $fs-lg;
+      color: $text-strong;
+    }
+  }
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;
+    color: $text-muted;
+  }
+
+  &__count {
+    color: $text-faint;
+    font-size: $fs-sm;
+    font-variant-numeric: tabular-nums;
+  }
+  &__empty-summary { color: $text-faint; font-size: $fs-sm; margin: 0; }
+  &__login-hint    { color: $text-muted; margin: $space-sm 0; }
+
+  &__form {
+    margin: $space-sm 0 $space-md;
+    padding: $space-sm;
+    background: $surface-alt;
+    border-radius: $radius;
+  }
+
+  &__field {
+    margin-bottom: $space-sm;
+
+    label {
+      @include form-label;
+    }
+
+    input, textarea {
+      @include form-input;
+    }
+
+    small { color: $text-faint; font-size: $fs-xs; }
+  }
+
+  &__form-actions {
+    display: flex;
+    gap: $space-2xs;
+    flex-wrap: wrap;
+  }
+
+  &__form-info {
+    margin-top: $space-2xs;
+    font-size: $fs-xs;
+    color: $text-faint;
+  }
+
+  &__msg {
+    padding: $space-2xs $space-sm;
+    border-radius: $radius-sm;
+    margin-bottom: $space-sm;
+    font-size: $fs-sm;
+    background: $success-bg;
+    color: $success-fg;
+
+    &--error {
+      background: $error-bg;
+      color: $error-fg;
+    }
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: $space-sm 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+  }
+
+  &__item {
+    padding: $space-sm;
+    border: 1px solid $border;
+    border-radius: $radius;
+  }
+
+  &__item-head {
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;
+    margin-bottom: $space-3xs;
+
+    strong { color: $text-strong; }
+  }
+
+  &__item-meta {
+    font-size: $fs-xs;
+    color: $text-faint;
+    margin: 0 0 $space-2xs;
+  }
+
+  &__item-body {
+    color: $text;
+    line-height: $lh-base;
+    margin: 0;
+    white-space: pre-line;
+  }
+}
+
+// ============================================================
+// Star rating component
+// ============================================================
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  color: #f59e0b;                            // brand star color (same in both themes)
+
+  &__star--empty { color: $border-strong; }
+
+  &__btn {
+    @include flex-center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 2rem;                          // 32 — minimum thumb-friendly
+    height: 2rem;
+    color: $border-strong;
+    border-radius: $radius-sm;
+    transition: color $t-fast $ease, transform $t-fast $ease;
+
+    @include hover { transform: scale(1.1); }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+    &--filled { color: #f59e0b; }
+  }
+}

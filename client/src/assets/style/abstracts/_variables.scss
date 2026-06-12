@@ -1,0 +1,179 @@
+// ============================================================
+// GlyciBio — Design Tokens (2026 — rem / em / clamp / fr)
+// Base: 1rem = 16px (browser default — preserves user zoom)
+// ============================================================
+
+// -- Colours ---------------------------------------------------
+$primary:          #249ddf;
+$primary-light:    #7eccff;
+$primary-dark:     #1c5879;
+
+// Brand greens
+// $secondary       = decorative accent (light backgrounds, dividers)
+// $secondary-dark  = solid-fill on text/icons (WCAG AA 5.17:1 vs white)
+// $secondary-darker= hover/pressed state for solid-fill controls
+$secondary:        #5ec52a;
+$secondary-light:  #adec8f;
+$secondary-dark:   #3c7a26;
+$secondary-darker: #2a5719;
+
+// Index Glycemique - tous AA (>= 4.5:1 vs white). Les valeurs claires
+// historiques (#51dd0a / #f08833) restaient sous 2.5:1 -> illisibles
+// pour les utilisateurs malvoyants.
+$ig-bas:   #3c7a26;   // <= 55   (5.17:1 vs white)
+$ig-moyen: #b35e10;   // 56-69   (4.63:1 vs white)
+$ig-eleve: #d42b20;   // >= 70   (5.07:1 vs white)
+
+// Neutres
+$white:    #ffffff;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black:    #000000;
+
+// States
+$success: #28a745;
+$error:   #dc3545;
+$warning: #ffc107;
+$info:    #17a2b8;
+
+// -- Typography ------------------------------------------------
+// Note : on utilise une stack systeme par defaut (zero FOIT, zero requete
+// reseau, conforme RGPD - pas d'IP envoyee a Google Fonts CDN).
+// Pour activer Inter/Poppins en self-hosted, ajouter dans index.html :
+//   <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+//   <link rel="preload" href="/fonts/Poppins-Variable.woff2" as="font" type="font/woff2" crossorigin>
+// puis declarer les @font-face avec font-display: swap, et basculer ici :
+//   $font-primary: 'Inter', <stack ci-dessous>;
+//   $font-heading: 'Poppins', <stack ci-dessous>;
+$font-system:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+                 Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+$font-primary:   $font-system;
+$font-heading:   $font-system;
+$font-size-base: 100%;  // = 16px — root font-size (allow browser zoom)
+
+// Fluid type scale — clamp(min, fluid-formula, max)
+// Mobile → desktop transition is smooth across all viewports.
+$fs-xs:   clamp(0.75rem,   0.715rem + 0.18vw, 0.8125rem);  // 12 → 13
+$fs-sm:   clamp(0.8125rem, 0.78rem  + 0.2vw,  0.875rem);   // 13 → 14
+$fs-base: 1rem;                                            // 16
+$fs-md:   clamp(1rem,      0.965rem + 0.2vw,  1.125rem);   // 16 → 18
+$fs-lg:   clamp(1.125rem,  1.05rem  + 0.4vw,  1.375rem);   // 18 → 22
+$fs-xl:   clamp(1.375rem,  1.215rem + 0.8vw,  1.75rem);    // 22 → 28
+$fs-2xl:  clamp(1.75rem,   1.52rem  + 1.2vw,  2.25rem);    // 28 → 36
+$fs-3xl:  clamp(2rem,      1.6rem   + 2vw,    3rem);       // 32 → 48 (hero)
+
+// Line heights (unitless — scale with font-size)
+$lh-tight: 1.2;
+$lh-snug:  1.4;
+$lh-base:  1.6;
+$lh-loose: 1.75;
+
+// Font weights
+$fw-regular:  400;
+$fw-medium:   500;
+$fw-semibold: 600;
+$fw-bold:     700;
+
+// -- Spacing scale (rem) ---------------------------------------
+// Hybrid 4 / 8 system: 4-12 are 4px steps, then 8px steps.
+$space-3xs: 0.25rem;   // 4
+$space-2xs: 0.5rem;    // 8
+$space-xs:  0.75rem;   // 12
+$space-sm:  1rem;      // 16
+$space-md:  1.5rem;    // 24
+$space-lg:  2rem;      // 32
+$space-xl:  3rem;      // 48
+$space-2xl: 4rem;      // 64
+$space-3xl: 6rem;      // 96
+
+// Fluid spacing (viewport-aware — for hero/section rhythm)
+$space-fluid-sm: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+$space-fluid-md: clamp(1rem,    0.5rem + 2vw, 2rem);
+$space-fluid-lg: clamp(1.5rem,  0.5rem + 4vw, 3rem);
+$space-fluid-xl: clamp(2rem,    1rem   + 6vw, 5rem);
+
+// Legacy aliases (cascade through every file using $spacing-*)
+$spacing-xs:  $space-3xs;  // 4
+$spacing-sm:  $space-2xs;  // 8
+$spacing-md:  $space-sm;   // 16
+$spacing-lg:  $space-md;   // 24
+$spacing-xl:  $space-lg;   // 32
+$spacing-xxl: $space-xl;   // 48
+
+// -- Radius scale ---------------------------------------------
+$radius-xs:   0.125rem;  // 2
+$radius-sm:   0.25rem;   // 4
+$radius:      0.5rem;    // 8
+$radius-lg:   0.75rem;   // 12
+$radius-xl:   1rem;      // 16
+$radius-2xl:  1.5rem;    // 24
+$radius-pill: 999px;     // pill (px is fine here — semantic infinity)
+
+// Legacy aliases
+$border-radius:    $radius;
+$border-radius-sm: $radius-sm;
+$border-radius-lg: $radius-lg;
+
+// -- Icon scale (em-friendly) ---------------------------------
+$icon-xs: 0.875rem;   // 14
+$icon-sm: 1rem;       // 16
+$icon:    1.25rem;    // 20
+$icon-md: 1.375rem;   // 22
+$icon-lg: 1.5rem;     // 24
+$icon-xl: 2rem;       // 32
+
+// -- Shadows (premium layered scale) --------------------------
+// Double-layer pattern (Stripe/Linear style) : une lumiere ambient tres
+// douce + une lumiere directionnelle plus marquee. Plus elegant que des
+// ombres simples a une seule couche.
+$shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+$shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04),
+            0 2px 4px rgba(15, 23, 42, 0.04);
+$shadow-md: 0 2px 4px rgba(15, 23, 42, 0.04),
+            0 4px 12px rgba(15, 23, 42, 0.08);
+$shadow-lg: 0 4px 8px rgba(15, 23, 42, 0.04),
+            0 12px 32px rgba(15, 23, 42, 0.12);
+$shadow-xl: 0 8px 16px rgba(15, 23, 42, 0.06),
+            0 24px 56px rgba(15, 23, 42, 0.16);
+// Upward shadows (for sticky bottom bars, cookie banners, etc.)
+$shadow-up-sm: 0 -1px 2px rgba(15, 23, 42, 0.04),
+               0 -4px 12px rgba(15, 23, 42, 0.06);
+$shadow-up-md: 0 -2px 4px rgba(15, 23, 42, 0.04),
+               0 -8px 24px rgba(15, 23, 42, 0.10);
+// Inner ring pour focus / selection premium
+$shadow-ring: 0 0 0 3px rgba(36, 157, 223, 0.18);
+
+// -- Layout ---------------------------------------------------
+$container-max:    75rem;                         // 1200px
+$container-pad:    clamp(1rem, 4vw, 1.5rem);     // 16 → 24 fluid
+$container-pad-lg: clamp(1rem, 5vw, 3rem);       // 16 → 48 (for hero/landing)
+$navbar-min-h:     3.5rem;                        // 56px mobile
+$navbar-min-h-md:  4rem;                          // 64px desktop
+$tap-target:       2.75rem;                       // 44px (WCAG 2.5.5)
+
+// -- Breakpoints (em — respects user zoom & browser font scaling) --
+$breakpoint-sm: 36em;   // ≈ 576px
+$breakpoint-md: 48em;   // ≈ 768px
+$breakpoint-lg: 62em;   // ≈ 992px
+$breakpoint-xl: 75em;   // ≈ 1200px
+$breakpoint-2xl: 85em;  // ≈ 1360px — seuil ou un split form+large tableau tient cote a cote
+
+// -- Transitions ----------------------------------------------
+$t-fast: 150ms;
+$t-base: 200ms;
+$t-slow: 300ms;
+$ease:   cubic-bezier(.4, 0, .2, 1);
+
+// -- Z-index ---------------------------------------------------
+$z-nav:     100;
+$z-overlay: 200;
+$z-drawer:  300;
+$z-modal:   400;
+$z-toast:   500;

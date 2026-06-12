@@ -1,0 +1,279 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+// ============================================================
+// Reusable section titles
+// ============================================================
+.section-title {
+  font-size: $fs-xl;
+  color: $text-strong;
+  text-align: center;
+  margin-bottom: $space-2xs;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: $gray-700;                          // AA contrast on white (7.6:1)
+  font-size: $fs-base;
+  margin-bottom: $space-lg;
+  max-width: 50ch;
+  margin-inline: auto;
+}
+
+// ============================================================
+// Hero - premium gradient + decorative orbs + eyebrow chip + trust row
+// ============================================================
+.hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;                               // les orbes blur ne fuient pas
+  background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+  border-radius: $radius-xl;
+  padding-block: $space-fluid-xl;
+  padding-inline: $space-fluid-lg;
+  margin-bottom: $space-fluid-xl;
+  box-shadow: $shadow-lg;
+
+  // Orbes decoratifs - lumiere radiale subtile, ajoute de la profondeur
+  // sans bloquer le contenu (z-index < 1, parent isolation contient le blur).
+  &__orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(40px);
+    opacity: 0.5;
+
+    &--a {
+      width: 24rem;
+      height: 24rem;
+      top: -8rem;
+      inset-inline-end: -6rem;
+      background: radial-gradient(circle, rgba($secondary-light, 0.65), transparent 70%);
+    }
+
+    &--b {
+      width: 32rem;
+      height: 32rem;
+      bottom: -16rem;
+      inset-inline-start: -8rem;
+      background: radial-gradient(circle, rgba($white, 0.20), transparent 70%);
+    }
+  }
+
+  &__content {
+    position: relative;
+    max-width: 38rem;
+  }
+
+  // Eyebrow chip - mini-label premium au-dessus du titre
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    margin-bottom: $space-md;
+    padding: 0.25rem 0.75rem;
+    background: rgba($white, 0.12);
+    border: 1px solid rgba($white, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: $radius-pill;
+    color: rgba($white, 0.92);
+    font-size: $fs-xs;
+    font-weight: $fw-medium;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+
+    svg {
+      color: $secondary-light;
+    }
+  }
+
+  &__title {
+    font-size: $fs-3xl;
+    color: $white;
+    line-height: $lh-tight;
+    margin-bottom: $space-sm;
+  }
+
+  &__highlight {
+    color: $secondary-light;
+  }
+
+  &__text {
+    color: rgba($white, 0.88);
+    font-size: $fs-md;
+    line-height: $lh-loose;
+    margin-bottom: $space-md;
+    max-width: 60ch;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2xs;
+    margin-bottom: $space-md;
+
+    .btn { flex: 1 1 auto; }
+
+    @include breakpoint(sm) {
+      .btn { flex: 0 0 auto; }
+    }
+  }
+
+  // Bouton primary du hero - icone + gap (arrow droite)
+  &__cta-primary {
+    gap: $space-2xs;
+
+    svg {
+      transition: transform $t-base $ease;
+    }
+
+    @include hover {
+      svg { transform: translateX(2px); }
+    }
+  }
+
+  // Outline button sur fond bleu fonce - inversion pour AA
+  &__cta-secondary {
+    background: rgba($white, 0.08);
+    border-color: rgba($white, 0.4);
+    color: $white;
+
+    @include hover {
+      background: $white;
+      color: $primary-dark;
+      border-color: $white;
+    }
+  }
+
+  // Trust row - chips minuscules sous les CTA
+  &__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-md;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: $fs-xs;
+    color: rgba($white, 0.82);
+
+    li {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-3xs;
+    }
+
+    svg {
+      color: $secondary-light;
+      flex-shrink: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta-primary svg { transition: none; }
+}
+
+// ============================================================
+// Features grid — auto-fit, no breakpoint juggling
+// ============================================================
+.features {
+  margin-bottom: $space-fluid-xl;
+
+  &__grid {
+    @include auto-grid(12rem, $space-md);
+  }
+
+  &__item {
+    text-align: center;
+    padding: $space-md;
+    background: $surface;
+    border-radius: $radius;
+    box-shadow: $shadow-sm;
+    transition: transform $t-base $ease, box-shadow $t-base $ease, background-color $t-base $ease;
+
+    &:hover {
+      transform: translateY(-0.25rem);
+      box-shadow: $shadow-md;
+    }
+
+    svg {
+      color: $primary;
+      margin-bottom: $space-2xs;
+    }
+
+    h3 {
+      font-size: $fs-base;
+      color: $text-strong;
+      margin-bottom: $space-3xs;
+    }
+
+    p {
+      font-size: $fs-sm;
+      color: $text-muted;
+    }
+  }
+}
+
+// ============================================================
+// Categories grid
+// ============================================================
+.home-categories {
+  margin-bottom: $space-fluid-xl;
+
+  &__grid {
+    @include auto-grid(10rem, $space-sm);
+  }
+}
+
+.category-card {
+  display: block;
+  background: $surface;
+  padding: $space-md;
+  border-radius: $radius;
+  box-shadow: $shadow-sm;
+  text-align: center;
+  transition: transform $t-base $ease, box-shadow $t-base $ease, border-color $t-base $ease, background-color $t-base $ease;
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-0.125rem);
+    box-shadow: $shadow-md;
+    border-color: $primary;
+  }
+
+  &__icon {
+    font-size: $fs-xl;
+    display: block;
+    margin-bottom: $space-2xs;
+  }
+
+  h3 {
+    font-size: $fs-sm;
+    color: $text-strong;
+    margin-bottom: $space-3xs;
+  }
+
+  p {
+    font-size: $fs-xs;
+    color: $gray-700;                        // AA contrast on white
+  }
+}
+
+// ============================================================
+// Produits vedettes
+// ============================================================
+.home-products {
+  margin-bottom: $space-fluid-xl;
+
+  &__grid {
+    @include auto-grid(14rem, $space-md);
+    margin-bottom: $space-md;
+  }
+
+  &__cta {
+    text-align: center;
+  }
+}

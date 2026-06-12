@@ -1,0 +1,300 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+// ============================================================
+// Empty cart state
+// ============================================================
+.cart-empty {
+  @include flex-center;
+  flex-direction: column;
+  gap: $space-sm;
+  padding: $space-2xl $space-sm;
+  text-align: center;
+  color: $text-muted;
+
+  h2 { color: $text; }
+}
+
+// ============================================================
+// Cart page — grid layout (items + sticky summary)
+// ============================================================
+.cart {
+  h1 {
+    font-size: $fs-2xl;
+    color: $text-strong;
+    margin-bottom: $space-md;
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-lg;
+
+    @include breakpoint(lg) {
+      grid-template-columns: minmax(0, 1fr) 20rem;     // main + summary 320px
+      align-items: start;
+    }
+  }
+
+  &__items { min-width: 0; }    // critical for grid item shrink
+
+  // Sticky summary card
+  &__summary {
+    background: $surface;
+    padding: $space-md;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    height: fit-content;
+    transition: background-color $t-base $ease;
+
+    @include breakpoint(lg) {
+      position: sticky;
+      top: var(--header-offset);     // uses runtime CSS var → always correct
+    }
+
+    h3 {
+      font-size: $fs-lg;
+      color: $text-strong;
+      margin-bottom: $space-md;
+      padding-bottom: $space-2xs;
+      border-bottom: 1px solid $border;
+    }
+  }
+
+  &__summary-line {
+    @include flex-between;
+    margin-bottom: $space-2xs;
+    color: $text-muted;
+    font-size: $fs-sm;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__summary-total {
+    @include flex-between;
+    margin-top: $space-sm;
+    padding-top: $space-sm;
+    border-top: 2px solid $border;
+    font-size: $fs-lg;
+    font-weight: $fw-bold;
+    color: $text-strong;
+    margin-bottom: $space-md;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__continue {
+    display: block;
+    text-align: center;
+    margin-top: $space-sm;
+    color: $primary;
+    font-weight: $fw-medium;
+
+    @include hover { text-decoration: underline; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; border-radius: $radius-sm; }
+  }
+
+  // Hint visible uniquement en mode guest (sous le CTA "Se connecter pour commander")
+  &__guest-hint {
+    margin: $space-2xs 0 0;
+    font-size: $fs-xs;
+    color: $text-faint;
+    text-align: center;
+    line-height: $lh-snug;
+
+    a {
+      color: $primary;
+      text-decoration: underline;
+      @include hover { color: $primary-dark; }
+    }
+  }
+}
+
+// ============================================================
+// Cart item — explicit grid-area layout for mobile & desktop
+// ============================================================
+.cart-item {
+  display: grid;
+  grid-template-columns: 5rem 1fr;             // image | content (mobile)
+  grid-template-areas:
+    "image info"
+    "image price"
+    "qty   remove"
+    "error error";
+  gap: $space-2xs $space-sm;
+  align-items: center;
+  background: $surface;
+  padding: $space-sm;
+  border-radius: $radius;
+  box-shadow: $shadow-sm;
+  margin-bottom: $space-sm;
+  transition: background-color $t-base $ease;
+
+  @include breakpoint(md) {
+    grid-template-columns: 5rem minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      "image info  qty   price remove"
+      "error error error error error";
+    gap: $space-md;
+    padding: $space-md;
+  }
+
+  &__image {
+    grid-area: image;
+    width: 5rem;
+    height: 5rem;
+    border-radius: $radius-sm;
+    background: $surface-alt;
+    @include flex-center;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__placeholder {
+    font-size: $fs-xs;
+    text-align: center;
+    color: $text-faint;
+    padding: $space-3xs;
+  }
+
+  &__info {
+    grid-area: info;
+    min-width: 0;
+
+    h3 {
+      font-size: $fs-base;
+      color: $text-strong;
+      margin-bottom: $space-3xs;
+      @include truncate(2);
+    }
+  }
+
+  &__price {
+    grid-column: info-start / info-end;        // ignored on grid-area parents — fallback
+    grid-area: price;
+    color: $text-muted;
+    font-size: $fs-sm;
+    font-variant-numeric: tabular-nums;
+
+    @include breakpoint(md) {
+      text-align: right;
+      font-weight: $fw-bold;
+      color: $primary;
+      font-size: $fs-base;
+      min-width: 5rem;
+    }
+  }
+
+  &__quantity {
+    grid-area: qty;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    background: $surface-alt;
+    border-radius: $radius;
+    padding: $space-3xs;
+    width: fit-content;
+
+    button {
+      @include flex-center;
+      width: $tap-target;                     // 44 — was 28
+      height: $tap-target;
+      border-radius: 50%;
+      color: $text-muted;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background $t-fast $ease;
+
+      @include hover { background: $button-ghost-hover; }
+      &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+      &:disabled { color: $text-faint; cursor: not-allowed; opacity: 0.5; }
+    }
+
+    span {
+      min-width: 1.75rem;
+      text-align: center;
+      font-weight: $fw-semibold;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__subtotal {
+    grid-area: price;
+    font-weight: $fw-bold;
+    color: $primary;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 5rem;
+  }
+
+  &__remove {
+    grid-area: remove;
+    @include flex-center;
+    width: $tap-target;
+    height: $tap-target;
+    color: $text-faint;
+    background: transparent;
+    border: none;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: color $t-fast $ease, background $t-fast $ease;
+    margin-inline-start: auto;
+
+    @include hover { color: $error; background: rgba($error, 0.08); }
+    &:focus-visible { outline: 2px solid $error; outline-offset: 2px; }
+  }
+
+  &__error {
+    grid-area: error;
+    margin: 0;
+    padding: $space-3xs $space-2xs;
+    background: rgba($error, 0.1);
+    color: $error;
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    border-radius: $radius-sm;
+    border-inline-start: 3px solid $error;
+  }
+
+  // ============================================================
+  // Free-shipping progress (sibling of .cart-item, lives in items list)
+  // ============================================================
+  &__free-shipping {
+    background: rgba($primary, 0.08);
+    border: 1px solid rgba($primary, 0.2);
+    border-radius: $radius-sm;
+    padding: $space-2xs $space-sm;
+    margin-bottom: $space-sm;
+    font-size: $fs-sm;
+    color: $text-strong;
+
+    p { margin: 0 0 $space-3xs; }
+    strong { color: $primary; font-variant-numeric: tabular-nums; }
+
+    &--unlocked {
+      background: $success-bg;
+      border-color: rgba($success, 0.35);
+      color: $success-fg;
+
+      strong { color: $success-fg; }
+    }
+  }
+
+  &__free-shipping-bar {
+    height: 0.375rem;
+    background: rgba($primary, 0.15);
+    border-radius: $radius-pill;
+    overflow: hidden;
+  }
+
+  &__free-shipping-bar-fill {
+    height: 100%;
+    background: $primary;
+    transition: width $t-slow ease-out;
+  }
+}

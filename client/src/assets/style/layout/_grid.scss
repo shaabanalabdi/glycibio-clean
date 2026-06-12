@@ -1,0 +1,50 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// ============================================================
+// Global CSS custom properties — runtime-tweakable layout values
+// `--header-offset` is the gap between page top and sticky elements
+// (filters sidebar, cart summary). Bumps responsively at md.
+// ============================================================
+:root {
+  --header-offset: calc(#{$navbar-min-h} + 2rem + #{$space-sm});      // ~5.5rem mobile
+}
+@media (min-width: $breakpoint-md) {
+  :root {
+    --header-offset: calc(#{$navbar-min-h-md} + 2.5rem + #{$space-sm}); // ~6.5rem desktop
+  }
+}
+
+// ============================================================
+// Page container — fluid horizontal padding, capped max-width
+// ============================================================
+.main-content {
+  @include container;
+  min-height: calc(100dvh - 10rem); // dynamic viewport — accounts for mobile UI chrome
+  padding-block: $space-fluid-md;   // top/bottom: 1rem → 2rem fluid
+}
+
+// ============================================================
+// Generic auto-grid utilities (reusable)
+// ============================================================
+.grid {
+  display: grid;
+  gap: $space-md;
+
+  &--auto-sm { grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr)); }
+  &--auto    { grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr)); }
+  &--auto-lg { grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr)); }
+}
+
+// Sidebar + main pattern (e.g., catalog page)
+.layout-sidebar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-md;
+
+  @include breakpoint(md) {
+    grid-template-columns: minmax(15rem, 17.5rem) 1fr;
+    gap: $space-lg;
+    align-items: start;
+  }
+}

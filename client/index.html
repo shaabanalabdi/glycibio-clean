@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2e7d32" />
+
+  <title>GlyciBio - Aliments a index glycemique controle</title>
+  <meta name="description" content="GlyciBio : selection d'aliments sains a index glycemique bas ou modere. Alternatives naturelles au sucre, livraison en France 48h." />
+  <meta name="keywords" content="index glycemique, IG bas, diabete, alimentation saine, glycemie, edulcorants naturels, bio" />
+
+  <link rel="canonical" href="https://glycibio.fr/" />
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="GlyciBio" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:title" content="GlyciBio - Aliments a index glycemique controle" />
+  <meta property="og:description" content="Selection d'aliments sains a index glycemique bas ou modere. Livraison en France 48h." />
+  <meta property="og:url" content="https://glycibio.fr/" />
+  <meta property="og:image" content="https://glycibio.fr/icon-512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="GlyciBio — Aliments a index glycemique controle" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="GlyciBio" />
+  <meta name="twitter:description" content="Aliments a index glycemique controle, livraison en France." />
+  <meta name="twitter:image" content="https://glycibio.fr/icon-512.png" />
+
+  <!-- JSON-LD Organization (Schema.org) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "GlyciBio",
+    "legalName": "GlyciBio SAS",
+    "url": "https://glycibio.fr",
+    "logo": "https://glycibio.fr/icon-512.png",
+    "email": "contact@glycibio.fr",
+    "telephone": "+33-1-23-45-67-89",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "12 rue des Jardins Bio",
+      "postalCode": "75011",
+      "addressLocality": "Paris",
+      "addressCountry": "FR"
+    },
+    "vatID": "FR12123456789",
+    "taxID": "12345678900012",
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": "contact@glycibio.fr",
+        "telephone": "+33-1-23-45-67-89",
+        "areaServed": "FR",
+        "availableLanguage": ["French"]
+      },
+      {
+        "@type": "ContactPoint",
+        "contactType": "data protection officer",
+        "email": "dpo@glycibio.fr",
+        "areaServed": "FR",
+        "availableLanguage": ["French"]
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    // Theme bootstrap : applique le theme AVANT le rendu React (anti-flash).
+    // Priorite : choix utilisateur en localStorage > preference systeme.
+    (function () {
+      try {
+        var stored = localStorage.getItem('glycibio-theme');
+        if (stored === 'dark' || stored === 'light') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+        // Sinon : pas d'attribut -> on laisse @media (prefers-color-scheme) decider.
+      } catch (e) { /* localStorage indisponible (mode prive Safari) */ }
+    })();
+  </script>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

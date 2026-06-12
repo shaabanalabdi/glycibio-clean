@@ -1,0 +1,408 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+// ============================================================
+// Top promo bar — rotating ticker on mobile, inline list ≥ sm
+// ============================================================
+.top-bar {
+  position: relative;
+  background: $primary;
+  color: $white;
+  font-size: $fs-xs;
+  line-height: 1;
+  overflow: hidden;
+
+  // Mobile: fixed slim height, rotate messages one at a time
+  height: 2rem;                       // 32px — slim, no layout shift
+
+  &__rotator {
+    position: relative;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4em;
+      padding-inline: $space-sm;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(50%);
+      animation: top-bar-rotate 15s infinite $ease;
+
+      svg { flex-shrink: 0; }
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+      }
+
+      &:nth-child(1) { animation-delay: 0s; }
+      &:nth-child(2) { animation-delay: 5s; }
+      &:nth-child(3) { animation-delay: 10s; }
+    }
+  }
+
+  // Pause la rotation au survol/focus pour permettre la lecture
+  &:hover &__rotator li,
+  &:focus-within &__rotator li {
+    animation-play-state: paused;
+  }
+
+  // Tablet+: flow inline, no animation
+  @include breakpoint(sm) {
+    height: auto;
+    padding: 0.4rem $space-sm;
+    font-size: $fs-sm;
+
+    &__rotator {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: $space-2xs $space-md;
+      height: auto;
+
+      li {
+        position: static;
+        inset: auto;
+        opacity: 1;
+        transform: none;
+        animation: none;
+        padding-inline: 0;
+      }
+    }
+  }
+}
+
+@keyframes top-bar-rotate {
+  0%, 30%  { opacity: 1; transform: translateY(0); }
+  33%, 95% { opacity: 0; transform: translateY(-50%); }
+  100%     { opacity: 0; transform: translateY(50%); }
+}
+
+// Reduced motion: stop rotation, show only first message on mobile
+@media (prefers-reduced-motion: reduce) {
+  .top-bar__rotator li {
+    animation: none;
+    transform: none;
+    opacity: 0;
+    &:first-child { opacity: 1; }
+  }
+}
+
+// ============================================================
+// Navbar — Mobile First (single-row flexbox, mathematically centered search)
+// Symmetry: LEFT (burger 2.75rem + 0.5rem gap) === RIGHT (cart 2.75rem + 0.5rem gap)
+// ============================================================
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: $z-nav;
+  background: $surface;
+  box-shadow: $shadow-sm;
+  border-bottom: 1px solid $border;
+  transition: background-color $t-base $ease, border-color $t-base $ease;
+
+  &__container {
+    @include container;
+    padding-block: $space-2xs;             // 0.5rem
+    min-height: $navbar-min-h;             // 3.5rem (56)
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;                       // 8px
+  }
+
+  // ------------------------------------------------------------
+  // Icon buttons — universal 44×44 thumb target
+  // ------------------------------------------------------------
+  &__icon-btn {
+    position: relative;
+    flex-shrink: 0;
+    @include flex-center;
+    @include tap-target;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: $radius-lg;
+    color: $text-muted;
+    cursor: pointer;
+    transition: background-color $t-fast $ease, color $t-fast $ease, transform $t-fast $ease;
+
+    &:hover { background: $button-ghost-hover; color: $primary; }
+    &:active { transform: scale(0.94); }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  // ------------------------------------------------------------
+  // LEFT zone: burger (mobile) / logo (desktop)
+  // ------------------------------------------------------------
+  &__burger { display: inline-flex; }
+
+  &__logo {
+    display: none;
+    align-items: center;
+    line-height: 0;
+    padding: $space-3xs;
+    border-radius: $radius-sm;
+    flex-shrink: 0;
+
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    &-image {
+      display: block;
+      height: 2.5rem;                  // 40px
+      width: auto;
+      max-width: 11.25rem;             // 180px
+      object-fit: contain;
+    }
+  }
+
+  // ------------------------------------------------------------
+  // CENTER zone: inline search bar (flex:1)
+  // ------------------------------------------------------------
+  &__search {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;
+    height: 2.5rem;                    // 40px (range 40-44)
+    padding: 0 $space-xs;              // 12px
+    background: $surface-alt;
+    border: 1px solid transparent;
+    border-radius: $radius-lg;
+    transition: background $t-fast $ease, border-color $t-fast $ease, box-shadow $t-fast $ease;
+
+    &:hover { background: $button-ghost-hover; }
+    &:focus-within {
+      background: $surface;
+      border-color: rgba($primary, 0.5);
+      box-shadow: 0 0 0 3px rgba($primary, 0.15);
+    }
+  }
+
+  &__search-icon { color: $text-faint; flex-shrink: 0; }
+
+  &__search-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 1rem;                   // 16px — prevents iOS zoom-on-focus
+    font-family: inherit;
+    color: $text-strong;
+    padding: 0;
+    height: 100%;
+
+    &::placeholder { color: $text-faint; }
+    &::-webkit-search-cancel-button { cursor: pointer; }
+  }
+
+  // ------------------------------------------------------------
+  // RIGHT zone
+  // ------------------------------------------------------------
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;                   // 8px between icons
+    flex-shrink: 0;
+  }
+
+  &__nav-link {
+    display: none;
+    color: $text-muted;
+    font-weight: $fw-medium;
+    font-size: $fs-base;
+    padding: $space-2xs $space-xs;
+    border-radius: $radius-sm;
+    transition: color $t-fast $ease, background-color $t-fast $ease;
+    &:hover { color: $primary; background: $button-ghost-hover; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  &__icon-btn--desktop { display: none; }
+
+  // ------------------------------------------------------------
+  // Cart badge
+  // ------------------------------------------------------------
+  &__cart-badge {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    min-width: 1.125rem;               // 18px
+    height: 1.125rem;
+    padding: 0 $space-3xs;
+    background: $error;
+    color: $white;
+    font-size: 0.65rem;
+    font-weight: $fw-bold;
+    line-height: 1;
+    border-radius: $radius-pill;
+    box-shadow: 0 0 0 2px $white;
+    @include flex-center;
+    pointer-events: none;
+  }
+
+  // Admin link styling (AA contrast on white)
+  &__admin {
+    background: $secondary-dark;           // was $secondary (2.20:1 FAIL)
+    color: $white !important;
+    padding: 0.375rem $space-sm !important;
+    border-radius: $radius;
+    &:hover { background: $secondary-darker; color: $white !important; }
+  }
+
+  // ============================================================
+  // Tablet+ (≥ md / 48em) — full desktop nav
+  // ============================================================
+  @include breakpoint(md) {
+    &__container {
+      padding-block: $space-xs;        // 12px
+      min-height: $navbar-min-h-md;    // 4rem (64)
+      gap: $space-sm;
+    }
+
+    &__burger { display: none; }
+    &__logo   { display: inline-flex; }
+
+    &__search {
+      max-width: 30rem;                // 480px
+      margin-inline: auto;
+      height: $tap-target;             // 44px
+      padding: 0 $space-sm;
+    }
+
+    &__nav-link,
+    &__icon-btn--desktop { display: inline-flex; }
+  }
+}
+
+// ============================================================
+// Mobile drawer — slide-in panel
+// ============================================================
+.navbar-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: $z-drawer;
+  pointer-events: none;
+  visibility: hidden;
+
+  &.is-open {
+    pointer-events: auto;
+    visibility: visible;
+    .navbar-drawer__backdrop { opacity: 1; }
+    .navbar-drawer__panel    { transform: translateX(0); }
+  }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity $t-base $ease;
+  }
+
+  &__panel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    width: min(82vw, 21.25rem);        // 340px max
+    background: $surface-elevated;
+    box-shadow: $shadow-lg;
+    transform: translateX(-100%);
+    transition: transform $t-slow $ease;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    [dir="rtl"] & { transform: translateX(100%); }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $space-2xs $space-sm;
+    border-bottom: 1px solid $border;
+    min-height: $navbar-min-h;
+  }
+
+  &__logo img {
+    display: block;
+    height: 2.25rem;                   // 36px
+    width: auto;
+    max-width: 10rem;
+    object-fit: contain;
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    padding: $space-sm;
+    gap: $space-3xs;
+
+    a, button {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-2xs;
+      min-height: 3rem;                // 48px — comfortable thumb
+      padding: $space-xs $space-sm;
+      border-radius: $radius;
+      color: $text;
+      font-size: $fs-base;
+      font-weight: $fw-medium;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: start;
+      transition: background-color $t-fast $ease, color $t-fast $ease;
+
+      &:hover { background: $button-ghost-hover; color: $primary; }
+      &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; }
+    }
+  }
+
+  &__divider {
+    height: 1px;
+    background: $border;
+    margin: $space-2xs 0;
+  }
+
+  &__logout {
+    color: $error !important;
+    &:hover { background: rgba($error, 0.08) !important; color: $error !important; }
+  }
+
+  &__auth {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2xs;
+    margin-top: $space-2xs;
+    .btn { width: 100%; }
+  }
+
+  @include breakpoint(md) {
+    display: none;
+  }
+}
+
+// ============================================================
+// Motion preferences
+// ============================================================
+@media (prefers-reduced-motion: reduce) {
+  .navbar__icon-btn,
+  .navbar__search,
+  .navbar-drawer__panel,
+  .navbar-drawer__backdrop { transition: none; }
+}

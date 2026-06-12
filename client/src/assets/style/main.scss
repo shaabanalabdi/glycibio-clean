@@ -1,0 +1,22 @@
+// ============================================================
+// Point d'entree des styles GLOBAUX (importe une fois par main.jsx).
+// Les styles propres a une page / un composant vivent dans le
+// style.scss de son dossier (architecture par composant).
+//
+// Restent centraux :
+//   - abstracts (variables, theme, mixins - tokens partages)
+//   - base/reset
+//   - layout/grid, components/button + card (classes transverses)
+//   - pages/auth (4 pages), pages/legal (5 pages), pages/checkout
+//     (checkout + confirmation) : partages par plusieurs routes lazy.
+// ============================================================
+@use 'abstracts/variables' as *;
+@use 'abstracts/theme' as *;
+@use 'abstracts/mixins' as *;
+@use 'base/reset';
+@use 'layout/grid';
+@use 'components/button';
+@use 'components/card';
+@use 'pages/auth';
+@use 'pages/checkout';
+@use 'pages/legal';

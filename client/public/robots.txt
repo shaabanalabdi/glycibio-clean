@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /panier
+Disallow: /commande
+Disallow: /profil
+Disallow: /login
+Disallow: /register
+Disallow: /reinitialiser-mdp
+Disallow: /mot-de-passe-oublie
+
+Sitemap: https://glycibio.fr/sitemap.xml

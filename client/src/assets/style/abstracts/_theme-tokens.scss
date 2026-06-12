@@ -1,0 +1,41 @@
+// ============================================================
+// Aliases SCSS des tokens de theme - permettent d'ecrire
+// `background: $surface;` au lieu de `background: var(--color-surface);`.
+//
+// Ce module ne PRODUIT AUCUN CSS : il peut donc etre @use par chaque
+// style.scss de composant sans dupliquer les blocs :root (qui vivent
+// dans _theme.scss, importe une seule fois par main.scss).
+// ============================================================
+
+$bg:                 var(--color-bg);
+$surface:            var(--color-surface);
+$surface-alt:        var(--color-surface-alt);
+$surface-elevated:   var(--color-surface-elevated);
+$overlay:            var(--color-overlay);
+
+$text:               var(--color-text);
+$text-strong:        var(--color-text-strong);
+$text-muted:         var(--color-text-muted);
+$text-faint:         var(--color-text-faint);
+$text-on-primary:    var(--color-text-on-primary);
+
+$border:             var(--color-border);
+$border-strong:      var(--color-border-strong);
+
+$input-bg:           var(--color-input-bg);
+$input-border:       var(--color-input-border);
+$input-disabled:     var(--color-input-disabled);
+
+$button-ghost-hover: var(--color-button-ghost-hover);
+
+$success-bg:         var(--color-success-bg);
+$success-fg:         var(--color-success-fg);
+$error-bg:           var(--color-error-bg);
+$error-fg:           var(--color-error-fg);
+$warning-bg:         var(--color-warning-bg);
+$warning-fg:         var(--color-warning-fg);
+$info-bg:            var(--color-info-bg);
+$info-fg:            var(--color-info-fg);
+
+$skeleton-base:      var(--color-skeleton-base);
+$skeleton-shine:     var(--color-skeleton-shine);

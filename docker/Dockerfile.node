@@ -1,0 +1,32 @@
+# ============================================================
+# GlyciBio — Dockerfile pour l'API Node.js
+# ============================================================
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copier les fichiers de dependances
+COPY server/package*.json ./
+
+# Installer uniquement les dependances de production
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Copier le code source
+COPY server/src ./src
+
+# Dossier d'uploads + ownership : tout /app appartient a l'utilisateur non-root
+RUN mkdir -p /app/uploads/products && chown -R node:node /app
+
+# Ne jamais tourner en root : limite le rayon d'explosion en cas de RCE
+USER node
+
+# Port expose
+EXPOSE 5000
+
+# Healthcheck dependency-free (node 20 a fetch global) : permet a
+# l'orchestrateur de detecter une API figee et de ne pas y router le trafic.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://localhost:5000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+# Demarrer le serveur
+CMD ["node", "src/server.js"]
