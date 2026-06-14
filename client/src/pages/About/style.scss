@@ -43,6 +43,7 @@
 
   &__pillar {
     background: $surface;
+    border: 1px solid $border;
     border-radius: $radius-lg;
     box-shadow: $shadow-sm;
     padding: $space-lg $space-md;

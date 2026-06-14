@@ -127,11 +127,12 @@
 
   &__step {
     background: $surface;
+    border: 1px solid $border;             // delimitation claire de chaque etape
     padding: $space-md;
     border-radius: $radius-lg;
     box-shadow: $shadow-sm;
     margin-bottom: $space-md;
-    transition: background-color $t-base $ease;
+    transition: border-color $t-base $ease, background-color $t-base $ease;
 
     @include breakpoint(md) {
       padding: $space-lg;

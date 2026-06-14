@@ -17,8 +17,10 @@
 // ============================================================
 
 :root {
-  // Surfaces (du plus arriere au plus avant)
-  --color-bg:               #{$gray-100};   // body
+  // Surfaces (du plus arriere au plus avant) — echelle d'elevation :
+  // bg (gris) < surface-alt (#f8f9fa) < surface (#fff) -> les cartes blanches
+  // "ressortent" du fond et sont identifiables immediatement (style Vercel/Linear).
+  --color-bg:               #f2f4f7;        // body — gris froid leger (etait #f8f9fa, trop proche du blanc)
   --color-surface:          #{$white};      // cards, navbar, footer
   --color-surface-alt:      #{$gray-100};   // hover/secondary surface
   --color-surface-elevated: #{$white};      // modals, drawers
@@ -31,9 +33,9 @@
   --color-text-faint:       #{$gray-600};
   --color-text-on-primary:  #{$white};
 
-  // Bordures
-  --color-border:           #{$gray-200};
-  --color-border-strong:    #{$gray-300};
+  // Bordures — renforcees pour delimiter clairement cartes/sections en mode clair
+  --color-border:           #{$gray-300};   // #dee2e6 (etait gray-200, trop pale)
+  --color-border-strong:    #{$gray-400};   // #ced4da — hover/emphase
 
   // Inputs
   --color-input-bg:         #{$white};

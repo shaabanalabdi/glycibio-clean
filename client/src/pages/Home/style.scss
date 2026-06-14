@@ -190,6 +190,7 @@
     text-align: center;
     padding: $space-md;
     background: $surface;
+    border: 1px solid $border;
     border-radius: $radius;
     box-shadow: $shadow-sm;
     transition: transform $t-base $ease, box-shadow $t-base $ease, background-color $t-base $ease;
@@ -236,7 +237,7 @@
   box-shadow: $shadow-sm;
   text-align: center;
   transition: transform $t-base $ease, box-shadow $t-base $ease, border-color $t-base $ease, background-color $t-base $ease;
-  border: 2px solid transparent;
+  border: 2px solid $border;
 
   &:hover {
     transform: translateY(-0.125rem);

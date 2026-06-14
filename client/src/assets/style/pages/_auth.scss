@@ -20,6 +20,7 @@
 .auth-form,
 .auth__card {
   background: $surface;
+  border: 1px solid $border;               // delimitation claire de la carte
   padding: clamp(1rem, 5vw, 2rem);         // fluid: 16 → 32
   border-radius: $radius-lg;
   box-shadow: $shadow-md;

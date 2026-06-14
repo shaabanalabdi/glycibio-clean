@@ -44,6 +44,7 @@
   // Image — aspect-ratio kills CLS
   &__image {
     background: $surface;
+    border: 1px solid $border;
     border-radius: $radius-lg;
     box-shadow: $shadow-sm;
     @include flex-center;
@@ -195,6 +196,7 @@
   // Nutrition section
   &__nutrition {
     background: $surface;
+    border: 1px solid $border;
     border-radius: $radius-lg;
     box-shadow: $shadow-sm;
     padding: $space-md;
@@ -401,6 +403,7 @@
 .reviews {
   margin-top: $space-xl;
   background: $surface;
+  border: 1px solid $border;
   padding: $space-md;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;

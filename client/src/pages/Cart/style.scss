@@ -42,6 +42,7 @@
   // Sticky summary card
   &__summary {
     background: $surface;
+    border: 1px solid $border;
     padding: $space-md;
     border-radius: $radius-lg;
     box-shadow: $shadow-sm;
@@ -123,6 +124,7 @@
   gap: $space-2xs $space-sm;
   align-items: center;
   background: $surface;
+  border: 1px solid $border;
   padding: $space-sm;
   border-radius: $radius;
   box-shadow: $shadow-sm;
