@@ -1,18 +1,22 @@
 import "./style.scss"
 import { useState, useEffect, useRef } from "react"
 import { useParams, Link } from "react-router-dom"
-import { ShoppingCart, ArrowLeft, Minus, Plus } from "lucide-react"
+import { ShoppingCart, ArrowLeft, Minus, Plus, Truck, ShieldCheck } from "lucide-react"
 import { ProductCard } from "@components/ProductCard/index.jsx"
 import { ProductGallery } from "@components/ProductGallery/index.jsx"
 import { ProductReviews } from "@components/ProductReviews/index.jsx"
 import { Breadcrumb } from "@components/Breadcrumb/index.jsx"
 import { ScrollReveal } from "@components/ScrollReveal/index.jsx"
+import { IgMeter } from "@components/IgMeter/index.jsx"
 import { useCart } from "@hooks/useCart.js"
 import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
 import { useGetProductQuery, useGetRelatedProductsQuery } from "@slices/productApiSlice.js"
 import { formatPrice } from "@utils/formatPrice.js"
 
 const SITE_BASE = "https://glycibio.fr"
+
+// Libelle FR du niveau IG, derive de ig_category (donnee reelle du produit)
+const IG_LABELS = { bas: "BAS", moyen: "MODÉRÉ", eleve: "ÉLEVÉ" }
 
 export const Product = () => {
     const { id } = useParams()
@@ -77,6 +81,7 @@ export const Product = () => {
     }
 
     const igClass = product?.ig_category || "bas"
+    const igLabel = IG_LABELS[igClass] || IG_LABELS.bas
     const canonical = product ? `${SITE_BASE}/produit/${product.slug || product.id}` : undefined
     const imageUrl = product ? buildAbs(product.image) : undefined
     const allImages = product
@@ -162,6 +167,9 @@ export const Product = () => {
             <div className="product-page__content">
                 {/* Galerie (image principale + images supplementaires) */}
                 <div className="product-page__image">
+                    <span className={`product-page__ig-pill badge-ig badge-ig--${igClass}`}>
+                        IG {product.glycemic_index} · {igLabel}
+                    </span>
                     <ProductGallery
                         productName={product.name}
                         images={[
@@ -173,27 +181,45 @@ export const Product = () => {
 
                 {/* Infos */}
                 <div className="product-page__info">
-                    <p className="product-page__category">{product.category_name}</p>
+                    {product.category_name && (
+                        <div className="product-page__pills">
+                            <span className="product-page__pill product-page__pill--cat">
+                                {product.category_name}
+                            </span>
+                        </div>
+                    )}
                     <h1 className="product-page__name">{product.name}</h1>
 
-                    <div className="product-page__ig">
-                        <span className={`badge-ig badge-ig--${igClass} badge-ig--lg`}>
-                            IG {product.glycemic_index}
-                        </span>
-                        <span className="product-page__ig-label">
-                            Index glycemique {igClass === "bas" ? "bas" : igClass === "moyen" ? "moyen" : "eleve"}
-                        </span>
+                    {/* Grande carte Index glycemique (signature) */}
+                    <div className="product-page__ig-card">
+                        <div className="product-page__ig-head">
+                            <span className="product-page__ig-card-label">Index glycémique</span>
+                            <span className="product-page__ig-number">
+                                {product.glycemic_index}
+                                <span className="product-page__ig-out">/ 100</span>
+                            </span>
+                        </div>
+                        <IgMeter ig={product.glycemic_index} size="lg" showScale />
+                        <p className="product-page__ig-explainer">
+                            Un IG de {product.glycemic_index} signifie une montée de la glycémie
+                            {igClass === "bas" ? " lente et faible" : igClass === "moyen" ? " modérée" : " rapide et forte"}
+                            {igClass === "bas" ? " — idéal en remplacement du sucre blanc (IG 70)." : "."}
+                        </p>
                     </div>
 
-                    <p className="product-page__price">{formatPrice(product.price)}</p>
-
-                    <p className="product-page__stock">
-                        {product.stock > 0 ? (
-                            <span className="product-page__stock--available">En stock ({product.stock} disponibles)</span>
-                        ) : (
-                            <span className="product-page__stock--out">Rupture de stock</span>
-                        )}
-                    </p>
+                    {/* Tableau nutritionnel — 3 stat cards */}
+                    {Object.keys(nutrition).length > 0 && (
+                        <div className="product-page__nutrition-row">
+                            {Object.entries(nutrition).map(([key, value]) => (
+                                <div className="product-page__stat" key={key}>
+                                    <span className="product-page__stat-value">{value}</span>
+                                    <span className="product-page__stat-label">
+                                        {key.charAt(0).toUpperCase() + key.slice(1).replace("_", " ")}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <p className="product-page__description">{product.description}</p>
 
@@ -209,59 +235,55 @@ export const Product = () => {
                         </div>
                     )}
 
-                    {/* Ajouter au panier */}
-                    {product.stock > 0 && (
-                        <div className="product-page__cart" ref={inlineCtaRef}>
-                            {error && <p className="product-page__error">{error}</p>}
+                    {/* Buy row : prix + stepper + CTA */}
+                    <div className="product-page__buy">
+                        <div className="product-page__price-block">
+                            <span className="product-page__price">{formatPrice(product.price)}</span>
+                            <span className="product-page__stock">
+                                {product.stock > 0 ? (
+                                    <span className="product-page__stock--available">En stock ({product.stock} disponibles)</span>
+                                ) : (
+                                    <span className="product-page__stock--out">Rupture de stock</span>
+                                )}
+                            </span>
+                        </div>
 
-                            <div className="product-page__quantity">
-                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
-                                    <Minus size={18} />
-                                </button>
-                                <span>{quantity}</span>
-                                <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}>
-                                    <Plus size={18} />
+                        {/* Ajouter au panier */}
+                        {product.stock > 0 && (
+                            <div className="product-page__cart" ref={inlineCtaRef}>
+                                {error && <p className="product-page__error">{error}</p>}
+
+                                <div className="product-page__quantity">
+                                    <button aria-label="Diminuer la quantité" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                                        <Minus size={18} />
+                                    </button>
+                                    <span>{quantity}</span>
+                                    <button aria-label="Augmenter la quantité" onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}>
+                                        <Plus size={18} />
+                                    </button>
+                                </div>
+
+                                <button
+                                    className={`btn btn--primary btn--lg ${added ? "btn--success" : ""}`}
+                                    onClick={addToCart}
+                                >
+                                    {added ? (
+                                        "Ajoute au panier"
+                                    ) : (
+                                        <><ShoppingCart size={20} /> Ajouter au panier</>
+                                    )}
                                 </button>
                             </div>
+                        )}
+                    </div>
 
-                            <button
-                                className={`btn btn--primary btn--lg ${added ? "btn--success" : ""}`}
-                                onClick={addToCart}
-                            >
-                                {added ? (
-                                    "Ajoute au panier"
-                                ) : (
-                                    <><ShoppingCart size={20} /> Ajouter au panier</>
-                                )}
-                            </button>
-                        </div>
-                    )}
-
+                    {/* Ligne de confiance : livraison + stock */}
+                    <ul className="product-page__trust">
+                        <li><Truck size={18} aria-hidden="true" /> Livraison rapide en 24/48h</li>
+                        <li><ShieldCheck size={18} aria-hidden="true" /> Paiement sécurisé · Bio certifié</li>
+                    </ul>
                 </div>
             </div>
-
-            {/* Tableau nutritionnel */}
-            {Object.keys(nutrition).length > 0 && (
-                <section className="product-page__nutrition">
-                    <h2>Informations nutritionnelles</h2>
-                    <table className="nutrition-table">
-                        <thead>
-                            <tr>
-                                <th>Nutriment</th>
-                                <th>Valeur</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(nutrition).map(([key, value]) => (
-                                <tr key={key}>
-                                    <td>{key.charAt(0).toUpperCase() + key.slice(1).replace("_", " ")}</td>
-                                    <td>{value}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </section>
-            )}
 
             {/* Avis clients */}
             <ProductReviews productId={product.id} />

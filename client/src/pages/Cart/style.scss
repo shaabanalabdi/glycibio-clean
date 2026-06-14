@@ -17,32 +17,94 @@
 }
 
 // ============================================================
-// Cart page — grid layout (items + sticky summary)
+// Cart page
 // ============================================================
 .cart {
-  h1 {
-    font-size: $fs-2xl;
-    color: $text-strong;
-    margin-bottom: $space-md;
+  // -- 3-step stepper header (white panel) -----------------
+  &__stepper {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: $space-sm $space-md;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-sm;
+    padding: $space-sm $space-md;
+    margin-bottom: $space-lg;
+
+    @include responsive(md) {
+      grid-template-columns: 1fr auto;
+      row-gap: $space-sm;
+    }
   }
 
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2xs;
+    font-family: $font-heading;
+    font-weight: $fw-bold;
+    font-size: $fs-md;
+    letter-spacing: -0.025em;
+    color: $text-strong;
+
+    img {
+      width: 2rem;
+      height: 2rem;
+      object-fit: contain;
+    }
+  }
+
+  &__secure {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $accent;
+    white-space: nowrap;
+
+    svg { flex: none; }
+  }
+
+  // -- Body grid : items + summary -------------------------
   &__content {
     display: grid;
     grid-template-columns: 1fr;
     gap: $space-lg;
 
     @include breakpoint(lg) {
-      grid-template-columns: minmax(0, 1fr) 20rem;     // main + summary 320px
+      grid-template-columns: minmax(0, 1fr) 23.75rem;   // main + summary 380px
       align-items: start;
     }
   }
 
   &__items { min-width: 0; }    // critical for grid item shrink
 
-  // Sticky summary card
+  &__items-head {
+    margin-bottom: $space-md;
+
+    h1 {
+      font-family: $font-heading;
+      font-size: $fs-2xl;
+      letter-spacing: -0.025em;
+      color: $text-strong;
+      margin: 0 0 $space-3xs;
+    }
+  }
+
+  &__items-sub {
+    margin: 0;
+    color: $text-muted;
+    font-size: $fs-sm;
+  }
+
+  // -- Summary panel ---------------------------------------
   &__summary {
     background: $surface;
     border: 1px solid $border;
+    border-inline-start: 3px solid $primary;
     padding: $space-md;
     border-radius: $radius-lg;
     box-shadow: $shadow-sm;
@@ -53,13 +115,65 @@
       position: sticky;
       top: var(--header-offset);     // uses runtime CSS var → always correct
     }
+  }
 
-    h3 {
-      font-size: $fs-lg;
-      color: $text-strong;
-      margin-bottom: $space-md;
-      padding-bottom: $space-2xs;
-      border-bottom: 1px solid $border;
+  &__summary-title {
+    font-family: $font-heading;
+    font-size: $fs-lg;
+    letter-spacing: -0.025em;
+    color: $text-strong;
+    margin: 0 0 $space-md;
+  }
+
+  // Glycemic-load box (green tint, green border)
+  &__ig-load {
+    background: $tint-green-bg;
+    border: 1px solid rgba($primary, 0.35);
+    border-radius: $radius;
+    padding: $space-sm;
+    margin-bottom: $space-md;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2xs;
+  }
+
+  &__ig-load-label {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    margin: 0;
+    font-weight: $fw-semibold;
+    font-size: $fs-sm;
+    color: $tint-green-fg;
+
+    svg { flex: none; color: $tint-green-fg; }
+  }
+
+  &__ig-load-verdict {
+    margin: 0;
+    font-size: $fs-sm;
+    color: $text;
+
+    strong {
+      font-family: $font-heading;
+      color: $tint-green-fg;
+    }
+  }
+
+  // Verdict moyen / eleve — teintes eclaircies en sombre pour rester >= 4.5:1
+  // sur la tuile verte translucide (l'orange/rouge profond y echoue).
+  &__ig-load--moyen {
+    .cart__ig-load-verdict strong { color: $ig-moyen; }
+    :root[data-theme='dark'] & .cart__ig-load-verdict strong { color: #f0a955; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']):not([data-theme='dark']) & .cart__ig-load-verdict strong { color: #f0a955; }
+    }
+  }
+  &__ig-load--eleve {
+    .cart__ig-load-verdict strong { color: $ig-eleve; }
+    :root[data-theme='dark'] & .cart__ig-load-verdict strong { color: #ff8c84; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme='light']):not([data-theme='dark']) & .cart__ig-load-verdict strong { color: #ff8c84; }
     }
   }
 
@@ -71,25 +185,78 @@
     font-variant-numeric: tabular-nums;
   }
 
+  &__summary-free {
+    color: $accent;
+    font-weight: $fw-semibold;
+  }
+
+  // Promo input + Appliquer
+  &__promo {
+    display: flex;
+    gap: $space-2xs;
+    margin: $space-sm 0;
+  }
+
+  &__promo-input {
+    @include form-input;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__promo-apply {
+    flex: none;
+    min-height: $tap-target;
+    padding-inline: $space-sm;
+    border: 1px solid $border-strong;
+    border-radius: $radius-sm;
+    background: $surface;
+    color: $text-strong;
+    font-weight: $fw-semibold;
+    font-size: $fs-sm;
+    cursor: pointer;
+    transition: background $t-fast $ease, border-color $t-fast $ease;
+
+    @include hover { background: $button-ghost-hover; border-color: $primary; }
+    @include focus-ring;
+  }
+
   &__summary-total {
     @include flex-between;
     margin-top: $space-sm;
     padding-top: $space-sm;
     border-top: 2px solid $border;
-    font-size: $fs-lg;
-    font-weight: $fw-bold;
-    color: $text-strong;
     margin-bottom: $space-md;
     font-variant-numeric: tabular-nums;
+
+    span:first-child {
+      font-family: $font-heading;
+      font-size: $fs-lg;
+      font-weight: $fw-bold;
+      color: $text-strong;
+    }
+    span:last-child {
+      font-family: $font-heading;
+      font-size: $fs-xl;          // ~28px
+      font-weight: $fw-bold;
+      letter-spacing: -0.025em;
+      color: $price;
+    }
   }
 
+  &__checkout {
+    box-shadow: 0 6px 16px rgba($primary, 0.32);
+  }
+
+  // Continue shopping (text button under the items list)
   &__continue {
-    display: block;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
     margin-top: $space-sm;
-    color: $primary;
+    color: $accent;
     font-weight: $fw-medium;
 
+    svg { flex: none; }
     @include hover { text-decoration: underline; }
     &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; border-radius: $radius-sm; }
   }
@@ -103,49 +270,132 @@
     line-height: $lh-snug;
 
     a {
-      color: $primary;
+      color: $accent;
       text-decoration: underline;
       @include hover { color: $primary-dark; }
+    }
+  }
+
+  // Payment logos row
+  &__payments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-sm;
+    justify-content: center;
+    margin-top: $space-md;
+    padding-top: $space-md;
+    border-top: 1px solid $border;
+
+    span {
+      font-size: $fs-xs;
+      font-weight: $fw-bold;
+      letter-spacing: 0.05em;
+      color: $text-faint;
     }
   }
 }
 
 // ============================================================
-// Cart item — explicit grid-area layout for mobile & desktop
+// 3-step stepper
+// ============================================================
+.cart-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2xs;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__step {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2xs;
+    color: $text-faint;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    white-space: nowrap;
+  }
+
+  &__num {
+    @include flex-center;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: none;
+    border-radius: 50%;
+    border: 2px solid $border-strong;
+    background: $surface;
+    color: $text-faint;
+    font-family: $font-heading;
+    font-size: $fs-sm;
+    font-weight: $fw-bold;
+  }
+
+  &__line {
+    width: 2.25rem;     // 36px connector
+    height: 2px;
+    flex: none;
+    background: $border-strong;
+    list-style: none;
+
+    @include responsive(sm) { width: 1rem; }
+  }
+
+  &__step--active {
+    color: $text-strong;
+
+    .cart-stepper__num {
+      background: $primary;
+      border-color: $primary;
+      color: $text-on-primary;
+    }
+  }
+
+  // Mobile : hide labels, keep the numbered circles + connectors
+  @include responsive(sm) {
+    .cart-stepper__label { @include sr-only; }
+  }
+}
+
+// ============================================================
+// Cart item — thumb / details / aside(price + qty)
 // ============================================================
 .cart-item {
   display: grid;
-  grid-template-columns: 5rem 1fr;             // image | content (mobile)
+  grid-template-columns: 5.25rem minmax(0, 1fr) auto;   // thumb | details | remove
   grid-template-areas:
-    "image info"
-    "image price"
-    "qty   remove"
-    "error error";
+    "image info  remove"
+    "image aside aside"
+    "error error error";
   gap: $space-2xs $space-sm;
-  align-items: center;
+  align-items: start;
   background: $surface;
   border: 1px solid $border;
   padding: $space-sm;
-  border-radius: $radius;
+  border-radius: $radius-lg;
   box-shadow: $shadow-sm;
   margin-bottom: $space-sm;
-  transition: background-color $t-base $ease;
+  transition: background-color $t-base $ease, box-shadow $t-base $ease, border-color $t-base $ease;
+
+  @include hover { box-shadow: $shadow-md; border-color: $border-strong; }
 
   @include breakpoint(md) {
-    grid-template-columns: 5rem minmax(0, 1fr) auto auto auto;
+    grid-template-columns: 5.25rem minmax(0, 1fr) auto auto;
     grid-template-areas:
-      "image info  qty   price remove"
-      "error error error error error";
+      "image info aside remove"
+      "error error error error";
     gap: $space-md;
+    align-items: center;
     padding: $space-md;
   }
 
   &__image {
     grid-area: image;
-    width: 5rem;
-    height: 5rem;
-    border-radius: $radius-sm;
+    width: 5.25rem;          // 84px thumb
+    height: 5.25rem;
+    border-radius: $radius;
     background: $surface-alt;
+    border: 1px solid $border;
     @include flex-center;
     overflow: hidden;
 
@@ -166,47 +416,85 @@
   &__info {
     grid-area: info;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3xs;
 
-    h3 {
-      font-size: $fs-base;
+    .cart-item__name {
+      font-family: $font-heading;
+      font-size: $fs-base;       // ~16px
+      font-weight: $fw-bold;
+      letter-spacing: -0.015em;
       color: $text-strong;
-      margin-bottom: $space-3xs;
+      margin: 0;
       @include truncate(2);
     }
   }
 
-  &__price {
-    grid-column: info-start / info-end;        // ignored on grid-area parents — fallback
-    grid-area: price;
-    color: $text-muted;
-    font-size: $fs-sm;
-    font-variant-numeric: tabular-nums;
+  &__category {
+    margin: 0;
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $text-faint;
+  }
+
+  &__ig {
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;
+    margin-top: $space-3xs;
+
+    .ig-meter { max-width: 7rem; }
+    .badge-ig { flex: none; }
+  }
+
+  // Right side : price (top) + qty stepper (below)
+  &__aside {
+    grid-area: aside;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-sm;
 
     @include breakpoint(md) {
-      text-align: right;
-      font-weight: $fw-bold;
-      color: $primary;
-      font-size: $fs-base;
-      min-width: 5rem;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: $space-2xs;
     }
   }
 
+  &__subtotal {
+    margin: 0;
+    font-family: $font-heading;
+    font-size: $fs-md;          // ~18px
+    font-weight: $fw-bold;
+    letter-spacing: -0.02em;
+    color: $price;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
   &__quantity {
-    grid-area: qty;
     display: inline-flex;
     align-items: center;
     gap: $space-3xs;
     background: $surface-alt;
-    border-radius: $radius;
-    padding: $space-3xs;
+    border: 1px solid $border;
+    border-radius: $radius-pill;
+    padding: 0.1875rem;
     width: fit-content;
 
     button {
       @include flex-center;
-      width: $tap-target;                     // 44 — was 28
-      height: $tap-target;
+      width: 2rem;
+      height: 2rem;
+      min-width: $tap-target;        // 44px tap zone (WCAG 2.5.5)
+      min-height: $tap-target;
       border-radius: 50%;
-      color: $text-muted;
+      color: $text-strong;
       background: transparent;
       border: none;
       cursor: pointer;
@@ -223,15 +511,6 @@
       font-weight: $fw-semibold;
       font-variant-numeric: tabular-nums;
     }
-  }
-
-  &__subtotal {
-    grid-area: price;
-    font-weight: $fw-bold;
-    color: $primary;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-    min-width: 5rem;
   }
 
   &__remove {
@@ -262,41 +541,41 @@
     border-radius: $radius-sm;
     border-inline-start: 3px solid $error;
   }
+}
 
-  // ============================================================
-  // Free-shipping progress (sibling of .cart-item, lives in items list)
-  // ============================================================
-  &__free-shipping {
-    background: rgba($primary, 0.08);
-    border: 1px solid rgba($primary, 0.2);
-    border-radius: $radius-sm;
-    padding: $space-2xs $space-sm;
-    margin-bottom: $space-sm;
-    font-size: $fs-sm;
-    color: $text-strong;
+// ============================================================
+// Free-shipping progress (lives in the summary panel)
+// ============================================================
+.cart__free-shipping {
+  background: rgba($primary, 0.08);
+  border: 1px solid rgba($primary, 0.2);
+  border-radius: $radius-sm;
+  padding: $space-2xs $space-sm;
+  margin-bottom: $space-sm;
+  font-size: $fs-sm;
+  color: $text-strong;
 
-    p { margin: 0 0 $space-3xs; }
-    strong { color: $primary; font-variant-numeric: tabular-nums; }
+  p { margin: 0 0 $space-3xs; }
+  strong { color: $accent; font-variant-numeric: tabular-nums; }
 
-    &--unlocked {
-      background: $success-bg;
-      border-color: rgba($success, 0.35);
-      color: $success-fg;
+  &--unlocked {
+    background: $success-bg;
+    border-color: rgba($success, 0.35);
+    color: $success-fg;
 
-      strong { color: $success-fg; }
-    }
+    strong { color: $success-fg; }
   }
+}
 
-  &__free-shipping-bar {
-    height: 0.375rem;
-    background: rgba($primary, 0.15);
-    border-radius: $radius-pill;
-    overflow: hidden;
-  }
+.cart__free-shipping-bar {
+  height: 0.375rem;
+  background: rgba($primary, 0.15);
+  border-radius: $radius-pill;
+  overflow: hidden;
+}
 
-  &__free-shipping-bar-fill {
-    height: 100%;
-    background: $primary;
-    transition: width $t-slow ease-out;
-  }
+.cart__free-shipping-bar-fill {
+  height: 100%;
+  background: $primary;
+  transition: width $t-slow ease-out;
 }

@@ -83,6 +83,21 @@ export class AuthController {
                 newsletter_opt_in_at: newsletter ? new Date() : null
             })
 
+            // Verification email "souple" : le compte est actif immediatement, une
+            // banniere invitera a confirmer. Best-effort : un echec SMTP ne bloque
+            // pas l'inscription (l'utilisateur pourra renvoyer le lien plus tard).
+            try
+            {
+                const verificationToken = crypto.randomBytes(32).toString("hex")
+                const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
+                await userRepository.setVerificationToken(userId, verificationToken, verificationExpires)
+                await EmailService.sendVerificationEmail(email, verificationToken)
+            }
+            catch (mailError)
+            {
+                Logger.warn(`[auth] Envoi email de verification echoue: ${mailError.message}`)
+            }
+
             const token = AuthHelper.signToken({ id: userId, role: "client" })
 
             // Jeton depose dans un cookie HttpOnly (le `token` du body reste fourni
@@ -92,7 +107,7 @@ export class AuthController {
             return res.status(201).json({
                 message: "Inscription reussie",
                 token,
-                user: { id: userId, email, role: "client", first_name: first_name || null, last_name: last_name || null }
+                user: { id: userId, email, role: "client", first_name: first_name || null, last_name: last_name || null, email_verified: false }
             })
         }
         catch (error)
@@ -159,7 +174,8 @@ export class AuthController {
                     email: user.email,
                     role: user.role,
                     first_name: user.first_name,
-                    last_name: user.last_name
+                    last_name: user.last_name,
+                    email_verified: !!user.email_verified
                 }
             })
         }
@@ -186,7 +202,8 @@ export class AuthController {
                     email: user.email,
                     role: user.role,
                     first_name: user.first_name,
-                    last_name: user.last_name
+                    last_name: user.last_name,
+                    email_verified: !!user.email_verified
                 }
             })
         }
@@ -272,6 +289,66 @@ export class AuthController {
         {
             AuthHelper.clearAuthCookie(res)
             return res.status(200).json({ message: "Deconnexion reussie" })
+        }
+        catch (error)
+        {
+            next(error)
+        }
+    }
+
+    // POST /api/auth/verify-email
+    static verifyEmail = async (req, res, next) => {
+        try
+        {
+            const { token } = req.body
+
+            if (!token) {
+                throw new ValidationException("Token de verification manquant")
+            }
+
+            const user = await userRepository.findByValidVerificationToken(token)
+
+            if (!user) {
+                throw new ValidationException("Lien de verification invalide ou expire. Demandez un nouveau lien.")
+            }
+
+            await userRepository.markEmailVerified(user.id)
+
+            return res.status(200).json({
+                message: "Adresse email confirmee avec succes."
+            })
+        }
+        catch (error)
+        {
+            next(error)
+        }
+    }
+
+    // POST /api/auth/resend-verification (authentifie)
+    static resendVerification = async (req, res, next) => {
+        try
+        {
+            const user = await userRepository.find(req.user.id)
+
+            if (!user) {
+                throw new NotFoundException("Utilisateur")
+            }
+
+            if (user.email_verified) {
+                return res.status(200).json({
+                    message: "Votre adresse email est deja confirmee."
+                })
+            }
+
+            const verificationToken = crypto.randomBytes(32).toString("hex")
+            const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
+
+            await userRepository.setVerificationToken(user.id, verificationToken, verificationExpires)
+            await EmailService.sendVerificationEmail(user.email, verificationToken)
+
+            return res.status(200).json({
+                message: "Un nouveau lien de confirmation vous a ete envoye."
+            })
         }
         catch (error)
         {

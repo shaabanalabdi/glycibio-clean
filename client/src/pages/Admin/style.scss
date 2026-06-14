@@ -19,7 +19,7 @@
 
     h1 {
       margin: 0 0 $spacing-xs;
-      color: $primary;
+      color: $accent;
     }
 
     p {
@@ -92,13 +92,13 @@
 
     &:hover {
       border-color: $primary;
-      color: $primary;
+      color: $accent;
     }
 
     &--active {
       border-color: $primary;
       background: rgba(36, 157, 223, 0.15);
-      color: $primary;
+      color: $accent;
     }
   }
 }
@@ -127,7 +127,7 @@
   transition: background-color $t-base $ease, border-color $t-base $ease;
 
   svg {
-    color: $primary;
+    color: $accent;
   }
 
   p {
@@ -137,7 +137,7 @@
   }
 
   strong {
-    color: $primary;
+    color: $accent;
     font-size: 1.35rem;
   }
 }
@@ -185,7 +185,7 @@
     strong {
       display: block;
       font-size: $fs-lg;
-      color: $primary;
+      color: $accent;
     }
 
     span {
@@ -254,7 +254,7 @@
 
     strong {
       display: block;
-      color: $primary;
+      color: $accent;
       font-weight: $fw-bold;
       font-variant-numeric: tabular-nums;
     }
@@ -381,7 +381,7 @@
 
   h3 {
     margin: 0;
-    color: $primary;
+    color: $accent;
     font-size: 1rem;
   }
 }
@@ -510,7 +510,7 @@
     cursor: pointer;
     transition: color $t-fast $ease, background $t-fast $ease;
 
-    @include hover { background: $button-ghost-hover; color: $primary; }
+    @include hover { background: $button-ghost-hover; color: $accent; }
     &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; }
   }
 
@@ -518,7 +518,7 @@
     color: $text-faint;
     transition: color $t-fast $ease, transform $t-fast $ease;
 
-    &--active { color: $primary; }
+    &--active { color: $accent; }
   }
 
   &--numeric &__btn {
@@ -527,7 +527,7 @@
 
   &[aria-sort='ascending'],
   &[aria-sort='descending'] {
-    .sortable-th__btn { color: $primary; }
+    .sortable-th__btn { color: $accent; }
   }
 }
 

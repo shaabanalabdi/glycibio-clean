@@ -4,18 +4,26 @@
 // ============================================================
 
 // -- Colours ---------------------------------------------------
-$primary:          #249ddf;
-$primary-light:    #7eccff;
-$primary-dark:     #1c5879;
+// Refonte 2026 : primary = vert nature (actions/liens), secondary = bleu
+// confiance (accents), prix = bleu profond. A11y : le vert vif #4ea827
+// echoue l'AA en texte blanc (2.94:1) -> reserve aux APLATS DECORATIFS
+// (gradient IG, tints). Les boutons/liens/texte utilisent $primary = #3c7a26
+// (5.17:1 AA vs blanc).
+$brand-green-vivid: #4ea827;   // decoratif uniquement (non-texte)
+$primary:          #3c7a26;    // actions / liens / boutons (AA 5.17:1)
+$primary-light:    #eef6e7;    // tint vert (surfaces douces)
+$primary-dark:     #2f6020;    // hover boutons verts
 
-// Brand greens
-// $secondary       = decorative accent (light backgrounds, dividers)
-// $secondary-dark  = solid-fill on text/icons (WCAG AA 5.17:1 vs white)
-// $secondary-darker= hover/pressed state for solid-fill controls
-$secondary:        #5ec52a;
-$secondary-light:  #adec8f;
-$secondary-dark:   #3c7a26;
-$secondary-darker: #2a5719;
+// Bleu confiance (secondaire) + accent prix/titres
+$secondary:        #249ddf;
+$secondary-light:  #e6f3fb;
+$secondary-dark:   #1c5879;    // prix / accents titres (AA)
+$secondary-darker: #14425c;    // hover sur fond bleu profond
+
+// Accent prix (bleu profond, police display). Theme-aware : pilote par
+// --color-price (clair = #1c5879 ; sombre = bleu eclairci AA, cf. _theme.scss)
+// pour que les prix restent lisibles sur les surfaces sombres.
+$price:            var(--color-price);
 
 // Index Glycemique - tous AA (>= 4.5:1 vs white). Les valeurs claires
 // historiques (#51dd0a / #f08833) restaient sous 2.5:1 -> illisibles
@@ -23,6 +31,8 @@ $secondary-darker: #2a5719;
 $ig-bas:   #3c7a26;   // <= 55   (5.17:1 vs white)
 $ig-moyen: #b35e10;   // 56-69   (4.63:1 vs white)
 $ig-eleve: #d42b20;   // >= 70   (5.07:1 vs white)
+// Gradient IG — le motif signature (track du composant <IgMeter />)
+$ig-gradient: linear-gradient(90deg, #{$ig-bas} 0%, #{$ig-bas} 40%, #{$ig-moyen} 60%, #{$ig-eleve} 100%);
 
 // Neutres
 $white:    #ffffff;
@@ -54,8 +64,12 @@ $info:    #17a2b8;
 //   $font-heading: 'Poppins', <stack ci-dessous>;
 $font-system:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
                  Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
-$font-primary:   $font-system;
-$font-heading:   $font-system;
+// Refonte 2026 — paire typographique auto-hebergee (cf. base/_fonts.scss).
+// Fallback sur la stack systeme si le woff2 n'est pas charge.
+$font-display:   'Bricolage Grotesque', $font-system;   // titres, prix, chiffres
+$font-body:      'Hanken Grotesk', $font-system;        // body / UI
+$font-primary:   $font-body;
+$font-heading:   $font-display;
 $font-size-base: 100%;  // = 16px — root font-size (allow browser zoom)
 
 // Fluid type scale — clamp(min, fluid-formula, max)
@@ -108,13 +122,13 @@ $spacing-xl:  $space-lg;   // 32
 $spacing-xxl: $space-xl;   // 48
 
 // -- Radius scale ---------------------------------------------
-$radius-xs:   0.125rem;  // 2
-$radius-sm:   0.25rem;   // 4
-$radius:      0.5rem;    // 8
-$radius-lg:   0.75rem;   // 12
-$radius-xl:   1rem;      // 16
-$radius-2xl:  1.5rem;    // 24
-$radius-pill: 999px;     // pill (px is fine here — semantic infinity)
+$radius-xs:   0.125rem;   // 2
+$radius-sm:   0.5625rem;  // 9   (refonte 2026)
+$radius:      0.75rem;    // 12
+$radius-lg:   1rem;       // 16
+$radius-xl:   1.25rem;    // 20
+$radius-2xl:  1.5rem;     // 24
+$radius-pill: 999px;      // pill (px is fine here — semantic infinity)
 
 // Legacy aliases
 $border-radius:    $radius;
@@ -133,15 +147,17 @@ $icon-xl: 2rem;       // 32
 // Double-layer pattern (Stripe/Linear style) : une lumiere ambient tres
 // douce + une lumiere directionnelle plus marquee. Plus elegant que des
 // ombres simples a une seule couche.
-$shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
-$shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06),
-            0 2px 4px rgba(15, 23, 42, 0.05);
-$shadow-md: 0 2px 4px rgba(15, 23, 42, 0.06),
-            0 6px 16px rgba(15, 23, 42, 0.10);
-$shadow-lg: 0 4px 8px rgba(15, 23, 42, 0.04),
-            0 12px 32px rgba(15, 23, 42, 0.12);
-$shadow-xl: 0 8px 16px rgba(15, 23, 42, 0.06),
-            0 24px 56px rgba(15, 23, 42, 0.16);
+// Opacites renforcees (2026-06) : sur le canvas CHAUD #e9e6df les ombres
+// trop legeres etaient invisibles -> les cartes ne se detachaient pas.
+$shadow-xs: 0 1px 2px rgba(29, 43, 33, 0.08);
+$shadow-sm: 0 1px 2px rgba(29, 43, 33, 0.08),
+            0 4px 10px rgba(29, 43, 33, 0.10);
+$shadow-md: 0 2px 6px rgba(29, 43, 33, 0.10),
+            0 10px 24px rgba(29, 43, 33, 0.13);
+$shadow-lg: 0 8px 16px rgba(29, 43, 33, 0.12),
+            0 24px 48px rgba(29, 43, 33, 0.18);
+$shadow-xl: 0 12px 24px rgba(29, 43, 33, 0.14),
+            0 36px 72px rgba(29, 43, 33, 0.22);
 // Upward shadows (for sticky bottom bars, cookie banners, etc.)
 $shadow-up-sm: 0 -1px 2px rgba(15, 23, 42, 0.04),
                0 -4px 12px rgba(15, 23, 42, 0.06);

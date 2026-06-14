@@ -105,8 +105,43 @@ export const Navbar = () => {
                     </button>
 
                     <Link to="/" className="navbar__logo" aria-label="GlyciBio - accueil" viewTransition>
-                        <img src={logo} alt="" className="navbar__logo-image" width="180" height="40" />
+                        <img src="/icon-512.png" alt="" className="navbar__logo-mark" width="38" height="38" />
+                        <span className="navbar__logo-text">GlyciBio</span>
                     </Link>
+
+                    {/* CENTER-LEFT — primary nav links (desktop) */}
+                    <ul className="navbar__nav" role="list">
+                        <li>
+                            <Link
+                                to="/"
+                                className={`navbar__nav-link${location.pathname === "/" ? " is-active" : ""}`}
+                                aria-current={location.pathname === "/" ? "page" : undefined}
+                                viewTransition
+                            >
+                                Accueil
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/catalogue"
+                                className={`navbar__nav-link${location.pathname.startsWith("/catalogue") ? " is-active" : ""}`}
+                                aria-current={location.pathname.startsWith("/catalogue") ? "page" : undefined}
+                                viewTransition
+                            >
+                                Catalogue
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/a-propos"
+                                className={`navbar__nav-link${location.pathname.startsWith("/a-propos") ? " is-active" : ""}`}
+                                aria-current={location.pathname.startsWith("/a-propos") ? "page" : undefined}
+                                viewTransition
+                            >
+                                À propos
+                            </Link>
+                        </li>
+                    </ul>
 
                     {/* CENTER — inline search bar (flex:1 fills space between left and right) */}
                     <form className="navbar__search" onSubmit={submitSearch} role="search" aria-label="Rechercher un produit">
@@ -114,7 +149,7 @@ export const Navbar = () => {
                         <input
                             type="search"
                             className="navbar__search-input"
-                            placeholder="Rechercher un produit..."
+                            placeholder="Rechercher un aliment"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             aria-label="Rechercher un produit"
@@ -123,21 +158,19 @@ export const Navbar = () => {
                         />
                     </form>
 
-                    {/* RIGHT — mobile: cart only / desktop: links + icons */}
+                    {/* RIGHT — mobile: cart only / desktop: icons */}
                     <div className="navbar__right">
-                        <Link to="/catalogue" className="navbar__nav-link" viewTransition>Catalogue</Link>
-                        <Link to="/contact" className="navbar__nav-link" viewTransition>Contact</Link>
                         {authUser && isAdmin && <Link to="/admin" className="navbar__nav-link navbar__admin" viewTransition>Dashboard</Link>}
 
                         {authUser && (
-                            <Link to="/favoris" className="navbar__icon-btn navbar__icon-btn--desktop" aria-label="Mes favoris" title="Mes favoris" viewTransition>
+                            <Link to="/favoris" className="navbar__icon-btn navbar__icon-btn--outlined navbar__icon-btn--desktop" aria-label="Mes favoris" title="Mes favoris" viewTransition>
                                 <Heart size={22} strokeWidth={2} aria-hidden="true" />
                             </Link>
                         )}
 
                         <Link
                             to={authUser ? "/profil" : "/login"}
-                            className="navbar__icon-btn navbar__icon-btn--desktop"
+                            className="navbar__icon-btn navbar__icon-btn--outlined navbar__icon-btn--desktop"
                             aria-label={authUser ? `Mon compte (${getDisplayName(authUser)})` : "Se connecter"}
                             title={authUser ? getDisplayName(authUser) : "Se connecter"}
                             viewTransition
@@ -149,7 +182,7 @@ export const Navbar = () => {
                             <button
                                 type="button"
                                 onClick={() => logout()}
-                                className="navbar__icon-btn navbar__icon-btn--desktop"
+                                className="navbar__icon-btn navbar__icon-btn--outlined navbar__icon-btn--desktop"
                                 aria-label="Se deconnecter"
                                 title="Se deconnecter"
                             >
@@ -203,6 +236,7 @@ export const Navbar = () => {
                     <nav className="navbar-drawer__nav" aria-label="Navigation mobile">
                         <Link to="/" onClick={closeMenu} viewTransition>Accueil</Link>
                         <Link to="/catalogue" onClick={closeMenu} viewTransition>Catalogue</Link>
+                        <Link to="/a-propos" onClick={closeMenu} viewTransition>À propos</Link>
                         <Link to="/contact" onClick={closeMenu} viewTransition>Contact</Link>
 
                         <div className="navbar-drawer__divider" role="separator" />

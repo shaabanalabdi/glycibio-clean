@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2e7d32" />
 
+  <!-- Preload des polices auto-hebergees (LCP) : decouvertes immediatement
+       au lieu d'attendre le parsing du CSS. crossorigin obligatoire (les
+       polices sont toujours fetchees en mode CORS, meme same-origin). -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/bricolage-grotesque-latin.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/hanken-grotesk-latin.woff2" />
+
   <title>GlyciBio - Aliments a index glycemique controle</title>
   <meta name="description" content="GlyciBio : selection d'aliments sains a index glycemique bas ou modere. Alternatives naturelles au sucre, livraison en France 48h." />
   <meta name="keywords" content="index glycemique, IG bas, diabete, alimentation saine, glycemie, edulcorants naturels, bio" />

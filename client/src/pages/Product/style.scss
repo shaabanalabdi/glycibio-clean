@@ -19,7 +19,7 @@
     display: inline-flex;
     align-items: center;
     gap: $space-3xs;
-    color: $primary;
+    color: $accent;
     font-weight: $fw-medium;
     margin-bottom: $space-md;
     padding: $space-2xs;
@@ -32,83 +32,173 @@
   &__content {
     display: grid;
     grid-template-columns: 1fr;
-    gap: $space-md;
+    gap: $space-lg;
     margin-bottom: $space-2xl;
 
     @include breakpoint(md) {
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-      gap: $space-2xl;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp($space-lg, 4vw, 2.75rem);    // ~44px
+      align-items: start;
     }
   }
 
-  // Image — aspect-ratio kills CLS
+  // Conteneur galerie — sert de contexte de positionnement pour la pastille IG.
+  // Le cadre carre (radius 20 + bordure) est porte par .product-gallery__main.
   &__image {
-    background: $surface;
-    border: 1px solid $border;
-    border-radius: $radius-lg;
-    box-shadow: $shadow-sm;
-    @include flex-center;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    transition: background-color $t-base $ease;
+    position: relative;
+    min-width: 0;
+  }
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+  // Pastille "IG {n} · BAS" en haut a gauche de la galerie
+  &__ig-pill {
+    position: absolute;
+    top: $space-sm;
+    left: $space-sm;
+    z-index: 2;
+    padding: $space-3xs $space-xs;
+    font-size: $fs-sm;
+    box-shadow: $shadow-sm;
+    white-space: nowrap;
+    pointer-events: none;
   }
 
   &__placeholder {
+    @include flex-center;
+    min-height: 12rem;
+    aspect-ratio: 1 / 1;
+    border: 1px solid $border;
+    border-radius: $radius-xl;
+    background: $placeholder-hatch;
     padding: $space-md;
     text-align: center;
     color: $text-faint;
-    font-size: $fs-base;
+    font-size: $fs-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   &__info { min-width: 0; }
 
-  &__category {
-    font-size: $fs-sm;
-    color: $text-faint;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: $space-3xs;
-  }
-
-  &__name {
-    font-size: $fs-2xl;                    // fluid 28→36
-    color: $text-strong;
-    line-height: $lh-tight;
+  // Pastilles categorie / regime
+  &__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2xs;
     margin-bottom: $space-sm;
   }
 
-  &__ig {
-    display: flex;
+  &__pill {
+    display: inline-flex;
     align-items: center;
+    padding: $space-3xs $space-xs;
+    border-radius: $radius-pill;
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    &--cat {
+      background: $tint-green-bg;
+      color: $tint-green-fg;
+    }
+  }
+
+  &__name {
+    font-family: $font-heading;
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 2.375rem);   // ~32 → 38px
+    font-weight: $fw-bold;
+    letter-spacing: -0.025em;
+    color: $text-strong;
+    line-height: $lh-tight;
+    margin-bottom: $space-md;
+  }
+
+  // ----- Grande carte Index glycemique (signature) -----
+  &__ig-card {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 1.125rem;               // ~18px
+    box-shadow: $shadow-sm;
+    padding: $space-md;
+    margin-bottom: $space-md;
+  }
+
+  &__ig-head {
+    @include flex-between;
     gap: $space-sm;
     margin-bottom: $space-md;
   }
 
-  &__ig-label {
-    color: $text-muted;
-    font-size: $fs-sm;
+  &__ig-card-label {
+    font-size: $fs-md;
+    font-weight: $fw-semibold;
+    color: $text-strong;
   }
 
-  &__price {
-    font-size: $fs-2xl;
+  &__ig-number {
+    display: inline-flex;
+    align-items: baseline;
+    gap: $space-3xs;
+    font-family: $font-heading;
+    font-size: clamp(1.75rem, 1.3rem + 1.6vw, 1.875rem);   // ~30px
     font-weight: $fw-bold;
-    color: $primary;
-    margin-bottom: $space-2xs;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: $accent;
     font-variant-numeric: tabular-nums;
   }
 
-  &__stock {
-    margin-bottom: $space-md;
+  &__ig-out {
     font-size: $fs-sm;
+    font-weight: $fw-medium;
+    color: $text-faint;
+  }
 
-    &--available { color: $success; font-weight: $fw-semibold; }
-    &--out       { color: $error;   font-weight: $fw-semibold; }
+  &__ig-explainer {
+    margin-top: $space-md;
+    color: $text-muted;
+    font-size: $fs-sm;
+    line-height: $lh-base;
+  }
+
+  // ----- Nutrition : 3 stat cards -----
+  &__nutrition-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-2xs;
+    margin-bottom: $space-md;
+
+    @include responsive(sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3xs;
+    text-align: center;
+    background: $surface-alt;
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: $space-sm $space-2xs;
+  }
+
+  &__stat-value {
+    font-family: $font-heading;
+    font-size: $fs-xl;
+    font-weight: $fw-bold;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: $text-strong;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__stat-label {
+    font-size: $fs-xs;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   &__description {
@@ -133,11 +223,46 @@
     flex-wrap: wrap;
   }
 
+  // ----- Buy row (prix + stepper + CTA) -----
+  &__buy {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    padding-top: $space-md;
+    border-top: 1px solid $border;
+  }
+
+  &__price-block {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: $space-2xs $space-sm;
+  }
+
+  &__price {
+    font-family: $font-heading;
+    font-size: clamp(1.875rem, 1.4rem + 1.8vw, 2.125rem);   // ~30 → 34px
+    font-weight: $fw-bold;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: $price;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__stock {
+    font-size: $fs-sm;
+
+    &--available { color: $accent; font-weight: $fw-semibold; }
+    &--out       { color: $error;   font-weight: $fw-semibold; }
+  }
+
   &__cart {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: $space-sm;
     flex-wrap: wrap;
+
+    .btn { flex: 1 1 auto; min-height: 3.375rem; }   // ~54px to match stepper
   }
 
   &__error {
@@ -153,16 +278,18 @@
     display: inline-flex;
     align-items: center;
     gap: $space-2xs;
-    background: $surface-alt;
+    background: $surface;
+    border: 1px solid $border-strong;
     border-radius: $radius;
-    padding: $space-3xs;
+    padding: $space-3xs $space-2xs;
+    height: 3.375rem;                       // ~54px tall, bordered
 
     button {
       @include flex-center;
-      width: $tap-target;                  // 44 — was 36
+      width: $tap-target;                  // 44
       height: $tap-target;
-      border-radius: 50%;
-      color: $text-muted;
+      border-radius: $radius-sm;
+      color: $text-strong;
       background: transparent;
       border: none;
       cursor: pointer;
@@ -174,11 +301,32 @@
     }
 
     span {
-      min-width: 2rem;
+      min-width: 2.25rem;
       text-align: center;
+      font-family: $font-heading;
       font-weight: $fw-bold;
-      font-size: $fs-md;
+      font-size: $fs-lg;
       font-variant-numeric: tabular-nums;
+    }
+  }
+
+  // ----- Ligne de confiance (livraison + stock) -----
+  &__trust {
+    list-style: none;
+    margin: $space-sm 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2xs $space-md;
+
+    li {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-3xs;
+      font-size: $fs-sm;
+      color: $text-muted;
+
+      svg { color: $accent; flex-shrink: 0; }
     }
   }
 
@@ -187,36 +335,11 @@
     margin-top: $space-sm;
 
     a {
-      color: $primary;
+      color: $accent;
       font-weight: $fw-semibold;
       @include hover { text-decoration: underline; }
     }
   }
-
-  // Nutrition section
-  &__nutrition {
-    background: $surface;
-    border: 1px solid $border;
-    border-radius: $radius-lg;
-    box-shadow: $shadow-sm;
-    padding: $space-md;
-    transition: background-color $t-base $ease;
-
-    @include breakpoint(md) {
-      padding: $space-lg;
-    }
-
-    h2 {
-      font-size: $fs-lg;
-      margin-bottom: $space-md;
-    }
-  }
-}
-
-// Large IG badge
-.badge-ig--lg {
-  padding: $space-3xs $space-sm;
-  font-size: $fs-sm;
 }
 
 // Allergen badge
@@ -235,33 +358,6 @@
   &:hover { background-color: $success !important; }
 }
 
-// Nutrition table
-.nutrition-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-
-  th, td {
-    padding: $space-2xs $space-sm;
-    text-align: left;
-    border-bottom: 1px solid $border;
-  }
-
-  th {
-    font-weight: $fw-semibold;
-    color: $text-muted;
-    background: $surface-alt;
-  }
-
-  td {
-    color: $text-muted;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-}
-
 // ============================================================
 // Product gallery (carousel)
 // ============================================================
@@ -272,9 +368,12 @@
 
   &__main {
     position: relative;
-    border-radius: $radius-lg;
+    border: 1px solid $border;
+    border-radius: $radius-xl;              // 20px — cadre carre du design
     overflow: hidden;
-    background: $surface-alt;
+    // Placeholder hachure diagonal (remplace par la vraie photo)
+    background: $placeholder-hatch;
+    box-shadow: $shadow-sm;
     aspect-ratio: 1 / 1;
 
     img {
@@ -282,6 +381,18 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+
+    // Quand l'image principale echoue : le placeholder remplit le cadre
+    // (pas de double bordure / double aspect-ratio).
+    .product-page__placeholder {
+      position: absolute;
+      inset: 0;
+      min-height: 0;
+      aspect-ratio: auto;
+      border: none;
+      border-radius: 0;
+      background: none;
     }
   }
 
@@ -386,8 +497,10 @@
   padding-bottom: max($space-2xs, env(safe-area-inset-bottom));  // notch safe
 
   &__price {
+    font-family: $font-heading;
     font-weight: $fw-bold;
-    color: $primary;
+    letter-spacing: -0.025em;
+    color: $price;
     font-size: $fs-md;
     font-variant-numeric: tabular-nums;
   }

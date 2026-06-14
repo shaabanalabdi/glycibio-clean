@@ -36,7 +36,7 @@
     }
 
     &--active {
-      color: $primary;
+      color: $accent;
 
       .checkout-steps__num {
         background: $primary;
@@ -143,12 +143,12 @@
       align-items: center;
       gap: $space-2xs;
       font-size: $fs-lg;
-      color: $primary;
+      color: $accent;
       margin-bottom: $space-md;
       padding-bottom: $space-2xs;
       border-bottom: 1px solid $border;
 
-      svg { color: $primary; }
+      svg { color: $accent; }
     }
 
     textarea,
@@ -239,7 +239,7 @@
 
   &__shipping-price {
     font-weight: $fw-bold;
-    color: $primary;
+    color: $price;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
@@ -301,7 +301,7 @@
     }
 
     a {
-      color: $primary;
+      color: $accent;
       text-decoration: underline;
       @include hover { color: $primary-dark; }
     }

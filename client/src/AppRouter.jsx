@@ -14,6 +14,7 @@ const Login = lazyPage(() => import("@pages/Login/index.jsx"), "Login")
 const Register = lazyPage(() => import("@pages/Register/index.jsx"), "Register")
 const ForgotPassword = lazyPage(() => import("@pages/ForgotPassword/index.jsx"), "ForgotPassword")
 const ResetPassword = lazyPage(() => import("@pages/ResetPassword/index.jsx"), "ResetPassword")
+const VerifyEmail = lazyPage(() => import("@pages/VerifyEmail/index.jsx"), "VerifyEmail")
 const Profile = lazyPage(() => import("@pages/Profile/index.jsx"), "Profile")
 const Cart = lazyPage(() => import("@pages/Cart/index.jsx"), "Cart")
 const Checkout = lazyPage(() => import("@pages/Checkout/index.jsx"), "Checkout")
@@ -44,6 +45,7 @@ export const AppRouter = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
                 <Route path="/reinitialiser-mdp" element={<ResetPassword />} />
+                <Route path="/verifier-email" element={<VerifyEmail />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/a-propos" element={<About />} />
                 <Route path="/mentions-legales" element={<LegalNotice />} />

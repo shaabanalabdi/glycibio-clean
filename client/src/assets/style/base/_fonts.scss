@@ -1,0 +1,25 @@
+// ============================================================
+// Polices auto-hebergees (RGPD : AUCUNE requete Google Fonts CDN —
+// aucune IP visiteur envoyee a Google). woff2 variables dans
+// client/public/fonts/. Le sous-ensemble "latin" couvre tout le
+// francais (accents é è ê à ç ... dans Latin-1 Supplement).
+//   - Bricolage Grotesque -> display (titres, prix, chiffres)
+//   - Hanken Grotesk       -> body / UI
+// Fallback automatique sur la stack systeme si le fichier manque.
+// ============================================================
+
+@font-face {
+  font-family: 'Hanken Grotesk';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/hanken-grotesk-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/bricolage-grotesque-latin.woff2') format('woff2');
+}

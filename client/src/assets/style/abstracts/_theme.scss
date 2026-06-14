@@ -20,30 +20,34 @@
   // Surfaces (du plus arriere au plus avant) — echelle d'elevation :
   // bg (gris) < surface-alt (#f8f9fa) < surface (#fff) -> les cartes blanches
   // "ressortent" du fond et sont identifiables immediatement (style Vercel/Linear).
-  --color-bg:               #f2f4f7;        // body — gris froid leger (etait #f8f9fa, trop proche du blanc)
-  --color-surface:          #{$white};      // cards, navbar, footer
-  --color-surface-alt:      #{$gray-100};   // hover/secondary surface
+  // Refonte 2026 : canvas CHAUD (jamais gris froid) + echelle d'elevation
+  // canvas (#e9e6df) < surface-alt (#fbfaf7) < surface/#fff (cards).
+  --color-bg:               #e9e6df;        // canvas chaud (page)
+  --color-surface:          #{$white};      // cards
+  --color-surface-alt:      #fbfaf7;        // frames / surfaces douces (chaud)
   --color-surface-elevated: #{$white};      // modals, drawers
-  --color-overlay:          rgba(0, 0, 0, 0.5);
+  --color-overlay:          rgba(29, 43, 33, 0.45);
 
-  // Texte
-  --color-text:             #{$gray-800};
-  --color-text-strong:      #{$gray-900};
-  --color-text-muted:       #{$gray-700};
-  --color-text-faint:       #{$gray-600};
+  // Texte — encre vert tres fonce
+  --color-text:             #1d2b21;
+  --color-text-strong:      #14201a;
+  --color-text-muted:       #586b5e;        // AA ~5.5:1 sur blanc
+  --color-text-faint:       #6a786e;        // AA ~4.6:1 (etait #7a8a7f = 3.6:1, echec AA en texte)
   --color-text-on-primary:  #{$white};
 
-  // Bordures — renforcees pour delimiter clairement cartes/sections en mode clair
-  --color-border:           #{$gray-300};   // #dee2e6 (etait gray-200, trop pale)
-  --color-border-strong:    #{$gray-400};   // #ced4da — hover/emphase
+  // Bordures chaudes — assombries (2026-06) : l'ancien #e6e2d8 etait quasi
+  // identique au canvas #e9e6df -> bord de carte invisible. Desormais nettes
+  // sur le canvas ET sur les cartes blanches.
+  --color-border:           #d8d0bd;
+  --color-border-strong:    #c6bca4;
 
   // Inputs
   --color-input-bg:         #{$white};
-  --color-input-border:     #{$gray-300};
-  --color-input-disabled:   #{$gray-100};
+  --color-input-border:     #d8d3c6;
+  --color-input-disabled:   #f1efe9;
 
   // Boutons icone / surface tactile
-  --color-button-ghost-hover: #{$gray-100};
+  --color-button-ghost-hover: #f1efe9;
 
   // Etats semantiques (background tints utilises dans .toast, banners, etc.)
   --color-success-bg:       #d4edda;
@@ -58,34 +62,55 @@
   // Skeleton
   --color-skeleton-base:    #{$gray-200};
   --color-skeleton-shine:   #{$gray-100};
+
+  // Hachure placeholder photo (remplacee par la vraie image quand dispo)
+  --placeholder-hatch:      repeating-linear-gradient(135deg, #eef2e9 0 11px, #e7ede1 11px 22px);
+
+  // Tints de marque (chips, pastilles, tuiles d'icones) — surface + texte.
+  // En clair : identiques aux aplats historiques (zero regression).
+  --tint-green-bg:          #{$primary-light};     // #eef6e7
+  --tint-green-fg:          #{$primary};           // #3c7a26
+  --tint-blue-bg:           #{$secondary-light};   // #e6f3fb
+  --tint-blue-fg:           #{$secondary-dark};    // #1c5879
+
+  // Prix (bleu profond sur fond clair)
+  --color-price:            #{$secondary-dark};    // #1c5879 (AA sur blanc)
+
+  // Accent vert "texte" (liens, eyebrows, titres verts, icones d'accent).
+  // Distinct de $primary (qui reste l'aplat des boutons) : ici c'est le vert
+  // EN TEXTE. Clair = #3c7a26 (AA 5.17:1 sur blanc).
+  --color-accent:           #{$primary};           // #3c7a26
 }
 
 // ============================================================
 // Mode sombre (manuel via data-theme="dark")
+// Refonte 2026 : charbon CHAUD teinte vert (jamais slate bleu froid) —
+// echo de l'encre de marque #1d2b21 (un quasi-noir vert). L'echelle
+// d'elevation reste bg < surface < surface-alt. Tous les textes >= 4.5:1.
 // ============================================================
 :root[data-theme='dark'] {
-  // Surfaces - palette neutre froide, contrastes calibres pour AA
-  --color-bg:               #0f1419;
-  --color-surface:          #1a2026;
-  --color-surface-alt:      #232b33;
-  --color-surface-elevated: #232b33;
-  --color-overlay:          rgba(0, 0, 0, 0.7);
+  // Surfaces — charbon vert (echo de l'encre #1d2b21)
+  --color-bg:               #131815;        // canvas charbon-vert (page)
+  --color-surface:          #1c231e;        // cards (texte 13:1)
+  --color-surface-alt:      #252d27;        // frames / surfaces lifted
+  --color-surface-elevated: #1c231e;        // modals, drawers
+  --color-overlay:          rgba(8, 12, 9, 0.72);
 
-  // Texte (>= 4.5:1 sur bg/surface)
-  --color-text:             #e8eaed;        // 14.2:1 vs #1a2026
+  // Texte — blancs chauds (legere teinte verte) calibres AA
+  --color-text:             #e9ece8;        // ~13:1 vs #1c231e
   --color-text-strong:      #ffffff;
-  --color-text-muted:       #aab0b6;        // 7.0:1
-  --color-text-faint:       #8a9098;        // 4.7:1
+  --color-text-muted:       #aab4ac;        // ~7.3:1 (AAA)
+  --color-text-faint:       #8a948c;        // ~5.0:1 (AA)
   --color-text-on-primary:  #{$white};
 
-  --color-border:           #2a323b;
-  --color-border-strong:    #3a4350;
+  --color-border:           #39423a;
+  --color-border-strong:    #4a554b;
 
-  --color-input-bg:         #232b33;
-  --color-input-border:     #3a4350;
-  --color-input-disabled:   #1a2026;
+  --color-input-bg:         #1c231e;
+  --color-input-border:     #3f493f;
+  --color-input-disabled:   #171c18;
 
-  --color-button-ghost-hover: #2a323b;
+  --color-button-ghost-hover: #2e362f;
 
   --color-success-bg:       rgba(40, 167, 69, 0.16);
   --color-success-fg:       #6dd482;
@@ -96,8 +121,25 @@
   --color-info-bg:          rgba(23, 162, 184, 0.18);
   --color-info-fg:          #6cc2d1;
 
-  --color-skeleton-base:    #232b33;
-  --color-skeleton-shine:   #2a323b;
+  --color-skeleton-base:    #252d27;
+  --color-skeleton-shine:   #2e362f;
+
+  // Hachure placeholder — charbon vert (au lieu du clair, ardent en sombre)
+  --placeholder-hatch:      repeating-linear-gradient(135deg, #1f2620 0 11px, #232b24 11px 22px);
+
+  // Tints de marque — aplats translucides (jamais de pastel clair en sombre)
+  // + texte/icone eclairci, tous >= 4.5:1 sur la tuile resultante.
+  --tint-green-bg:          rgba(78, 168, 39, 0.16);
+  --tint-green-fg:          #7fcf5a;
+  --tint-blue-bg:           rgba(36, 157, 223, 0.18);
+  --tint-blue-fg:           #6fc6f0;
+
+  // Prix — bleu de marque eclairci pour rester lisible sur le sombre (~7:1)
+  --color-price:            #6fc6f0;
+
+  // Accent vert en texte — vert vif de marque #4ea827 : AA sur tout le sombre
+  // (4.7:1 sur surface-alt -> 6:1 sur bg) la ou le vert profond #3c7a26 echoue.
+  --color-accent:           #4ea827;
 }
 
 // ============================================================
@@ -106,21 +148,21 @@
 // ============================================================
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']):not([data-theme='dark']) {
-    --color-bg:               #0f1419;
-    --color-surface:          #1a2026;
-    --color-surface-alt:      #232b33;
-    --color-surface-elevated: #232b33;
-    --color-overlay:          rgba(0, 0, 0, 0.7);
-    --color-text:             #e8eaed;
+    --color-bg:               #131815;
+    --color-surface:          #1c231e;
+    --color-surface-alt:      #252d27;
+    --color-surface-elevated: #1c231e;
+    --color-overlay:          rgba(8, 12, 9, 0.72);
+    --color-text:             #e9ece8;
     --color-text-strong:      #ffffff;
-    --color-text-muted:       #aab0b6;
-    --color-text-faint:       #8a9098;
-    --color-border:           #2a323b;
-    --color-border-strong:    #3a4350;
-    --color-input-bg:         #232b33;
-    --color-input-border:     #3a4350;
-    --color-input-disabled:   #1a2026;
-    --color-button-ghost-hover: #2a323b;
+    --color-text-muted:       #aab4ac;
+    --color-text-faint:       #8a948c;
+    --color-border:           #39423a;
+    --color-border-strong:    #4a554b;
+    --color-input-bg:         #1c231e;
+    --color-input-border:     #3f493f;
+    --color-input-disabled:   #171c18;
+    --color-button-ghost-hover: #2e362f;
     --color-success-bg:       rgba(40, 167, 69, 0.16);
     --color-success-fg:       #6dd482;
     --color-error-bg:         rgba(220, 53, 69, 0.18);
@@ -129,8 +171,15 @@
     --color-warning-fg:       #ffd55a;
     --color-info-bg:          rgba(23, 162, 184, 0.18);
     --color-info-fg:          #6cc2d1;
-    --color-skeleton-base:    #232b33;
-    --color-skeleton-shine:   #2a323b;
+    --color-skeleton-base:    #252d27;
+    --color-skeleton-shine:   #2e362f;
+    --placeholder-hatch:      repeating-linear-gradient(135deg, #1f2620 0 11px, #232b24 11px 22px);
+    --tint-green-bg:          rgba(78, 168, 39, 0.16);
+    --tint-green-fg:          #7fcf5a;
+    --tint-blue-bg:           rgba(36, 157, 223, 0.18);
+    --tint-blue-fg:           #6fc6f0;
+    --color-price:            #6fc6f0;
+    --color-accent:           #4ea827;
   }
 }
 

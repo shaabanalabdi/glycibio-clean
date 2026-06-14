@@ -105,10 +105,17 @@
   position: sticky;
   top: 0;
   z-index: $z-nav;
+  // Verre depoli : blanc ~85% + flou. Fallback opaque si backdrop-filter KO.
   background: $surface;
-  box-shadow: $shadow-sm;
+  background: color-mix(in srgb, #{$white} 85%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: $shadow-xs;
   border-bottom: 1px solid $border;
   transition: background-color $t-base $ease, border-color $t-base $ease;
+
+  // Dark : pas de translucidite (le flou sur fond sombre est moins lisible)
+  :root[data-theme='dark'] & { background: $surface; }
 
   &__container {
     @include container;
@@ -130,42 +137,87 @@
     padding: 0;
     background: transparent;
     border: none;
-    border-radius: $radius-lg;
+    border-radius: $radius;
     color: $text-muted;
     cursor: pointer;
-    transition: background-color $t-fast $ease, color $t-fast $ease, transform $t-fast $ease;
+    transition: background-color $t-fast $ease, color $t-fast $ease,
+                border-color $t-fast $ease, box-shadow $t-fast $ease, transform $t-fast $ease;
 
-    &:hover { background: $button-ghost-hover; color: $primary; }
+    &:hover { background: $button-ghost-hover; color: $accent; }
     &:active { transform: scale(0.94); }
     &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
   }
 
-  // ------------------------------------------------------------
-  // LEFT zone: burger (mobile) / logo (desktop)
-  // ------------------------------------------------------------
-  &__burger { display: inline-flex; }
+  // Profile / favoris / logout : carre blanc borde (44×44, radius md)
+  &__icon-btn--outlined {
+    width: $tap-target;
+    height: $tap-target;
+    background: $surface;
+    border: 1px solid $border;
+    color: $text;
 
-  &__logo {
-    display: none;
-    align-items: center;
-    line-height: 0;
-    padding: $space-3xs;
-    border-radius: $radius-sm;
-    flex-shrink: 0;
-
-    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
-
-    &-image {
-      display: block;
-      height: 2.5rem;                  // 40px
-      width: auto;
-      max-width: 11.25rem;             // 180px
-      object-fit: contain;
+    &:hover {
+      background: $surface;
+      border-color: $primary;
+      color: $accent;
+      box-shadow: $shadow-xs;
     }
   }
 
   // ------------------------------------------------------------
-  // CENTER zone: inline search bar (flex:1)
+  // LEFT zone: burger (mobile) / logo (always visible)
+  // ------------------------------------------------------------
+  &__burger { display: inline-flex; }
+
+  &__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2xs;                   // 8px entre la marque et le mot
+    line-height: 1;
+    padding: $space-3xs;
+    border-radius: $radius-sm;
+    flex-shrink: 0;
+    text-decoration: none;
+
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    &-mark {
+      display: block;
+      height: 2.375rem;                // 38px
+      width: 2.375rem;
+      object-fit: contain;
+    }
+
+    &-text {
+      display: none;                   // mobile : marque seule, gain de place
+      font-family: $font-heading;
+      font-weight: $fw-bold;
+      font-size: 1.3125rem;            // 21px
+      letter-spacing: -0.025em;
+      line-height: 1;
+      color: $text-strong;
+
+      @include breakpoint(sm) { display: inline; }
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Primary nav (desktop) — Accueil / Catalogue / À propos
+  // ------------------------------------------------------------
+  &__nav {
+    display: none;
+    align-items: center;
+    gap: $space-2xs;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+
+    li { display: flex; }
+  }
+
+  // ------------------------------------------------------------
+  // CENTER zone: inline search bar (pill, flex:1)
   // ------------------------------------------------------------
   &__search {
     flex: 1;
@@ -173,14 +225,14 @@
     display: flex;
     align-items: center;
     gap: $space-2xs;
-    height: 2.5rem;                    // 40px (range 40-44)
-    padding: 0 $space-xs;              // 12px
-    background: $surface-alt;
-    border: 1px solid transparent;
-    border-radius: $radius-lg;
+    height: 2.625rem;                  // 42px
+    padding: 0 $space-sm;              // 16px
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-pill;       // pill
     transition: background $t-fast $ease, border-color $t-fast $ease, box-shadow $t-fast $ease;
 
-    &:hover { background: $button-ghost-hover; }
+    &:hover { border-color: $border-strong; }
     &:focus-within {
       background: $surface;
       border-color: rgba($primary, 0.5);
@@ -218,41 +270,71 @@
 
   &__nav-link {
     display: none;
+    position: relative;
     color: $text-muted;
     font-weight: $fw-medium;
     font-size: $fs-base;
     padding: $space-2xs $space-xs;
     border-radius: $radius-sm;
     transition: color $t-fast $ease, background-color $t-fast $ease;
-    &:hover { color: $primary; background: $button-ghost-hover; }
+
+    &:hover { color: $text; background: $button-ghost-hover; }
     &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    // Lien actif : texte encre + soulignement vert 2px
+    &.is-active {
+      color: $text;
+      font-weight: $fw-semibold;
+
+      &::after {
+        content: "";
+        position: absolute;
+        left: $space-xs;
+        right: $space-xs;
+        bottom: 0.125rem;
+        height: 2px;
+        border-radius: $radius-pill;
+        background: $primary;
+      }
+    }
   }
 
   &__icon-btn--desktop { display: none; }
 
   // ------------------------------------------------------------
-  // Cart badge
+  // Cart — green action button ($primary) with white count badge
   // ------------------------------------------------------------
+  &__cart {
+    width: $tap-target;
+    height: $tap-target;
+    background: $primary;
+    color: $white;
+    border-radius: $radius;
+
+    &:hover { background: $primary-dark; color: $white; box-shadow: $shadow-sm; }
+  }
+
   &__cart-badge {
     position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
-    min-width: 1.125rem;               // 18px
-    height: 1.125rem;
-    padding: 0 $space-3xs;
-    background: $error;
-    color: $white;
-    font-size: 0.65rem;
+    top: -0.25rem;
+    right: -0.25rem;
+    min-width: 1.25rem;                // 20px circle
+    height: 1.25rem;
+    padding: 0 0.25rem;
+    background: $white;
+    color: $primary;                  // badge blanc fixe -> vert profond (AA 5.17:1) dans les 2 modes
+    font-size: 0.6875rem;             // 11px (> caption floor on a badge token)
     font-weight: $fw-bold;
     line-height: 1;
     border-radius: $radius-pill;
-    box-shadow: 0 0 0 2px $white;
+    box-shadow: 0 0 0 2px $primary;
     @include flex-center;
     pointer-events: none;
   }
 
   // Admin link styling (AA contrast on white)
   &__admin {
+    display: none;
     background: $secondary-dark;           // was $secondary (2.20:1 FAIL)
     color: $white !important;
     padding: 0.375rem $space-sm !important;
@@ -271,16 +353,17 @@
     }
 
     &__burger { display: none; }
-    &__logo   { display: inline-flex; }
+
+    &__nav { display: flex; }
 
     &__search {
-      max-width: 30rem;                // 480px
+      max-width: 26rem;                // 416px
       margin-inline: auto;
       height: $tap-target;             // 44px
-      padding: 0 $space-sm;
     }
 
     &__nav-link,
+    &__admin,
     &__icon-btn--desktop { display: inline-flex; }
   }
 }
@@ -368,7 +451,7 @@
       text-align: start;
       transition: background-color $t-fast $ease, color $t-fast $ease;
 
-      &:hover { background: $button-ghost-hover; color: $primary; }
+      &:hover { background: $button-ghost-hover; color: $accent; }
       &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; }
     }
   }

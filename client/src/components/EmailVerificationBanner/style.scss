@@ -1,0 +1,47 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+@use "../../assets/style/abstracts/mixins" as *;
+
+// ============================================================
+// Email verification banner — bandeau "souple" sous la navbar
+// ============================================================
+.verify-banner {
+  display: flex;
+  align-items: center;
+  gap: $space-2xs;
+  flex-wrap: wrap;
+  padding: $space-2xs $container-pad;
+  background: $warning-bg;
+  color: $warning-fg;
+  border-bottom: 1px solid $border;
+  font-size: $fs-sm;
+
+  &__icon {
+    flex-shrink: 0;
+  }
+
+  &__text {
+    flex: 1 1 12rem;
+    margin: 0;
+  }
+
+  &__action {
+    flex-shrink: 0;
+  }
+
+  &__close {
+    flex-shrink: 0;
+    @include flex-center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    border-radius: $radius-sm;
+    transition: background-color $t-fast $ease;
+
+    @include hover { background: rgba(0, 0, 0, 0.08); }
+    &:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+  }
+}

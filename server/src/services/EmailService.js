@@ -93,6 +93,24 @@ export class EmailService {
         return this.sendEmail({ to: userEmail, subject, html })
     }
 
+    static sendVerificationEmail = async (userEmail, verificationToken) => {
+        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173"
+        const verifyUrl = `${clientUrl}/verifier-email?token=${verificationToken}`
+        const subject = "GlyciBio — Confirmez votre adresse email"
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #2d6a4f;">Bienvenue chez GlyciBio !</h1>
+            <p>Merci pour votre inscription. Confirmez votre adresse email pour securiser votre compte :</p>
+            <a href="${verifyUrl}" style="display:inline-block; background:#2d6a4f; color:#fff; padding:12px 24px; border-radius:6px; text-decoration:none; margin: 20px 0;">
+              Confirmer mon email
+            </a>
+            <p style="color:#666; font-size:12px;">Ce lien est valable pendant 24 heures. Si vous n'etes pas a l'origine de cette inscription, ignorez cet email.</p>
+            <p style="color: #666; font-size: 12px;">L'equipe GlyciBio</p>
+          </div>
+        `
+        return this.sendEmail({ to: userEmail, subject, html })
+    }
+
     static sendPasswordResetEmail = async (userEmail, resetToken) => {
         const clientUrl = process.env.CLIENT_URL || "http://localhost:5173"
         const resetUrl = `${clientUrl}/reinitialiser-mdp?token=${resetToken}`

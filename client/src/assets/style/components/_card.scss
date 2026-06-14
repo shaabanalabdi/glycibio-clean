@@ -111,9 +111,10 @@
   }
 
   &__price {
+    font-family: $font-heading;                        // police display (chiffres)
     font-size: $fs-md;
     font-weight: $fw-bold;
-    color: $primary;
+    color: $price;
     margin-top: auto;
     font-variant-numeric: tabular-nums;                // aligned digits across cards
   }
@@ -171,13 +172,13 @@
   @include flex-center;
   min-width: $tap-target;          // 44 — was 3rem
   min-height: $tap-target;         // ensure both axes meet WCAG 2.5.5
-  background: $secondary-dark;     // AA 5.17:1 with white icon (was $secondary = 2.20:1 FAIL)
+  background: $primary;            // vert AA 5.17:1 avec icone blanche
   color: $white;
   border: none;
   cursor: pointer;
   transition: background $t-base $ease;
 
-  @include hover { background: $secondary-darker; }
+  @include hover { background: $primary-dark; }
   &:focus-visible { outline: 2px solid $white; outline-offset: -3px; }
 
   &--added {

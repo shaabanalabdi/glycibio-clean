@@ -27,6 +27,22 @@ export default defineConfig({
                     return
                 }
                 defaultHandler(warning)
+            },
+            output: {
+                // Vendor splitting : sort React/Router/Redux du chunk principal
+                // vers des chunks "vendor" stables (mieux caches entre deploys,
+                // telecharges en parallele). On NE touche PAS a lucide-react :
+                // Vite le code-split deja par icone (charge a la demande).
+                manualChunks(id) {
+                    if (!id.includes('node_modules')) return
+                    if (/[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom)[\\/]/.test(id)) {
+                        return 'react-vendor'
+                    }
+                    if (/[\\/]node_modules[\\/](@reduxjs|react-redux|redux|redux-thunk|reselect|immer)[\\/]/.test(id)) {
+                        return 'redux-vendor'
+                    }
+                    // tout le reste -> strategie de chunking par defaut de Vite
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ import { Pagination } from "@components/Pagination/index.jsx"
 import { Breadcrumb } from "@components/Breadcrumb/index.jsx"
 import { EmptyState } from "@components/EmptyState/index.jsx"
 import { ProductCardGridSkeleton } from "@components/Skeleton/index.jsx"
+import { SORT_OPTIONS } from "@components/ProductFilter/index.jsx"
 import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
 import { useGetProductsQuery } from "@slices/productApiSlice.js"
 import { useGetCategoriesQuery } from "@slices/categoryApiSlice.js"
@@ -60,8 +61,35 @@ export const Catalog = () => {
 
     return (
         <div className="catalog">
-            <Breadcrumb items={[{ label: "Accueil", href: "/" }, { label: "Catalogue" }]} />
-            <h1 className="catalog__title">Nos Produits</h1>
+            {/* Barre de titre — breadcrumb + titre + compteur + tri */}
+            <div className="catalog__titlebar">
+                <div className="catalog__titlebar-top">
+                    <Breadcrumb items={[{ label: "Accueil", href: "/" }, { label: "Catalogue" }]} />
+                </div>
+                <div className="catalog__titlebar-main">
+                    <h1 className="catalog__title">Tous les aliments</h1>
+                    <div className="catalog__titlebar-tools">
+                        {!error && (
+                            <p className="catalog__count">
+                                {pagination.total || 0} produit{pagination.total > 1 ? "s" : ""}
+                            </p>
+                        )}
+                        <div className="catalog__sort">
+                            <label htmlFor="catalog-sort" className="sr-only">Trier les produits</label>
+                            <select
+                                id="catalog-sort"
+                                className="catalog__sort-select"
+                                value={filters.sort}
+                                onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value, page: 1 }))}
+                            >
+                                {SORT_OPTIONS.map((o) => (
+                                    <option key={o.value} value={o.value}>Trier : {o.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div className="catalog__content">
                 {/* Sidebar filtres */}
@@ -73,13 +101,6 @@ export const Catalog = () => {
 
                 {/* Grille produits */}
                 <div className="catalog__main">
-                    {/* Compteur resultats */}
-                    {!error && (
-                        <p className="catalog__count">
-                            {pagination.total || 0} produit{pagination.total > 1 ? "s" : ""} trouve{pagination.total > 1 ? "s" : ""}
-                        </p>
-                    )}
-
                     {loading ? (
                         <ProductCardGridSkeleton count={8} />
                     ) : error ? (

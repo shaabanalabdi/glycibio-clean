@@ -29,7 +29,7 @@
       transition: color $t-fast $ease, background $t-fast $ease;
       text-decoration: none;
 
-      @include hover { color: $primary; background: $button-ghost-hover; }
+      @include hover { color: $accent; background: $button-ghost-hover; }
       &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
     }
 

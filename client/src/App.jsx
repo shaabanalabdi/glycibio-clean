@@ -1,5 +1,6 @@
 import { AppRouter } from "./AppRouter.jsx"
 import { Navbar } from "@components/Navbar/index.jsx"
+import { EmailVerificationBanner } from "@components/EmailVerificationBanner/index.jsx"
 import { Footer } from "@components/Footer/index.jsx"
 import { CookieBanner } from "@components/CookieBanner/index.jsx"
 import { ErrorBoundary } from "@components/ErrorBoundary/index.jsx"
@@ -18,6 +19,7 @@ function App() {
             <TopProgressBar />
             <CartAnnouncer />
             <Navbar />
+            <EmailVerificationBanner />
             <main id="main-content" className="main-content">
                 <AppRouter />
             </main>

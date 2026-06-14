@@ -22,7 +22,7 @@
   cursor: pointer;
   text-align: center;
   white-space: nowrap;
-  transition: background-color $t-base $ease, color $t-base $ease, border-color $t-base $ease, transform $t-fast $ease;
+  transition: background-color $t-base $ease, color $t-base $ease, border-color $t-base $ease, box-shadow $t-base $ease, transform $t-fast $ease;
 
   &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
   &:active { transform: scale(0.98); }
@@ -32,18 +32,18 @@
   &--primary {
     background-color: $primary;
     color: $white;
-    &:hover:not(:disabled) { background-color: $primary-dark; }
+    &:hover:not(:disabled) { background-color: $primary-dark; box-shadow: $shadow-sm; }
   }
 
   &--secondary {
     background-color: $secondary-dark;     // AA 5.17:1 with white (was $secondary = 2.20:1 FAIL)
     color: $white;
-    &:hover:not(:disabled) { background-color: $secondary-darker; }
+    &:hover:not(:disabled) { background-color: $secondary-darker; box-shadow: $shadow-sm; }
   }
 
   &--outline {
     border-color: $primary;
-    color: $primary;
+    color: $accent;
     background: transparent;
     &:hover:not(:disabled) { background-color: $primary; color: $white; }
   }
@@ -51,13 +51,13 @@
   &--ghost {
     color: $text-muted;
     background: transparent;
-    &:hover:not(:disabled) { background: $button-ghost-hover; color: $primary; }
+    &:hover:not(:disabled) { background: $button-ghost-hover; color: $accent; }
   }
 
   &--danger {
     background-color: $error;
     color: $white;
-    &:hover:not(:disabled) { background-color: color.adjust($error, $lightness: -10%); }
+    &:hover:not(:disabled) { background-color: color.adjust($error, $lightness: -10%); box-shadow: $shadow-sm; }
   }
 
   // Sizes (em-based → padding and gap scale automatically)

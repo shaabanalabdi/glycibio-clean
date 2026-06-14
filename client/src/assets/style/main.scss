@@ -13,6 +13,7 @@
 @use 'abstracts/variables' as *;
 @use 'abstracts/theme' as *;
 @use 'abstracts/mixins' as *;
+@use 'base/fonts';
 @use 'base/reset';
 @use 'layout/grid';
 @use 'components/button';

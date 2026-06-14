@@ -47,6 +47,20 @@ export const authApiSlice = createApi({
                 method: "POST",
                 body: data
             })
+        }),
+        verifyEmail: build.mutation({
+            query: (data) => ({
+                url: "/auth/verify-email",
+                method: "POST",
+                body: data
+            }),
+            invalidatesTags: ["authUser"]
+        }),
+        resendVerification: build.mutation({
+            query: () => ({
+                url: "/auth/resend-verification",
+                method: "POST"
+            })
         })
     })
 })
@@ -57,5 +71,7 @@ export const {
     useLogoutMutation,
     useGetAuthenticatedUserQuery,
     useForgotPasswordMutation,
-    useResetPasswordMutation
+    useResetPasswordMutation,
+    useVerifyEmailMutation,
+    useResendVerificationMutation
 } = authApiSlice

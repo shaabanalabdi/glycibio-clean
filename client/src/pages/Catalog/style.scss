@@ -3,23 +3,133 @@
 @use "../../assets/style/abstracts/mixins" as *;
 
 // ============================================================
-// Catalog page — CSS Grid (sidebar + main)
+// Catalog page — title bar + grid (sidebar + main)
 // ============================================================
 .catalog {
-  &__title {
-    font-size: $fs-2xl;
-    color: $text-strong;
+  // ----------------------------------------------------------------
+  // Title bar (white surface) — breadcrumb + title + count + sort
+  // ----------------------------------------------------------------
+  &__titlebar {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-sm;
+    padding: $space-md;
     margin-bottom: $space-md;
+
+    @include breakpoint(md) {
+      padding: $space-md $space-lg;
+    }
+
+    // The breadcrumb component already carries bottom margin
+    .breadcrumb { margin-bottom: $space-2xs; }
   }
 
-  // Sidebar + main: stack on mobile/tablet, side-by-side ≥ lg (992px)
+  &__titlebar-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-sm;
+
+    @include breakpoint(md) {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: $space-md;
+    }
+  }
+
+  &__title {
+    font-family: $font-heading;
+    font-size: $fs-2xl;
+    font-weight: $fw-bold;
+    line-height: $lh-tight;
+    letter-spacing: -0.025em;
+    color: $text-strong;
+    margin: 0;
+  }
+
+  &__titlebar-tools {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    flex-wrap: wrap;
+    width: 100%;
+
+    @include breakpoint(md) {
+      width: auto;
+      flex-wrap: nowrap;
+    }
+  }
+
+  &__count {
+    color: $text-muted;
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    margin: 0;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Sort dropdown — bordered pill control
+  &__sort {
+    position: relative;
+    flex: 1;
+
+    @include breakpoint(md) { flex: 0 0 auto; }
+
+    // Custom chevron
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      inset-inline-end: $space-sm;
+      width: 0.5rem;
+      height: 0.5rem;
+      margin-top: -0.35rem;
+      border-right: 2px solid $text-muted;
+      border-bottom: 2px solid $text-muted;
+      transform: rotate(45deg);
+      pointer-events: none;
+    }
+  }
+
+  &__sort-select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    min-height: $tap-target;
+    padding: 0.5rem 2.5rem 0.5rem $space-sm;
+    font-family: inherit;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $text-strong;
+    background: $surface;
+    border: 1px solid $border-strong;
+    border-radius: $radius;
+    cursor: pointer;
+    transition: border-color $t-fast $ease, box-shadow $t-fast $ease;
+
+    @include breakpoint(md) { min-width: 12rem; }
+
+    @include hover { border-color: $primary; }
+    &:focus-visible {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.15);
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // Body grid: stack on mobile/tablet, 264px sidebar + 1fr ≥ lg
+  // ----------------------------------------------------------------
   &__content {
     display: grid;
     grid-template-columns: 1fr;
     gap: $space-md;
 
     @include breakpoint(lg) {
-      grid-template-columns: minmax(15rem, 17.5rem) minmax(0, 1fr);
+      grid-template-columns: 16.5rem minmax(0, 1fr);   // 264px / 1fr
       gap: $space-lg;
       align-items: start;
     }
@@ -27,15 +137,18 @@
 
   &__main { min-width: 0; }
 
-  &__count {
-    color: $text-muted;
-    font-size: $fs-sm;
-    margin-bottom: $space-sm;
-    font-variant-numeric: tabular-nums;
-  }
-
   &__grid {
-    @include auto-grid(14rem, $space-md);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-sm;
+
+    @include breakpoint(md) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: $space-md;
+    }
+    @include breakpoint(lg) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));   // 3-col catalog grid
+    }
   }
 
   &__loading,
@@ -47,17 +160,17 @@
 }
 
 // ============================================================
-// Filter sidebar — organized: header + chips + sort + sections
+// Filter sidebar — white card, colored section bars
 // ============================================================
 .filters {
   background: $surface;
   border: 1px solid $border;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
-  padding: $space-sm;
+  padding: $space-md;
   display: flex;
   flex-direction: column;
-  gap: $space-sm;
+  gap: $space-md;
   transition: background-color $t-base $ease;
 
   // Desktop: sticky, internally scrollable if it overflows viewport
@@ -69,7 +182,6 @@
     overscroll-behavior: contain;
     scrollbar-width: thin;
 
-    // Custom scrollbar for webkit
     &::-webkit-scrollbar      { width: 6px; }
     &::-webkit-scrollbar-thumb {
       background: $border-strong;
@@ -94,8 +206,10 @@
     display: inline-flex;
     align-items: center;
     gap: $space-2xs;
+    font-family: $font-heading;
     font-size: $fs-md;
     font-weight: $fw-bold;
+    letter-spacing: -0.02em;
     color: $text-strong;
     margin: 0;
   }
@@ -117,7 +231,7 @@
   }
 
   &__reset {
-    color: $primary;
+    color: $accent;
     font-size: $fs-sm;
     font-weight: $fw-semibold;
     background: none;
@@ -145,8 +259,8 @@
     align-items: center;
     gap: $space-3xs;
     padding: $space-3xs $space-2xs;
-    background: rgba($primary, 0.08);
-    color: $primary;
+    background: $tint-green-bg;
+    color: $tint-green-fg;
     font-size: $fs-xs;
     font-weight: $fw-semibold;
     line-height: 1;
@@ -174,86 +288,40 @@
   }
 
   // ----------------------------------------------------------------
-  // Generic group (used for non-collapsed sections like Sort)
-  // ----------------------------------------------------------------
-  &__group {
-    display: flex;
-    flex-direction: column;
-    gap: $space-3xs;
-
-    label {
-      font-size: $fs-sm;
-      font-weight: $fw-semibold;
-      color: $text-muted;
-    }
-
-    input,
-    select {
-      @include form-input;
-      font-size: $fs-sm;
-    }
-
-    // "Primary" group — sort dropdown: tinted background to mark it as the hero action
-    &--primary {
-      background: $surface-alt;
-      padding: $space-2xs;
-      border-radius: $radius;
-    }
-  }
-
-  // ----------------------------------------------------------------
-  // Collapsible section — uses native <details>/<summary>
+  // Section — header w/ a 6×18px colored bar before its label
   // ----------------------------------------------------------------
   &__section {
-    border-top: 1px solid $border;
-    padding-top: $space-2xs;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2xs;
+  }
 
-    &:first-of-type { border-top: none; padding-top: 0; }
+  &__section-title {
+    display: flex;
+    align-items: center;
+    gap: $space-2xs;
+    font-family: $font-heading;
+    font-size: $fs-md;
+    font-weight: $fw-bold;
+    letter-spacing: -0.02em;
+    color: $text-strong;
+    margin: 0;
 
-    summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: $fs-sm;
-      font-weight: $fw-semibold;
-      color: $text-strong;
-      cursor: pointer;
-      padding: $space-2xs 0;
-      list-style: none;
-      user-select: none;
-      transition: color $t-fast $ease;
-
-      // Hide default markers
-      &::-webkit-details-marker { display: none; }
-      &::marker                 { content: ''; }
-
-      // Chevron via ::after — rotates when open
-      &::after {
-        content: '';
-        width: 0.5rem;
-        height: 0.5rem;
-        margin-inline-end: $space-3xs;
-        border-right: 2px solid $text-muted;
-        border-bottom: 2px solid $text-muted;
-        transform: rotate(45deg);
-        transition: transform $t-fast $ease;
-      }
-
-      @include hover { color: $primary; &::after { border-color: $primary; } }
-      &:focus-visible {
-        outline: 2px solid $primary;
-        outline-offset: 2px;
-        border-radius: $radius-sm;
-      }
+    // The colored bar
+    &::before {
+      content: '';
+      flex: 0 0 auto;
+      width: 6px;
+      height: 18px;
+      border-radius: $radius-pill;
+      background: $primary;
     }
 
-    &[open] > summary::after {
-      transform: rotate(-135deg);
-    }
+    &--green::before { background: $brand-green-vivid; }
+    &--blue::before  { background: $secondary; }
   }
 
   &__section-body {
-    padding: $space-3xs 0 $space-2xs;
     display: flex;
     flex-direction: column;
     gap: $space-2xs;
@@ -282,7 +350,7 @@
   }
 
   // ----------------------------------------------------------------
-  // Allergen checkbox list
+  // Category checkbox list with counts (checked = green box + check)
   // ----------------------------------------------------------------
   &__checks {
     display: flex;
@@ -294,12 +362,12 @@
     display: flex;
     align-items: center;
     gap: $space-2xs;
-    min-height: 2.5rem;                  // 40px — comfortable thumb target
+    min-height: $tap-target;             // 44px (WCAG 2.5.5)
     padding: 0 $space-2xs;
-    margin: 0 (-$space-2xs);             // negate parent padding so hover spans full width
+    margin: 0 (-$space-2xs);             // negate parent padding for full-width hover
     border-radius: $radius-sm;
     font-size: $fs-sm;
-    font-weight: $fw-regular !important;
+    font-weight: $fw-regular;
     color: $text-muted;
     cursor: pointer;
     user-select: none;
@@ -307,19 +375,205 @@
 
     @include hover { background: $button-ghost-hover; }
 
-    input[type='checkbox'] {
-      width: 1.125rem !important;
-      height: 1.125rem;
-      min-height: auto;
+    // Hide the native control — we render a custom box
+    input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
       margin: 0;
-      flex-shrink: 0;
-      cursor: pointer;
-      accent-color: $primary;
+    }
+  }
+
+  // Custom check box
+  &__check-box {
+    flex: 0 0 auto;
+    @include flex-center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 2px solid $border-strong;
+    border-radius: $radius-xs;
+    background: $surface;
+    color: $white;
+    transition: background $t-fast $ease, border-color $t-fast $ease;
+
+    svg { opacity: 0; transition: opacity $t-fast $ease; }
+  }
+
+  &__check-label {
+    flex: 1;
+    min-width: 0;
+    @include truncate(1);
+  }
+
+  &__check-count {
+    flex: 0 0 auto;
+    color: $text-faint;
+    font-size: $fs-sm;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Checked state — green box + white check + green text
+  &__check:has(input:checked) {
+    color: $accent;
+    font-weight: $fw-semibold;
+
+    .filters__check-box {
+      background: $primary;
+      border-color: $primary;
+      svg { opacity: 1; }
+    }
+  }
+
+  &__check input:focus-visible + .filters__check-box {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+  }
+}
+
+// ============================================================
+// IG slider (signature) — gradient track + two draggable handles
+// Visual control synced to the existing ig-category mechanism.
+// ============================================================
+.ig-slider {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2xs;
+  padding-top: $space-3xs;
+
+  &__track {
+    position: relative;
+    height: 8px;
+    margin: 0.5rem 0.25rem;
+    background: $ig-gradient;
+    border-radius: $radius-pill;
+  }
+
+  // Highlighted selected sub-range overlay
+  &__range {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 14px;
+    border-radius: $radius-pill;
+    background: rgba($white, 0.15);
+    box-shadow: inset 0 0 0 2px rgba($white, 0.85);
+    pointer-events: none;
+  }
+
+  // Draggable handle — white circle, dark border
+  &__handle {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border-radius: 50%;
+    background: $white;
+    border: 2px solid #2b3a2f;
+    box-shadow: 0 1px 3px rgba(29, 43, 33, 0.35);
+    cursor: grab;
+    touch-action: none;
+    transition: box-shadow $t-fast $ease, transform $t-fast $ease;
+
+    &::after {
+      // Larger invisible hit area (>= 44px) for touch
+      content: '';
+      position: absolute;
+      inset: -13px;
     }
 
-    &:has(input:checked) {
-      color: $primary;
-      font-weight: $fw-semibold !important;
+    @include hover { box-shadow: 0 2px 6px rgba(29, 43, 33, 0.4); }
+    &:active { cursor: grabbing; }
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: 3px;
+    }
+  }
+
+  &__scale {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-2xs;
+    font-size: $fs-xs;
+    color: $text-muted;
+    line-height: 1.3;
+  }
+
+  &__caption {
+    color: $text-strong;
+    font-weight: $fw-semibold;
+    text-align: right;
+  }
+}
+
+// ============================================================
+// IG chips — Bas / Modéré / Élevé toggle (selected = green tint)
+// ============================================================
+.ig-chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-2xs;
+
+  &__chip {
+    @include flex-center;
+    min-height: $tap-target;             // 44px (WCAG 2.5.5)
+    padding: $space-2xs $space-3xs;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $text-muted;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius;
+    cursor: pointer;
+    transition: background $t-fast $ease, color $t-fast $ease, border-color $t-fast $ease;
+
+    @include hover { border-color: $border-strong; color: $text-strong; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    &--active {
+      background: $tint-green-bg;
+      color: $tint-green-fg;
+      border-color: rgba($primary, 0.35);
+
+      @include hover { color: $tint-green-fg; }
+    }
+  }
+}
+
+// ============================================================
+// Régime pills — toggle chips (selected = green-light)
+// ============================================================
+.regime-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2xs;
+
+  &__pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: $tap-target;             // 44px (WCAG 2.5.5)
+    padding: $space-2xs $space-sm;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $text-muted;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-pill;
+    cursor: pointer;
+    transition: background $t-fast $ease, color $t-fast $ease, border-color $t-fast $ease;
+
+    @include hover { border-color: $border-strong; color: $text-strong; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    &--active {
+      background: $tint-green-bg;
+      color: $tint-green-fg;
+      border-color: rgba($primary, 0.35);
+
+      @include hover { color: $tint-green-fg; }
     }
   }
 }

@@ -10,7 +10,13 @@ const REQUIRED_USER_COLUMNS = [
     { name: "locked_until",         ddl: "DATETIME NULL DEFAULT NULL" },
     { name: "newsletter_opt_in",    ddl: "TINYINT(1) NOT NULL DEFAULT 0" },
     { name: "newsletter_opt_in_at", ddl: "DATETIME NULL DEFAULT NULL" },
-    { name: "tokens_valid_after",   ddl: "DATETIME NULL DEFAULT NULL" }
+    { name: "tokens_valid_after",   ddl: "DATETIME NULL DEFAULT NULL" },
+    // Verification email (verification "souple") : email_verified=0 par defaut
+    // pour les nouveaux comptes ; les comptes existants sont "grandfathered" a 1
+    // au moment de la creation de la colonne (voir ensureColumns).
+    { name: "email_verified",             ddl: "TINYINT(1) NOT NULL DEFAULT 0" },
+    { name: "verification_token",         ddl: "VARCHAR(64) NULL DEFAULT NULL" },
+    { name: "verification_token_expires", ddl: "DATETIME NULL DEFAULT NULL" }
 ]
 
 class UserRepository extends Repository {
@@ -44,6 +50,21 @@ class UserRepository extends Repository {
                             catch (e)
                             {
                                 Logger.warn(`[UserRepository] Echec ajout users.${col.name}: ${e.message}`)
+                            }
+                        }
+
+                        // Grandfather : si email_verified vient d'etre cree, marquer
+                        // TOUS les comptes existants comme verifies. Seuls les NOUVEAUX
+                        // comptes (inseres ensuite avec le defaut 0) devront confirmer.
+                        if (missing.some((c) => c.name === "email_verified")) {
+                            try
+                            {
+                                await db.query("UPDATE users SET email_verified = 1")
+                                Logger.info("[UserRepository] Comptes existants marques email_verified=1 (grandfather)")
+                            }
+                            catch (e)
+                            {
+                                Logger.warn(`[UserRepository] Grandfather email_verified echoue: ${e.message}`)
                             }
                         }
                     }
@@ -97,6 +118,31 @@ class UserRepository extends Repository {
             [token]
         )
         return rows.length === 0 ? null : rows[0]
+    }
+
+    // --- Verification email -------------------------------------------------
+    setVerificationToken = async (id, token, expires) => {
+        await db.query(
+            "UPDATE users SET verification_token = ?, verification_token_expires = ? WHERE id = ?",
+            [token, expires, id]
+        )
+    }
+
+    // Ne matche que les comptes NON verifies (empeche la reutilisation d'un
+    // lien apres confirmation).
+    findByValidVerificationToken = async (token) => {
+        const [rows] = await db.query(
+            "SELECT id FROM users WHERE verification_token = ? AND verification_token_expires > NOW() AND email_verified = 0",
+            [token]
+        )
+        return rows.length === 0 ? null : rows[0]
+    }
+
+    markEmailVerified = async (id) => {
+        await db.query(
+            "UPDATE users SET email_verified = 1, verification_token = NULL, verification_token_expires = NULL WHERE id = ?",
+            [id]
+        )
     }
 
     // tokens_valid_after = NOW() : invalide tous les jetons emis avant la

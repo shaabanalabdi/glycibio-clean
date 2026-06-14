@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { ShoppingCart, Heart } from "lucide-react"
 import { ProductImage } from "@components/ProductImage/index.jsx"
+import { IgMeter } from "@components/IgMeter/index.jsx"
 import { useAuthenticated } from "@hooks/useAuthenticated.js"
 import { useCart } from "@hooks/useCart.js"
 import { useWishlist } from "@hooks/useWishlist.js"
@@ -68,6 +69,7 @@ export const ProductCard = ({ product }) => {
             <div className="product-card__info">
                 <p className="product-card__category">{product.category_name}</p>
                 <h3 className="product-card__name">{product.name}</h3>
+                <IgMeter ig={product.glycemic_index} size="sm" />
                 <p className="product-card__price">{formatPrice(product.price)}</p>
                 {!outOfStock && product.stock !== undefined && product.stock <= 5 && (
                     <p className="product-card__low-stock">Plus que {product.stock} en stock !</p>

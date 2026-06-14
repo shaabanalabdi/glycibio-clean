@@ -37,7 +37,7 @@
 
     p { margin: 0; }
     a {
-      color: $primary;
+      color: $accent;
       text-decoration: underline;
       @include hover { color: $primary-dark; }
     }

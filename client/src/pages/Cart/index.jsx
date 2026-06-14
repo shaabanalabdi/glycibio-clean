@@ -2,7 +2,7 @@ import "./style.scss"
 import { useState, useEffect, useCallback } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
-import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react"
+import { Trash2, Plus, Minus, ShoppingBag, Check, Lock, ArrowLeft } from "lucide-react"
 import { useAuthenticated } from "@hooks/useAuthenticated.js"
 import {
     useGetCartQuery,
@@ -14,6 +14,7 @@ import { resolveImageUrl } from "@utils/imageUrl.js"
 import { buildSrcset, SRCSET_PRESETS } from "@utils/imageSrcset.js"
 import { formatPrice } from "@utils/formatPrice.js"
 import { CartItemSkeleton } from "@components/Skeleton/index.jsx"
+import { IgMeter } from "@components/IgMeter/index.jsx"
 import {
     getGuestCart,
     setGuestCartItemQuantity,
@@ -45,6 +46,33 @@ const guestItemToDisplay = (item) => {
 
 const computeTotal = (items) =>
     items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0).toFixed(2)
+
+// Moyenne IG du panier ponderee par la quantite (cote client, a partir du
+// champ glycemic_index deja present sur chaque item). Renvoie null si aucun
+// item ne porte d'IG -> la box "Charge glycemique" est alors masquee.
+const computeAvgIg = (items) => {
+    let weighted = 0
+    let qtySum = 0
+    items.forEach((item) => {
+        const ig = Number(item.glycemic_index)
+        const qty = Number(item.quantity) || 0
+        if (Number.isFinite(ig) && qty > 0) {
+            weighted += ig * qty
+            qtySum += qty
+        }
+    })
+    if (qtySum === 0) return null
+    return Math.round(weighted / qtySum)
+}
+
+const IG_VERDICTS = {
+    bas:   "excellent équilibre 👏",
+    moyen: "équilibre correct",
+    eleve: "à surveiller"
+}
+
+const igLevelOf = (ig) => (ig <= 55 ? "bas" : ig <= 69 ? "moyen" : "eleve")
+const igLevelLabel = { bas: "bas", moyen: "modéré", eleve: "élevé" }
 
 export const Cart = () => {
     const { isAuthenticated, isUserLoading } = useAuthenticated()
@@ -191,7 +219,29 @@ export const Cart = () => {
     if (loading) {
         return (
             <div className="cart" aria-busy="true">
-                <h1>Mon Panier</h1>
+                <div className="cart__stepper" aria-hidden="true">
+                    <div className="cart__brand">
+                        <img src="/icon-512.png" alt="" width="32" height="32" />
+                        <span>GlyciBio</span>
+                    </div>
+                    <ol className="cart-stepper">
+                        <li className="cart-stepper__step cart-stepper__step--active">
+                            <span className="cart-stepper__num">1</span>
+                            <span className="cart-stepper__label">Panier</span>
+                        </li>
+                        <li className="cart-stepper__line" />
+                        <li className="cart-stepper__step">
+                            <span className="cart-stepper__num">2</span>
+                            <span className="cart-stepper__label">Livraison</span>
+                        </li>
+                        <li className="cart-stepper__line" />
+                        <li className="cart-stepper__step">
+                            <span className="cart-stepper__num">3</span>
+                            <span className="cart-stepper__label">Paiement</span>
+                        </li>
+                    </ol>
+                    <span className="cart__secure"><Lock size={16} aria-hidden="true" /> Sécurisé</span>
+                </div>
                 <div className="cart__content">
                     <div className="cart__items">
                         <CartItemSkeleton />
@@ -231,12 +281,52 @@ export const Cart = () => {
         )
     }
 
+    // ----- Derives client-side (affichage uniquement) -----
+    const avgIg = computeAvgIg(cart.items)
+    const avgLevel = avgIg != null ? igLevelOf(avgIg) : null
+    const allLow = cart.items.every((it) => {
+        const ig = Number(it.glycemic_index)
+        return Number.isFinite(ig) && ig <= 55
+    })
+    const subtotalNum = parseFloat(cart.total) || 0
+    const vatNum = subtotalNum * (0.2 / 1.2)   // TVA incluse a 20%
+
     return (
         <div className="cart">
-            <h1>Mon Panier ({cart.itemCount} article{cart.itemCount > 1 ? "s" : ""})</h1>
+            <div className="cart__stepper">
+                <div className="cart__brand">
+                    <img src="/icon-512.png" alt="" width="32" height="32" />
+                    <span>GlyciBio</span>
+                </div>
+                <ol className="cart-stepper" aria-label="Etapes de la commande">
+                    <li className="cart-stepper__step cart-stepper__step--active" aria-current="step">
+                        <span className="cart-stepper__num">1</span>
+                        <span className="cart-stepper__label">Panier</span>
+                    </li>
+                    <li className="cart-stepper__line" aria-hidden="true" />
+                    <li className="cart-stepper__step">
+                        <span className="cart-stepper__num">2</span>
+                        <span className="cart-stepper__label">Livraison</span>
+                    </li>
+                    <li className="cart-stepper__line" aria-hidden="true" />
+                    <li className="cart-stepper__step">
+                        <span className="cart-stepper__num">3</span>
+                        <span className="cart-stepper__label">Paiement</span>
+                    </li>
+                </ol>
+                <span className="cart__secure"><Lock size={16} aria-hidden="true" /> Sécurisé</span>
+            </div>
 
             <div className="cart__content">
                 <div className="cart__items">
+                    <header className="cart__items-head">
+                        <h1>Votre panier</h1>
+                        <p className="cart__items-sub">
+                            {cart.itemCount} article{cart.itemCount > 1 ? "s" : ""}
+                            {allLow && " · tous à index glycémique bas"}
+                        </p>
+                    </header>
+
                     {cart.items.map((item) => (
                         <div key={item.id} className="cart-item">
                             <div className="cart-item__image">
@@ -263,38 +353,47 @@ export const Cart = () => {
                             </div>
 
                             <div className="cart-item__info">
-                                <h3>{item.name}</h3>
-                                {item.glycemic_index != null && item.ig_category && (
-                                    <span className={`badge-ig badge-ig--${item.ig_category}`}>
-                                        IG {item.glycemic_index}
-                                    </span>
+                                {item.category_name && (
+                                    <p className="cart-item__category">{item.category_name}</p>
                                 )}
-                                <p className="cart-item__price">{formatPrice(item.price)}</p>
+                                <p className="cart-item__name">{item.name}</p>
+                                {item.glycemic_index != null && (
+                                    <div className="cart-item__ig">
+                                        <IgMeter ig={item.glycemic_index} size="sm" />
+                                        {item.ig_category && (
+                                            <span className={`badge-ig badge-ig--${item.ig_category}`}>
+                                                IG {item.glycemic_index}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="cart-item__quantity">
-                                <button
-                                    type="button"
-                                    onClick={() => updateQuantity(item, item.quantity - 1)}
-                                    disabled={item.quantity <= 1}
-                                    aria-label="Reduire la quantite"
-                                >
-                                    <Minus size={16} aria-hidden="true" />
-                                </button>
-                                <span aria-live="polite">{item.quantity}</span>
-                                <button
-                                    type="button"
-                                    onClick={() => updateQuantity(item, item.quantity + 1)}
-                                    disabled={typeof item.stock === "number" && item.quantity >= item.stock}
-                                    aria-label="Augmenter la quantite"
-                                >
-                                    <Plus size={16} aria-hidden="true" />
-                                </button>
-                            </div>
+                            <div className="cart-item__aside">
+                                <p className="cart-item__subtotal">
+                                    {formatPrice(item.subtotal)}
+                                </p>
 
-                            <p className="cart-item__subtotal">
-                                {formatPrice(item.subtotal)}
-                            </p>
+                                <div className="cart-item__quantity">
+                                    <button
+                                        type="button"
+                                        onClick={() => updateQuantity(item, item.quantity - 1)}
+                                        disabled={item.quantity <= 1}
+                                        aria-label="Reduire la quantite"
+                                    >
+                                        <Minus size={16} aria-hidden="true" />
+                                    </button>
+                                    <span aria-live="polite">{item.quantity}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => updateQuantity(item, item.quantity + 1)}
+                                        disabled={typeof item.stock === "number" && item.quantity >= item.stock}
+                                        aria-label="Augmenter la quantite"
+                                    >
+                                        <Plus size={16} aria-hidden="true" />
+                                    </button>
+                                </div>
+                            </div>
 
                             <button
                                 type="button"
@@ -312,10 +411,28 @@ export const Cart = () => {
                             )}
                         </div>
                     ))}
+
+                    <Link to="/catalogue" className="cart__continue">
+                        <ArrowLeft size={18} aria-hidden="true" />
+                        Continuer mes achats
+                    </Link>
                 </div>
 
                 <div className="cart__summary">
-                    <h3>Resume</h3>
+                    <h2 className="cart__summary-title">Récapitulatif</h2>
+
+                    {avgIg != null && (
+                        <div className={`cart__ig-load cart__ig-load--${avgLevel}`}>
+                            <p className="cart__ig-load-label">
+                                <Check size={16} aria-hidden="true" />
+                                Charge glycémique du panier
+                            </p>
+                            <IgMeter ig={avgIg} size="sm" />
+                            <p className="cart__ig-load-verdict">
+                                IG moyen <strong>{avgIg}</strong> · {igLevelLabel[avgLevel]} — {IG_VERDICTS[avgLevel]}
+                            </p>
+                        </div>
+                    )}
 
                     {(() => {
                         const FREE_SHIPPING_THRESHOLD = 49
@@ -347,14 +464,32 @@ export const Cart = () => {
                     </div>
                     <div className="cart__summary-line">
                         <span>Livraison</span>
-                        <span>Calculee a l&apos;etape suivante</span>
+                        <span className="cart__summary-free">Offerte</span>
                     </div>
+                    <div className="cart__summary-line">
+                        <span>TVA incluse</span>
+                        <span>{formatPrice(vatNum)}</span>
+                    </div>
+
+                    <form
+                        className="cart__promo"
+                        onSubmit={(e) => e.preventDefault()}
+                    >
+                        <input
+                            type="text"
+                            className="cart__promo-input"
+                            placeholder="Code promo"
+                            aria-label="Code promo"
+                        />
+                        <button type="submit" className="cart__promo-apply">Appliquer</button>
+                    </form>
+
                     <div className="cart__summary-total">
                         <span>Total</span>
                         <span>{formatPrice(cart.total)}</span>
                     </div>
 
-                    <button type="button" className="btn btn--primary btn--full" onClick={handleCheckoutClick}>
+                    <button type="button" className="btn btn--primary btn--full cart__checkout" onClick={handleCheckoutClick}>
                         {isGuest ? "Se connecter pour commander" : "Passer la commande"}
                     </button>
 
@@ -365,9 +500,11 @@ export const Cart = () => {
                         </p>
                     )}
 
-                    <Link to="/catalogue" className="cart__continue">
-                        Continuer les achats
-                    </Link>
+                    <div className="cart__payments" aria-label="Moyens de paiement acceptés">
+                        <span>VISA</span>
+                        <span>MASTERCARD</span>
+                        <span>PAYPAL</span>
+                    </div>
                 </div>
             </div>
         </div>
