@@ -1,1 +1,65 @@
+# Dossier docs exclu de ce depot (volontaire)
 /docs
+
+# ============================================================
+# Dependencies
+# ============================================================
+node_modules/
+.pnp
+.pnp.js
+
+# ============================================================
+# Variables d'environnement (SECRETS — ne jamais committer)
+# ============================================================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.staging
+server/.env
+client/.env
+
+# ============================================================
+# Build output
+# ============================================================
+dist/
+build/
+.vite/
+
+# ============================================================
+# Logs
+# ============================================================
+logs/
+*.log
+npm-debug.log*
+
+# ============================================================
+# Sauvegardes base de donnees (dumps locaux)
+# ============================================================
+backups/
+*.sql.gz
+
+# Note : server/uploads/products/ (images de seed) est VOLONTAIREMENT
+# versionne ici pour que le deploiement recupere les visuels via git.
+
+# ============================================================
+# Cache / OS / Editeurs
+# ============================================================
+.cache/
+.eslintcache
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.sw?
+
+# ============================================================
+# Outils IA / assistants locaux
+# ============================================================
+.claude/
+.agents/
+.mcp.json
+*.secret
+secrets.*
