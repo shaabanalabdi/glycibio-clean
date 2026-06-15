@@ -167,6 +167,24 @@ export const adminApiSlice = baseApi.injectEndpoints({
                 body: { status }
             }),
             invalidatesTags: ["adminReviews"]
+        }),
+
+        // --- Apparence / personnalisation (image de fond du hero) ---
+        updateHeroBackground: build.mutation({
+            // formData : multipart (champ "image")
+            query: (formData) => ({
+                url: "/admin/settings/hero-background",
+                method: "PUT",
+                body: formData
+            }),
+            invalidatesTags: ["settings"]
+        }),
+        resetHeroBackground: build.mutation({
+            query: () => ({
+                url: "/admin/settings/hero-background",
+                method: "DELETE"
+            }),
+            invalidatesTags: ["settings"]
         })
     })
 })
@@ -198,5 +216,7 @@ export const {
     useUpdateShippingMethodMutation,
     useDeleteShippingMethodMutation,
     useGetAdminReviewsQuery,
-    useUpdateReviewStatusMutation
+    useUpdateReviewStatusMutation,
+    useUpdateHeroBackgroundMutation,
+    useResetHeroBackgroundMutation
 } = adminApiSlice

@@ -16,6 +16,7 @@ import "./apiSlice/paymentApiSlice.js"
 import "./apiSlice/contactApiSlice.js"
 import "./apiSlice/shippingApiSlice.js"
 import "./apiSlice/wishlistApiSlice.js"
+import "./apiSlice/settingApiSlice.js"
 import "./apiSlice/adminApiSlice.js"
 
 // Cache RTK Query UNIQUE : un seul reducer + un seul middleware (au lieu de 11).

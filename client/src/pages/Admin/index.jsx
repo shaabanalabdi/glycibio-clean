@@ -1,6 +1,6 @@
 import "./style.scss"
 import { useState } from "react"
-import { FolderTree, LayoutDashboard, Mail, Package, ShoppingBag, Star, Truck, Users } from "lucide-react"
+import { FolderTree, Image as ImageIcon, LayoutDashboard, Mail, Package, ShoppingBag, Star, Truck, Users } from "lucide-react"
 import { useGetAdminProductsQuery } from "@slices/adminApiSlice.js"
 import { useGetAdminCategoriesQuery } from "@slices/adminApiSlice.js"
 import { useGetAdminShippingQuery } from "@slices/adminApiSlice.js"
@@ -16,6 +16,7 @@ import { AdminOrders } from "@components/AdminOrders/index.jsx"
 import { AdminMessages } from "@components/AdminMessages/index.jsx"
 import { AdminReviews } from "@components/AdminReviews/index.jsx"
 import { AdminUsers } from "@components/AdminUsers/index.jsx"
+import { AdminAppearance } from "@components/AdminAppearance/index.jsx"
 
 // Hub admin : barre laterale groupee + rendu du panneau de l'onglet actif.
 // Chaque onglet est un composant autonome qui possede ses propres donnees
@@ -41,7 +42,8 @@ export const Admin = () => {
         {
             label: "Tableau de bord",
             items: [
-                { id: "overview", label: "Vue d'ensemble", icon: LayoutDashboard }
+                { id: "overview", label: "Vue d'ensemble", icon: LayoutDashboard },
+                { id: "appearance", label: "Apparence", icon: ImageIcon }
             ]
         },
         {
@@ -106,6 +108,7 @@ export const Admin = () => {
 
             <div className="admin-main">
                 {activeTab === "overview" && <AdminOverview />}
+                {activeTab === "appearance" && <AdminAppearance />}
                 {activeTab === "products" && <AdminProducts />}
                 {activeTab === "categories" && <AdminCategories />}
                 {activeTab === "shipping" && <AdminShipping />}

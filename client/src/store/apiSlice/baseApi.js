@@ -26,6 +26,8 @@ export const baseApi = createApi({
         "authUser", "profile",
         // catalogue public
         "products", "product", "reviews", "categories", "methods",
+        // parametres de site (image de fond du hero, ...)
+        "settings",
         // espace connecte
         "cart", "orders", "wishlist",
         // back-office

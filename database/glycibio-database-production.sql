@@ -62,6 +62,7 @@ DROP VIEW IF EXISTS v_product_ratings;
 
 DROP PROCEDURE IF EXISTS sp_recalc_order_totals;
 
+DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS abandoned_cart_sent;
 DROP TABLE IF EXISTS product_images;
 DROP TABLE IF EXISTS wishlist_items;
@@ -306,6 +307,19 @@ CREATE TABLE abandoned_cart_sent (
   PRIMARY KEY (user_id),
   CONSTRAINT fk_acs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- ============================================================
+-- 13) settings (parametres de site cle/valeur — ex: image de fond du hero,
+--     modifiable depuis la console d'administration)
+-- ============================================================
+CREATE TABLE settings (
+  setting_key   VARCHAR(64) PRIMARY KEY,
+  setting_value TEXT NULL,
+  updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+INSERT INTO settings (setting_key, setting_value) VALUES
+  ('hero_background', NULL);
 
 -- ============================================================
 -- TRIGGERS & PROCEDURE (calcul auto des totaux + verrou commandes validees)

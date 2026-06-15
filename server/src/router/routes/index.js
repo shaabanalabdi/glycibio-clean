@@ -10,6 +10,7 @@ import { contactRoutes } from "./contactRoutes.js";
 import { shippingRoutes } from "./shippingRoutes.js";
 import { userRoutes } from "./userRoutes.js";
 import { wishlistRoutes } from "./wishlistRoutes.js";
+import { settingRoutes } from "./settingRoutes.js";
 
 import { adminProductRoutes } from "./admin/adminProductRoutes.js";
 import { adminCategoryRoutes } from "./admin/adminCategoryRoutes.js";
@@ -19,6 +20,7 @@ import { adminDashboardRoutes } from "./admin/adminDashboardRoutes.js";
 import { adminUserRoutes } from "./admin/adminUserRoutes.js";
 import { adminShippingRoutes } from "./admin/adminShippingRoutes.js";
 import { adminReviewRoutes } from "./admin/adminReviewRoutes.js";
+import { adminSettingRoutes } from "./admin/adminSettingRoutes.js";
 
 import { isAuthenticated } from "../../middleware/isAuthenticated.js"
 import { isAdmin } from "../../middleware/isAdmin.js"
@@ -32,6 +34,7 @@ routes.use("/products", productRoutes)
 routes.use("/categories", categoryRoutes)
 routes.use("/contact", contactRoutes)
 routes.use("/shipping", shippingRoutes)
+routes.use("/settings", settingRoutes)
 
 // Routes protegees
 routes.use("/cart", isAuthenticated, cartRoutes)
@@ -50,3 +53,4 @@ routes.use("/admin/dashboard", isAuthenticated, isAdmin, adminDashboardRoutes)
 routes.use("/admin/users", isAuthenticated, isAdmin, adminUserRoutes)
 routes.use("/admin/shipping", isAuthenticated, isAdmin, adminShippingRoutes)
 routes.use("/admin/reviews", isAuthenticated, isAdmin, adminReviewRoutes)
+routes.use("/admin/settings", isAuthenticated, isAdmin, adminSettingRoutes)

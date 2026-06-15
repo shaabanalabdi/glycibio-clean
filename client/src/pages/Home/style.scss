@@ -233,6 +233,42 @@
 
 }
 
+// ============================================================
+// Variante : image de fond definie depuis l'admin.
+// Le voile sombre est applique en inline-style (degrade) sur l'element ;
+// ici on bascule le texte en clair pour rester lisible (AA) sur la photo.
+// ============================================================
+.hero--has-image {
+  background-size: cover;
+  background-position: center;
+  border-color: transparent;
+  color: $white;
+
+  .hero__orb { display: none; }   // les orbes flous n'ont pas de sens sur une photo
+
+  .hero__eyebrow {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba($white, 0.55);
+    color: $white;
+    svg { color: $white; }
+  }
+
+  .hero__title,
+  .hero__highlight { color: $white; }
+
+  .hero__text { color: rgba($white, 0.92); }
+
+  .hero__trust {
+    color: $white;
+    svg { color: $white; }
+  }
+
+  .hero__cta-tertiary {
+    color: $white;
+    @include hover { background: rgba($white, 0.18); color: $white; }
+  }
+}
+
 // Orb keyframes — translate + scale
 @keyframes hero-float-a {
   0%, 100% { transform: translate(0, 0) scale(1); }

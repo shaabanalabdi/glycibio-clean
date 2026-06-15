@@ -11,6 +11,8 @@ import { useAuthenticated } from "@hooks/useAuthenticated.js"
 import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
 import { useGetCategoriesQuery } from "@slices/categoryApiSlice.js"
 import { useGetProductsQuery } from "@slices/productApiSlice.js"
+import { useGetSettingsQuery } from "@slices/settingApiSlice.js"
+import { resolveImageUrl } from "@utils/imageUrl.js"
 
 // Icone adaptee a chaque categorie (devine via mots-cles du nom, accents
 // optionnels car la base stocke les noms sans accents). Ordre : du plus
@@ -42,10 +44,20 @@ export const Home = () => {
     const { data: featuredData, isLoading: loading } = useGetProductsQuery({ limit: 4, sort: "ig_asc" })
     const featuredProducts = featuredData?.products ?? []
 
+    // Image de fond du hero, configurable depuis la console d'admin (sinon degrade).
+    const { data: siteSettings } = useGetSettingsQuery()
+    const heroBackground = siteSettings?.hero_background
+
     return (
         <div className="home">
-            {/* Hero - light gradient canvas + floating orbs + showcase card */}
-            <section className="hero">
+            {/* Hero - degrade par defaut, OU image de fond configuree en admin
+                (avec un voile sombre degrade pour garder le texte lisible). */}
+            <section
+                className={`hero${heroBackground ? " hero--has-image" : ""}`}
+                style={heroBackground ? {
+                    backgroundImage: `linear-gradient(90deg, rgba(20,32,26,0.82) 0%, rgba(20,32,26,0.55) 55%, rgba(20,32,26,0.30) 100%), url(${resolveImageUrl(heroBackground)})`
+                } : undefined}
+            >
                 <div className="hero__orb hero__orb--a" aria-hidden="true" />
                 <div className="hero__orb hero__orb--b" aria-hidden="true" />
 
