@@ -13,7 +13,13 @@ export const userApiSlice = baseApi.injectEndpoints({
                 method: "PUT",
                 body: data
             }),
-            invalidatesTags: ["profile"]
+            // "authUser" en plus de "profile" : l'app lit l'utilisateur courant
+            // (nom, adresse, telephone) via /auth/me (tag "authUser", cf.
+            // useAuthenticated). Sans invalider ce tag, l'adresse est bien
+            // enregistree en base mais l'UI (pre-remplissage Profil/Checkout)
+            // garde l'ancienne valeur en cache -> l'utilisateur croit que ca n'a
+            // pas ete sauvegarde.
+            invalidatesTags: ["profile", "authUser"]
         }),
         changePassword: build.mutation({
             query: (data) => ({
