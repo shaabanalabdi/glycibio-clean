@@ -1,5 +1,6 @@
 import {orderRepository} from "../repository/OrderRepository.js";
 import {orderItemRepository} from "../repository/OrderItemRepository.js";
+import {cartItemRepository} from "../repository/CartItemRepository.js";
 import {StripeService} from "../services/StripeService.js";
 import {Validator} from "../services/Validator.js";
 import {ValidationException, NotFoundException, ConflictException} from "../error/HttpException.js";
@@ -42,6 +43,10 @@ export class OrderController {
             const { orderId } = await orderRepository.createPendingFromCart(
                 req.user.id, shipping_address, shipping_method_id
             )
+
+            // Repli sans Stripe : aucune etape de paiement -> on vide le panier
+            // ici (le tunnel Stripe, lui, le vide au paiement confirme via markPaid).
+            await cartItemRepository.clearForUser(req.user.id)
 
             const order = await orderRepository.find(orderId)
 

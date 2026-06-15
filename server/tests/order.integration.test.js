@@ -78,7 +78,7 @@ after(async () => {
 const addToCart = (qty) =>
     db.query("INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)", [fx.userId, fx.productId, qty])
 
-test("createPendingFromCart : decremente le stock, calcule le total, vide le panier", { skip }, async () => {
+test("createPendingFromCart : decremente le stock, calcule le total, CONSERVE le panier", { skip }, async () => {
     await addToCart(3)
 
     const res = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
@@ -88,7 +88,7 @@ test("createPendingFromCart : decremente le stock, calcule le total, vide le pan
     assert.equal(product.stock, 7, "stock = 10 - 3")
 
     const [cart] = await db.query("SELECT id FROM cart_items WHERE user_id = ?", [fx.userId])
-    assert.equal(cart.length, 0, "le panier doit etre vide")
+    assert.equal(cart.length, 1, "le panier est CONSERVE jusqu'au paiement (vide seulement a markPaid)")
 
     const [[order]] = await db.query("SELECT status, subtotal, total FROM orders WHERE id = ?", [res.orderId])
     assert.equal(order.status, "en_attente")
@@ -108,9 +108,12 @@ test("createPendingFromCart : stock insuffisant -> rejet, stock inchange (rollba
     assert.equal(product.stock, 10, "le stock ne doit PAS avoir bouge (transaction annulee)")
 })
 
-test("markPaid : transition atomique exactly-once (anti double traitement)", { skip }, async () => {
+test("markPaid : transition atomique exactly-once + vide le panier au paiement", { skip }, async () => {
     await addToCart(2)
     const { orderId } = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
+
+    const [beforePay] = await db.query("SELECT id FROM cart_items WHERE user_id = ?", [fx.userId])
+    assert.equal(beforePay.length, 1, "panier CONSERVE avant paiement")
 
     const first = await orderRepo.markPaid(orderId, "pi_test_123")
     const second = await orderRepo.markPaid(orderId, "pi_test_123")
@@ -121,6 +124,9 @@ test("markPaid : transition atomique exactly-once (anti double traitement)", { s
     const [[order]] = await db.query("SELECT status, stripe_payment_id FROM orders WHERE id = ?", [orderId])
     assert.equal(order.status, "payee")
     assert.equal(order.stripe_payment_id, "pi_test_123")
+
+    const [afterPay] = await db.query("SELECT id FROM cart_items WHERE user_id = ?", [fx.userId])
+    assert.equal(afterPay.length, 0, "panier VIDE apres paiement confirme")
 })
 
 test("cancelPendingAndRestoreStock : restaure le stock, idempotent", { skip }, async () => {
@@ -141,4 +147,27 @@ test("cancelPendingAndRestoreStock : restaure le stock, idempotent", { skip }, a
 
     const [[order]] = await db.query("SELECT status FROM orders WHERE id = ?", [orderId])
     assert.equal(order.status, "annulee")
+})
+
+test("createPendingFromCart : un 2e checkout annule la commande en_attente precedente (pas de reservation double)", { skip }, async () => {
+    await addToCart(3)
+
+    const first = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
+    const [[afterFirst]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(afterFirst.stock, 7, "stock = 10 - 3 (1re reservation)")
+
+    // Panier toujours plein -> 2e checkout : annule/restaure la 1re puis re-reserve.
+    // Le stock NET ne bouge pas : pas de double reservation.
+    const second = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
+    const [[afterSecond]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(afterSecond.stock, 7, "stock TOUJOURS 7 (1re annulee/restauree, 2e reservee)")
+
+    const [[order1]] = await db.query("SELECT status FROM orders WHERE id = ?", [first.orderId])
+    assert.equal(order1.status, "annulee", "la 1re commande en_attente est annulee")
+    const [[order2]] = await db.query("SELECT status FROM orders WHERE id = ?", [second.orderId])
+    assert.equal(order2.status, "en_attente", "la 2e commande reste en attente")
+
+    // Le panier est conserve (vide seulement au paiement).
+    const [cart] = await db.query("SELECT id FROM cart_items WHERE user_id = ?", [fx.userId])
+    assert.equal(cart.length, 1, "panier conserve apres re-checkout")
 })

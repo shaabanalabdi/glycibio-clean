@@ -46,11 +46,35 @@ class OrderRepository extends Repository {
     }
 
     // Creation de commande depuis le panier, dans UNE transaction :
+    //   - annulation des commandes "en_attente" precedentes (restaure leur stock)
+    //     -> pas de reservation double si le client relance le paiement
     //   - verrouillage des lignes produits (FOR UPDATE, anti race condition TOCTOU)
-    //   - verification des stocks
-    //   - insertion commande + articles, decrement du stock, vidage du panier
+    //   - verification des stocks + insertion commande/articles + decrement
+    // Le panier N'EST PAS vide ici : il l'est seulement au PAIEMENT confirme
+    // (markPaid) -> un checkout abandonne conserve donc le panier du client.
     createPendingFromCart = async (userId, shippingAddress, shippingMethodId) =>
         withTransaction(async (connection) => {
+            // Annuler toute commande encore en attente de cet utilisateur et
+            // restaurer son stock (re-checkout : evite la reservation en double
+            // et l'accumulation de commandes fantomes).
+            const [pendings] = await connection.query(
+                "SELECT id FROM orders WHERE user_id = ? AND status = 'en_attente' FOR UPDATE",
+                [userId]
+            )
+            for (const po of pendings) {
+                const [poItems] = await connection.query(
+                    "SELECT product_id, quantity FROM order_items WHERE order_id = ?",
+                    [po.id]
+                )
+                for (const it of poItems) {
+                    await connection.query(
+                        "UPDATE products SET stock = stock + ? WHERE id = ?",
+                        [it.quantity, it.product_id]
+                    )
+                }
+                await connection.query("UPDATE orders SET status = 'annulee' WHERE id = ?", [po.id])
+            }
+
             const [cartItems] = await connection.query(
                 `SELECT ci.product_id, ci.quantity, p.name, p.price, p.stock, p.image
                  FROM cart_items ci
@@ -105,8 +129,7 @@ class OrderRepository extends Repository {
                 )
             }
 
-            await connection.query("DELETE FROM cart_items WHERE user_id = ?", [userId])
-
+            // NB: le panier n'est PAS vide ici (cf. markPaid au paiement confirme).
             return { orderId, cartItems, subtotal, shippingCost, shippingName, total }
         })
 
@@ -132,7 +155,14 @@ class OrderRepository extends Repository {
             "SELECT id, total, shipping_address, user_id, status FROM orders WHERE id = ?",
             [orderId]
         )
-        return orders.length === 0 ? null : orders[0]
+        if (orders.length === 0) return null
+
+        // Paiement confirme -> on vide MAINTENANT le panier (et seulement
+        // maintenant : un checkout abandonne conserve donc le panier du client).
+        // Idempotent : seul l'appel gagnant (affectedRows === 1) arrive ici.
+        await db.query("DELETE FROM cart_items WHERE user_id = ?", [orders[0].user_id])
+
+        return orders[0]
     }
 
     // Annule une commande "en_attente" et restaure le stock des produits.
