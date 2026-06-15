@@ -32,6 +32,7 @@ Les composants n'utilisent QUE des tokens sémantiques, jamais les hex bruts.
 | input-bg | #ffffff | #1c231e | Champs |
 | input-border | #d8d3c6 | #3f493f | Bordure de champ |
 | accent | #3c7a26 | #4ea827 | Liens / titres verts / icônes (texte vert AA) |
+| trust | #1c5879 | #6fc6f0 | Bleu de confiance (sécurité, focus) — secondaire de marque |
 | price | #1c5879 | #6fc6f0 | Prix (bleu profond) |
 | tint-green-bg / -fg | #eef6e7 / #3c7a26 | rgba(78,168,39,.16) / #7fcf5a | Pastilles/tuiles vertes |
 | tint-blue-bg / -fg | #e6f3fb / #1c5879 | rgba(36,157,223,.18) / #6fc6f0 | Pastilles/tuiles bleues |
@@ -43,7 +44,9 @@ Les composants n'utilisent QUE des tokens sémantiques, jamais les hex bruts.
 ### Brand (constant, indépendant du thème)
 - primary #3c7a26 (vert action, boutons/liens, AA 5.17:1 sur blanc) ; primary-dark #2f6020 (hover)
 - secondary #249ddf (bleu confiance) ; secondary-dark #1c5879 (prix/accents)
+  - **Rôle « confiance » assumé** (token `trust`) : prix, signaux de sécurité/confiance (bandeau « paiement sécurisé », badge SSL), focus, tuiles bleues. Le bleu reste **secondaire** — le vert garde la hiérarchie des actions (CTA). Objectif : préserver la reconnaissance de marque sans concurrencer le vert d'action.
 - green-vivid #4ea827 (décoratif uniquement, pas en texte sur blanc)
+- **Vert UNIFIÉ sur #3c7a26** (une seule source de vérité) : `theme-color` (index.html + site.webmanifest) et la vue SQL `v_products_full` (`ig_color` → #3c7a26 / #b35e10 / #d42b20) sont alignées sur les tokens. Fini les verts divergents historiques (#2e7d32 dans theme-color, #5D9D3C/#F08833/#D43A30 dans la vue SQL).
 
 ### Index Glycémique (signature) — tous AA
 - ig-bas #3c7a26 (IG <= 55) ; ig-moyen #b35e10 (56-69) ; ig-eleve #d42b20 (>= 70)

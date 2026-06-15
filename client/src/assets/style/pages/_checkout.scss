@@ -340,7 +340,9 @@
 
   &__trust-headline {
     font-size: $fs-sm;
-    color: $text-muted;
+    // Bleu de confiance : signal de securite assume (role secondaire de marque)
+    color: $trust;
+    font-weight: $fw-semibold;
     margin-bottom: $space-2xs;
   }
 
@@ -383,5 +385,5 @@
   &--stripe { background: #635bff; color: #fff; border-color: #635bff; }
   &--visa   { background: #1a1f71; color: #fff; border-color: #1a1f71; }
   &--mc     { background: #eb001b; color: #fff; border-color: #eb001b; }
-  &--ssl    { background: #16a34a; color: #fff; border-color: #16a34a; }
+  &--ssl    { background: $secondary-dark; color: #fff; border-color: $secondary-dark; }   // bleu profond de marque (securite) — blanc AA ~7.7:1
 }

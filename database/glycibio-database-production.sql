@@ -456,7 +456,7 @@ UPDATE products
 
 CREATE OR REPLACE VIEW v_products_full AS
 SELECT p.id, p.name, p.slug, p.price, p.glycemic_index, p.ig_category,
-  CASE p.ig_category WHEN 'bas' THEN '#5D9D3C' WHEN 'moyen' THEN '#F08833' WHEN 'eleve' THEN '#D43A30' ELSE '#999999' END AS ig_color,
+  CASE p.ig_category WHEN 'bas' THEN '#3c7a26' WHEN 'moyen' THEN '#b35e10' WHEN 'eleve' THEN '#d42b20' ELSE '#6a786e' END AS ig_color,
   p.stock, p.allergens, p.is_active, c.name AS category_name
 FROM products p JOIN categories c ON p.category_id = c.id;
 

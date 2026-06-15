@@ -80,6 +80,11 @@
   // Distinct de $primary (qui reste l'aplat des boutons) : ici c'est le vert
   // EN TEXTE. Clair = #3c7a26 (AA 5.17:1 sur blanc).
   --color-accent:           #{$primary};           // #3c7a26
+
+  // Bleu de CONFIANCE (role secondaire assume de la marque) : prix, signaux
+  // de securite/confiance, focus. Distinct du vert d'action -> preserve la
+  // reconnaissance de la marque sans concurrencer la hierarchie des CTA verts.
+  --color-trust:            #{$secondary-dark};    // #1c5879 (AA sur clair)
 }
 
 // ============================================================
@@ -140,6 +145,9 @@
   // Accent vert en texte — vert vif de marque #4ea827 : AA sur tout le sombre
   // (4.7:1 sur surface-alt -> 6:1 sur bg) la ou le vert profond #3c7a26 echoue.
   --color-accent:           #4ea827;
+
+  // Bleu de confiance eclairci (AA sur le sombre)
+  --color-trust:            #6fc6f0;
 }
 
 // ============================================================
@@ -180,6 +188,7 @@
     --tint-blue-fg:           #6fc6f0;
     --color-price:            #6fc6f0;
     --color-accent:           #4ea827;
+    --color-trust:            #6fc6f0;
   }
 }
 
