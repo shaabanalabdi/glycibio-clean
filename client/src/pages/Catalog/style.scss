@@ -101,7 +101,7 @@
     min-height: $tap-target;
     padding: 0.5rem 2.5rem 0.5rem $space-sm;
     font-family: inherit;
-    font-size: $fs-sm;
+    font-size: $fs-base;          // >= 16px : evite l'auto-zoom iOS au focus
     font-weight: $fw-semibold;
     color: $text-strong;
     background: $surface;
@@ -329,7 +329,7 @@
     input,
     select {
       @include form-input;
-      font-size: $fs-sm;
+      font-size: $fs-base;        // >= 16px : evite l'auto-zoom iOS au focus
     }
   }
 

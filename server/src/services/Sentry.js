@@ -30,7 +30,15 @@ export class SentryService {
         }
         catch (err)
         {
-            Logger.warn("Sentry non disponible : paquet @sentry/node non installe", { msg: err.message })
+            // SENTRY_DSN est defini MAIS le paquet est absent : le suivi des
+            // erreurs est en realite desactive. En PRODUCTION on logge en ERROR
+            // (et non warn) pour ne PAS donner un faux sentiment de monitoring.
+            const message = "[Sentry] SENTRY_DSN defini mais @sentry/node introuvable -> suivi des erreurs DESACTIVE. Installez-le : npm install @sentry/node"
+            if ((process.env.NODE_ENV || "") === "production") {
+                Logger.error(message, { err: err.message })
+            } else {
+                Logger.warn(message, { err: err.message })
+            }
             Sentry = null
             return null
         }

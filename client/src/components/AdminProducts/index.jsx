@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Plus } from "lucide-react"
 import {
     useGetAdminProductsQuery,
     useGetAdminCategoriesQuery,
@@ -63,8 +64,36 @@ export const AdminProducts = () => {
     const [productSort, setProductSort] = useState({ col: null, dir: null })
     const [busyProductId, setBusyProductId] = useState(null)
     const [notice, setNotice] = useState({ type: "", text: "" })
+    const [formOpen, setFormOpen] = useState(false)
+    const formRef = useRef(null)
+    const addBtnRef = useRef(null)
 
     const savingProduct = isCreating || isUpdating
+
+    // Le formulaire est replie par defaut (liste = contenu principal). A son
+    // ouverture (Ajouter / Modifier) on le fait defiler dans la vue + focus,
+    // en respectant prefers-reduced-motion (scrollIntoView({behavior}) prime
+    // sur le scroll-behavior CSS, donc on resout le comportement ici).
+    useEffect(() => {
+        if (formOpen && formRef.current) {
+            const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+            formRef.current.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
+            formRef.current.querySelector("input, select, textarea")?.focus()
+        }
+    }, [formOpen, productForm.id])
+
+    const openCreate = () => {
+        resetForm()
+        setFormOpen(true)
+    }
+
+    // Ferme le panneau ET rend le focus au bouton "Ajouter" (sinon il tombe
+    // sur <body> quand le formulaire se demonte — WCAG 2.4.3).
+    const closeForm = () => {
+        resetForm()
+        setFormOpen(false)
+        addBtnRef.current?.focus()
+    }
 
     const setNextProductImagePreview = (nextPreview) => {
         setProductImagePreview((prev) => {
@@ -151,6 +180,7 @@ export const AdminProducts = () => {
             category_id: product.category_id ? String(product.category_id) : "",
             is_active: !!product.is_active
         })
+        setFormOpen(true)
     }
 
     const handleSubmit = async (event) => {
@@ -179,6 +209,8 @@ export const AdminProducts = () => {
             }
             setNotice({ type: "success", text: productForm.id ? "Produit mis a jour." : "Produit cree avec succes." })
             resetForm()
+            setFormOpen(false)
+            addBtnRef.current?.focus()
         }
         catch (error)
         {
@@ -242,42 +274,51 @@ export const AdminProducts = () => {
     return (
         <div className="admin-panel">
             {notice.text && (
-                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`}>
+                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`} role={notice.type === "error" ? "alert" : "status"} aria-live={notice.type === "error" ? "assertive" : "polite"}>
                     {notice.text}
                 </p>
             )}
-            <div className="admin-panel__toolbar">
-                <h2>Gestion des produits</h2>
-                <div className="admin-filter-inline">
-                    <input
-                        type="search"
-                        placeholder="Rechercher un produit..."
-                        value={productFilter.search}
-                        onChange={(event) => setProductFilter((prev) => ({ ...prev, search: event.target.value }))}
-                    />
-                    <select
-                        value={productFilter.status}
-                        onChange={(event) => setProductFilter((prev) => ({ ...prev, status: event.target.value }))}
-                    >
-                        <option value="all">Tous</option>
-                        <option value="active">Actifs</option>
-                        <option value="inactive">Inactifs</option>
-                    </select>
-                    <select
-                        value={productFilter.category}
-                        onChange={(event) => setProductFilter((prev) => ({ ...prev, category: event.target.value }))}
-                    >
-                        <option value="all">Toutes categories</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={String(category.id)}>{category.name}</option>
-                        ))}
-                    </select>
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Gestion des produits <span className="admin-count-badge">{products.length}</span></h2>
+                    <p className="admin-head__subtitle">Catalogue, stock, prix et visibilite.</p>
                 </div>
-            </div>
+                <div className="admin-head__controls">
+                    <div className="admin-filter-inline">
+                        <input
+                            type="search"
+                            placeholder="Rechercher un produit..."
+                            value={productFilter.search}
+                            onChange={(event) => setProductFilter((prev) => ({ ...prev, search: event.target.value }))}
+                        />
+                        <select
+                            value={productFilter.status}
+                            onChange={(event) => setProductFilter((prev) => ({ ...prev, status: event.target.value }))}
+                        >
+                            <option value="all">Tous</option>
+                            <option value="active">Actifs</option>
+                            <option value="inactive">Inactifs</option>
+                        </select>
+                        <select
+                            value={productFilter.category}
+                            onChange={(event) => setProductFilter((prev) => ({ ...prev, category: event.target.value }))}
+                        >
+                            <option value="all">Toutes categories</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={String(category.id)}>{category.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <button type="button" className="btn btn--primary" onClick={openCreate} ref={addBtnRef}>
+                        <Plus size={16} aria-hidden="true" /> Ajouter
+                    </button>
+                </div>
+            </header>
 
-            <div className="admin-split">
+            {formOpen && (
                 <form
                     className="admin-form-card"
+                    ref={formRef}
                     onSubmit={(event) => { void handleSubmit(event) }}
                 >
                     <h3>{productForm.id ? `Modifier produit #${productForm.id}` : "Ajouter un produit"}</h3>
@@ -365,8 +406,8 @@ export const AdminProducts = () => {
                         <button type="submit" className="btn btn--primary" disabled={savingProduct}>
                             {savingProduct ? "Sauvegarde..." : productForm.id ? "Mettre a jour" : "Creer le produit"}
                         </button>
-                        <button type="button" className="btn btn--outline" onClick={resetForm} disabled={savingProduct}>
-                            Reinitialiser
+                        <button type="button" className="btn btn--outline" onClick={closeForm} disabled={savingProduct}>
+                            Annuler
                         </button>
                     </div>
 
@@ -374,8 +415,9 @@ export const AdminProducts = () => {
                         <AdminProductGallery productId={productForm.id} />
                     )}
                 </form>
+            )}
 
-                <div className="admin-table-wrap">
+            <div className="admin-table-wrap">
                     <table>
                         <thead>
                             <tr>
@@ -386,7 +428,7 @@ export const AdminProducts = () => {
                                 <SortableTh label="Stock" col="stock" sort={productSort} onSort={setProductSort} numeric />
                                 <SortableTh label="IG" col="glycemic_index" sort={productSort} onSort={setProductSort} numeric />
                                 <SortableTh label="Statut" col="is_active" sort={productSort} onSort={setProductSort} />
-                                <th>Actions</th>
+                                <th className="admin-col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -414,7 +456,7 @@ export const AdminProducts = () => {
                                             {product.is_active ? "Actif" : "Inactif"}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td className="admin-col-actions">
                                         <div className="admin-inline-actions">
                                             <button type="button" className="btn btn--outline" onClick={() => handleEdit(product)}>Modifier</button>
                                             <button
@@ -444,7 +486,6 @@ export const AdminProducts = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
         </div>
     )
 }

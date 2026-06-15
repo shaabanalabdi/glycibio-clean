@@ -3,32 +3,80 @@
 @use "../../assets/style/abstracts/mixins" as *;
 
 // ============================================================
-// Email verification banner — bandeau "souple" sous la navbar
+// Email verification banner — carte d'avis "souple" sous la navbar.
+// Aligne sur l'identite du site : carte surface chaude, bord net + ombre
+// douce, coins arrondis, liisere + tuile d'icone ambre (semantique), le
+// tout dans la largeur de contenu (pas un bandeau plein-cadre brut).
 // ============================================================
 .verify-banner {
-  display: flex;
-  align-items: center;
-  gap: $space-2xs;
-  flex-wrap: wrap;
-  padding: $space-2xs $container-pad;
-  background: $warning-bg;
-  color: $warning-fg;
-  border-bottom: 1px solid $border;
-  font-size: $fs-sm;
+  padding: $space-sm $container-pad 0;
 
+  // La carte s'aligne sur la largeur de contenu des pages
+  &__card {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    flex-wrap: wrap;
+    max-width: $container-max;
+    margin-inline: auto;
+    padding: $space-sm $space-md;
+    background: $surface;
+    border: 1px solid $border;
+    border-inline-start: 4px solid $warning-fg;     // liisere ambre (semantique)
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+
+    // Etat "lien renvoye" -> accent vert succes
+    &--success {
+      border-inline-start-color: $success-fg;
+    }
+  }
+
+  // Tuile d'icone — pastille ambre (verte en succes)
   &__icon {
     flex-shrink: 0;
+    @include flex-center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: $radius;
+    background: $warning-bg;
+    color: $warning-fg;
+
+    .verify-banner__card--success & {
+      background: $success-bg;
+      color: $success-fg;
+    }
+  }
+
+  &__content {
+    flex: 1 1 14rem;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: $font-heading;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    line-height: $lh-snug;
+    color: $text-strong;
   }
 
   &__text {
-    flex: 1 1 12rem;
     margin: 0;
+    font-size: $fs-sm;
+    line-height: $lh-snug;
+    color: $text-muted;
   }
 
   &__action {
     flex-shrink: 0;
   }
 
+  // Bouton fermer — ghost rond, theme-aware
   &__close {
     flex-shrink: 0;
     @include flex-center;
@@ -36,12 +84,12 @@
     height: 2.25rem;
     background: transparent;
     border: none;
-    color: inherit;
+    color: $text-muted;
     cursor: pointer;
     border-radius: $radius-sm;
-    transition: background-color $t-fast $ease;
+    transition: background-color $t-fast $ease, color $t-fast $ease;
 
-    @include hover { background: rgba(0, 0, 0, 0.08); }
-    &:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+    @include hover { background: $button-ghost-hover; color: $text-strong; }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
   }
 }

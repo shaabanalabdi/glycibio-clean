@@ -41,11 +41,13 @@ export const Register = () => {
 
         if (!form.cgv) {
             setError("Vous devez accepter les CGV et la politique de confidentialite")
+            document.querySelector('[name="cgv"]')?.focus()
             return
         }
 
         if (form.password !== form.confirmPassword) {
             setError("Les mots de passe ne correspondent pas")
+            document.querySelector('[name="confirmPassword"]')?.focus()
             return
         }
 
@@ -75,7 +77,7 @@ export const Register = () => {
     return (
         <div className="auth-page">
             <form onSubmit={handleSubmit} className="auth-form" noValidate>
-                <h2>Inscription</h2>
+                <h1>Inscription</h1>
                 <p className="auth-form__subtitle">Creez votre compte GlyciBio</p>
 
                 {error && <p className="auth-form__error" role="alert">{error}</p>}

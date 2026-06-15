@@ -23,6 +23,7 @@ export const Product = () => {
     const { addToCart: addCart } = useCart()
     const [quantity, setQuantity] = useState(1)
     const [added, setAdded] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState("")
     // La barre sticky mobile ne s'affiche QUE quand le CTA inline est sorti
     // de l'ecran (IntersectionObserver). Evite l'affichage en double.
@@ -53,13 +54,22 @@ export const Product = () => {
     }, [product])
 
     const addToCart = async () => {
+        if (submitting) return
         setError("")
-        const { ok, message } = await addCart(product, quantity)
-        if (ok) {
-            setAdded(true)
-            setTimeout(() => setAdded(false), 3000)
-        } else {
-            setError(message || "Erreur d'ajout au panier")
+        setSubmitting(true)
+        try
+        {
+            const { ok, message } = await addCart(product, quantity)
+            if (ok) {
+                setAdded(true)
+                setTimeout(() => setAdded(false), 3000)
+            } else {
+                setError(message || "Erreur d'ajout au panier")
+            }
+        }
+        finally
+        {
+            setSubmitting(false)
         }
     }
 
@@ -251,13 +261,13 @@ export const Product = () => {
                         {/* Ajouter au panier */}
                         {product.stock > 0 && (
                             <div className="product-page__cart" ref={inlineCtaRef}>
-                                {error && <p className="product-page__error">{error}</p>}
+                                {error && <p className="product-page__error" role="alert">{error}</p>}
 
                                 <div className="product-page__quantity">
                                     <button aria-label="Diminuer la quantité" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
                                         <Minus size={18} />
                                     </button>
-                                    <span>{quantity}</span>
+                                    <span aria-live="polite">{quantity}</span>
                                     <button aria-label="Augmenter la quantité" onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}>
                                         <Plus size={18} />
                                     </button>
@@ -266,9 +276,13 @@ export const Product = () => {
                                 <button
                                     className={`btn btn--primary btn--lg ${added ? "btn--success" : ""}`}
                                     onClick={addToCart}
+                                    disabled={submitting}
+                                    aria-busy={submitting}
                                 >
-                                    {added ? (
-                                        "Ajoute au panier"
+                                    {submitting ? (
+                                        "Ajout…"
+                                    ) : added ? (
+                                        "Ajouté au panier"
                                     ) : (
                                         <><ShoppingCart size={20} /> Ajouter au panier</>
                                     )}
@@ -306,8 +320,8 @@ export const Product = () => {
                     <div className="product-sticky-cta__price">
                         {formatPrice(product.price)}
                     </div>
-                    <button className="btn btn--primary" onClick={addToCart}>
-                        <ShoppingCart size={18} /> {added ? "Ajoute" : "Ajouter au panier"}
+                    <button className="btn btn--primary" onClick={addToCart} disabled={submitting} aria-busy={submitting}>
+                        <ShoppingCart size={18} /> {submitting ? "Ajout…" : added ? "Ajouté" : "Ajouter au panier"}
                     </button>
                 </div>
             )}

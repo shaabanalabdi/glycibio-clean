@@ -1,5 +1,6 @@
 import {orderRepository} from "../repository/OrderRepository.js";
 import {orderItemRepository} from "../repository/OrderItemRepository.js";
+import {StripeService} from "../services/StripeService.js";
 import {Validator} from "../services/Validator.js";
 import {ValidationException, NotFoundException, ConflictException} from "../error/HttpException.js";
 
@@ -22,6 +23,18 @@ export class OrderController {
     static createOrder = async (req, res, next) => {
         try
         {
+            // Garde-fou anti-abus : ce point d'entree cree une commande "en_attente"
+            // SANS lien de paiement. Il n'existe QUE comme repli quand Stripe n'est
+            // pas configure (cf. Checkout : appele seulement sur un 503 de
+            // create-checkout). Si Stripe est actif, on REFUSE cette route : sinon
+            // un client authentifie pourrait decrementer/reserver le stock en boucle
+            // sans jamais payer (deni d'inventaire), en contournant Stripe.
+            if (await StripeService.isConfigured()) {
+                throw new ConflictException(
+                    "Le paiement en ligne est requis : utilisez le tunnel de paiement (create-checkout)."
+                )
+            }
+
             const { shipping_address, shipping_method_id, cgv_accepted } = req.body
 
             validateOrderInput({ shipping_address, shipping_method_id, cgv_accepted })

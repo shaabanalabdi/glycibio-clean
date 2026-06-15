@@ -3,193 +3,342 @@
 @use '../abstracts/mixins' as *;
 
 // ============================================================
-// Product card — aspect-ratio image, em-based padding
+// Product card — "Refined commerce + IG signature"
+// Carte calme a rythme vertical clair : photo (coeur givre haut-gauche
+// + badge IG haut-droit), eyebrow categorie en capitales discretes, nom
+// en police display (2 lignes), bande IG signature teintee (IgMeter +
+// libelle de niveau), puis un footer hairline qui associe le prix bleu
+// (gauche) a une pilule verte compacte "Ajouter" (droite). Pas de barre
+// pleine largeur. Toute la carte est cliquable via un lien d'overlay
+// (stretched link) — HTML valide, pas de <button> imbrique dans un <a>.
 // ============================================================
 .product-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: $surface;
-  border: 1px solid $border;                 // delimitation claire (style shadcn/Vercel)
+  border: 1px solid $border;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
   overflow: hidden;
-  position: relative;
+  color: $text;
+
+  // Couleur de niveau IG — pilote le point + le libelle de bande
+  &[data-ig="bas"]   { --ig-color: #{$ig-bas}; }
+  &[data-ig="moyen"] { --ig-color: #{$ig-moyen}; }
+  &[data-ig="eleve"] { --ig-color: #{$ig-eleve}; }
+
   transition: transform $t-base $ease,
               border-color $t-base $ease,
               box-shadow $t-base $ease,
               background-color $t-base $ease;
 
-  // Hover : lift + premium shadow + slight image scale (revele depuis l'enfant)
+  // Hover : lift discret + ombre premium + leger zoom de la photo
   @include hover {
-    transform: translateY(-0.375rem);
+    transform: translateY(-0.25rem);
     border-color: $border-strong;
     box-shadow: $shadow-lg;
 
-    .product-card__image img {
-      transform: scale(1.05);
-    }
+    .product-card__image img { transform: scale(1.05); }
   }
 
-  // Image - aspect-ratio replaces fixed height (no CLS, scales fluidly)
-  &__image {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    background: $surface-alt;
-    overflow: hidden;             // necessaire pour clipper le zoom hover
-    @include flex-center;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      // Zoom subtil sur hover de la card (cf. parent)
-      transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: transform;
-    }
+  // Focus clavier du lien d'overlay -> halo net sur TOUTE la carte.
+  // (outline dessine hors de la carte : non rogne par overflow:hidden.)
+  &:has(.product-card__overlay:focus-visible) {
+    outline: 2px solid $primary;
+    outline-offset: 3px;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    transition: border-color $t-base $ease, box-shadow $t-base $ease;
     @include hover {
       transform: none;
       .product-card__image img { transform: none; }
     }
   }
 
+  // -- Lien d'overlay (stretched link) ---------------------------
+  // Couvre toute la carte (navigation) ; les controles passent dessus
+  // via z-index 2. z-index 1 ici, contenu statique en dessous.
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+  }
+
+  // -- Image -----------------------------------------------------
+  &__image {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: $surface-alt;
+    overflow: hidden;
+    @include flex-center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+  }
+
   &__placeholder {
+    width: 100%;
+    height: 100%;
+    @include flex-center;
     padding: $space-2xs;
     text-align: center;
     font-size: $fs-sm;
     color: $text-faint;
+    background: $placeholder-hatch;
   }
 
+  // IG badge — coin haut-droit (lisible sur n'importe quelle photo)
   &__badge {
     position: absolute;
     top: $space-2xs;
     inset-inline-end: $space-2xs;
+    z-index: 2;
+    box-shadow: $shadow-xs;
   }
 
+  // Coeur favoris — coin haut-gauche, pastille givree
   &__wishlist {
     position: absolute;
     top: $space-2xs;
     inset-inline-start: $space-2xs;
-    width: $tap-target;            // 44 — WCAG 2.5.5
+    z-index: 2;
+    width: $tap-target;             // 44 — WCAG 2.5.5
     height: $tap-target;
-    border-radius: 50%;
+    border-radius: $radius-pill;
     border: none;
-    background: rgba(255, 255, 255, 0.92);    // always white halo (over image)
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     color: $gray-700;
     cursor: pointer;
     @include flex-center;
     box-shadow: $shadow-sm;
     transition: color $t-fast $ease, transform $t-fast $ease, background $t-fast $ease;
 
-    @include hover { color: #e0245e; background: $white; transform: scale(1.06); }
-    &--active { color: #e0245e; background: $white; }
+    @include hover {
+      color: #e0245e;
+      background: rgba(255, 255, 255, 0.96);
+      transform: scale(1.06);
+    }
+    &--active { color: #e0245e; background: rgba(255, 255, 255, 0.96); }
     &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      @include hover { transform: none; }
+    }
+  }
+
+  // Pastille "Rupture de stock" — sur la photo
+  &__out-of-stock {
+    position: absolute;
+    bottom: $space-2xs;
+    inset-inline-start: $space-2xs;
+    z-index: 2;
+    background: rgba($error, 0.92);
+    color: $white;
+    font-size: $fs-xs;
+    font-weight: $fw-bold;
+    padding: 0.1875rem 0.5rem;
+    border-radius: $radius-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    box-shadow: $shadow-sm;
+  }
+
+  // -- Corps (info + footer partagent le meme padding) -----------
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;                        // pousse le footer en bas -> cartes alignees
+    padding: $space-sm;
+    gap: $space-xs;
   }
 
   &__info {
-    padding: $space-sm;
     display: flex;
     flex-direction: column;
     gap: $space-3xs;
   }
 
+  // Eyebrow categorie — capitales discretes
   &__category {
     font-size: $fs-xs;
+    font-weight: $fw-semibold;
     color: $text-faint;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.07em;
+    line-height: 1;
   }
 
+  // Nom produit — police display, 2 lignes reservees (hauteurs egales)
   &__name {
-    font-size: $fs-base;
+    font-family: $font-heading;
+    font-size: $fs-md;
+    font-weight: $fw-semibold;
     line-height: $lh-snug;
-    color: $text;
-    min-height: 2.8em;                                 // reserve 2 lines — equalizes card heights
+    color: $text-strong;
+    min-height: 2.8em;              // reserve 2 lignes
     @include truncate(2);
   }
 
-  &__price {
-    font-family: $font-heading;                        // police display (chiffres)
-    font-size: $fs-md;
-    font-weight: $fw-bold;
-    color: $price;
-    margin-top: auto;
-    font-variant-numeric: tabular-nums;                // aligned digits across cards
+  // -- Bande IG signature (calme, teintee du niveau) -------------
+  // L'index glycemique reste le differenciateur : libelle de bande +
+  // le composant <IgMeter /> sur une surface legerement teintee.
+  &__ig {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2xs;
+    padding: $space-2xs $space-xs;
+    border: 1px solid $border;
+    border-radius: $radius;
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--ig-color) 8%, transparent),
+        transparent 75%),
+      $surface-alt;
   }
 
-  &--out-of-stock {
-    opacity: 0.75;
-    .product-card__image img { filter: grayscale(40%); }
+  &__ig-head {
+    @include flex-between;
+    gap: $space-2xs;
   }
 
-  &__out-of-stock {
-    position: absolute;
-    bottom: $space-2xs;
-    inset-inline-start: $space-2xs;
-    background: rgba($error, 0.9);
-    color: $white;
+  &__ig-label {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
     font-size: $fs-xs;
     font-weight: $fw-bold;
-    padding: 0.125rem 0.5rem;
-    border-radius: $radius-sm;
-    text-transform: uppercase;
     letter-spacing: 0.03em;
+    color: var(--ig-color);
   }
 
+  &__ig-dot {
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    background: var(--ig-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ig-color) 22%, transparent);
+  }
+
+  // En sombre, les teintes IG profondes seraient sous l'AA -> on les
+  // eclaircit (le badge sur photo garde, lui, son fond plein + texte blanc).
+  :root[data-theme='dark'] &[data-ig="bas"]   { --ig-color: #7ed957; }
+  :root[data-theme='dark'] &[data-ig="moyen"] { --ig-color: #f0a955; }
+  :root[data-theme='dark'] &[data-ig="eleve"] { --ig-color: #ff8c84; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']):not([data-theme='dark']) {
+      .product-card[data-ig="bas"]   { --ig-color: #7ed957; }
+      .product-card[data-ig="moyen"] { --ig-color: #f0a955; }
+      .product-card[data-ig="eleve"] { --ig-color: #ff8c84; }
+    }
+  }
+
+  // Note stock faible — pastille ambre discrete (tokens theme-aware)
   &__low-stock {
-    font-size: $fs-sm;
-    color: $ig-moyen;
+    align-self: flex-start;
+    padding: 0.125rem 0.5rem;
+    border-radius: $radius-pill;
+    font-size: $fs-xs;
     font-weight: $fw-semibold;
-    margin-top: $space-3xs;
+    color: $warning-fg;
+    background: $warning-bg;
   }
-}
 
-// ============================================================
-// Card actions row (View + Add to cart)
-// ============================================================
-.product-card__actions {
-  display: grid;
-  grid-template-columns: 1fr auto;  // link fluid + cart fixed
-}
+  // -- Footer : prix (gauche) + Ajouter (droite), dans le padding --
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-2xs;
+    margin-top: auto;               // ancre le footer en bas du corps
+    padding-top: $space-xs;
+    border-top: 1px solid $border;
+  }
 
-.product-card__link {
-  display: block;
-  text-align: center;
-  padding: $space-2xs $space-sm;
-  background: $primary;
-  color: $white;
-  font-weight: $fw-semibold;
-  font-size: $fs-sm;
-  transition: background $t-base $ease;
+  &__price {
+    font-family: $font-heading;
+    font-size: $fs-lg;
+    font-weight: $fw-bold;
+    line-height: 1;
+    color: $price;
+    font-variant-numeric: tabular-nums;
+  }
 
-  @include hover { background: $primary-dark; }    // touch-safe (was raw :hover)
-  &:focus-visible { outline: 2px solid $white; outline-offset: -3px; }
-}
-
-.product-card__cart {
-  @include flex-center;
-  min-width: $tap-target;          // 44 — was 3rem
-  min-height: $tap-target;         // ensure both axes meet WCAG 2.5.5
-  background: $primary;            // vert AA 5.17:1 avec icone blanche
-  color: $white;
-  border: none;
-  cursor: pointer;
-  transition: background $t-base $ease;
-
-  @include hover { background: $primary-dark; }
-  &:focus-visible { outline: 2px solid $white; outline-offset: -3px; }
-
-  &--added {
-    background: $success;
+  // Bouton "Ajouter" — pilule verte compacte (jamais une barre pleine).
+  // position:relative + z-index 2 -> cliquable au-dessus du lien d'overlay.
+  &__add {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    min-height: $tap-target;        // 44 — WCAG 2.5.5
+    padding-inline: $space-sm;
+    border: none;
+    border-radius: $radius-pill;
+    background: $primary;           // AA 5.17:1 vs label/icone blancs
+    color: $white;
+    font-family: $font-body;
     font-size: $fs-sm;
-    padding-inline: $space-2xs;
+    font-weight: $fw-semibold;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background $t-base $ease, transform $t-fast $ease;
+
+    svg { flex-shrink: 0; }
+
+    @include hover {
+      background: $primary-dark;
+      transform: translateY(-1px);
+    }
+    &:active { transform: translateY(0); }
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: background $t-base $ease;
+      @include hover { transform: none; }
+    }
+
+    &--added {
+      background: $success;
+      @include hover { background: $success; transform: none; }
+    }
+
+    &--disabled,
+    &:disabled {
+      background: $surface-alt;
+      color: $text-faint;
+      border: 1px solid $border;
+      cursor: not-allowed;
+      @include hover { background: $surface-alt; transform: none; }
+    }
+  }
+
+  // -- Etat rupture de stock ------------------------------------
+  &--out-of-stock {
+    .product-card__image img {
+      filter: grayscale(100%);
+      opacity: 0.6;
+    }
+    @include hover {
+      transform: none;
+      .product-card__image img { transform: none; }
+    }
   }
 }
 
 // ============================================================
-// Index Glycemique badges
+// Index Glycemique — badges (pastille couleur du niveau, sur photo)
 // ============================================================
 .badge-ig {
   display: inline-block;

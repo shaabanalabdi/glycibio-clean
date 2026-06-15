@@ -28,6 +28,7 @@
   max-width: 30rem;                        // 480 → 30rem
   transition: background-color $t-base $ease;
 
+  h1,
   h2,
   .auth__title {
     color: $accent;

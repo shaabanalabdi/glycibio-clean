@@ -3,6 +3,7 @@ import {userRepository} from "../repository/UserRepository.js";
 import {StripeService} from "../services/StripeService.js";
 import {EmailService} from "../services/EmailService.js";
 import {Logger} from "../services/Logger.js";
+import {resolveWebhookAction} from "../services/WebhookEvents.js";
 
 const markOrderPaid = async (orderId, paymentIntentId) => {
     const order = await orderRepository.markPaid(orderId, paymentIntentId)
@@ -54,39 +55,16 @@ export class WebhookController {
 
         try
         {
-            switch (event.type) {
-                case "checkout.session.completed": {
-                    const session = event.data.object
-                    const orderId = session.metadata?.order_id
-                    if (orderId && session.payment_status === "paid") {
-                        await markOrderPaid(orderId, session.payment_intent)
-                    }
-                    break
-                }
+            // Routage PUR (teste unitairement, cf. services/WebhookEvents.js) :
+            // le controleur ne fait plus qu'EXECUTER l'action retournee.
+            const { action, orderId, paymentIntentId } = resolveWebhookAction(event)
 
-                case "checkout.session.expired":
-                case "checkout.session.async_payment_failed": {
-                    const session = event.data.object
-                    const orderId = session.metadata?.order_id
-                    if (orderId) {
-                        await orderRepository.cancelPendingAndRestoreStock(orderId, event.type)
-                    }
-                    break
-                }
-
-                case "payment_intent.payment_failed":
-                case "payment_intent.canceled": {
-                    const intent = event.data.object
-                    const orderId = intent.metadata?.order_id
-                    if (orderId) {
-                        await orderRepository.cancelPendingAndRestoreStock(orderId, event.type)
-                    }
-                    break
-                }
-
-                default:
-                    break
+            if (action === "markPaid") {
+                await markOrderPaid(orderId, paymentIntentId)
+            } else if (action === "cancelRestoreStock") {
+                await orderRepository.cancelPendingAndRestoreStock(orderId, event.type)
             }
+            // action === "ignore" : evenement non pertinent -> aucune action
         }
         catch (dbErr)
         {

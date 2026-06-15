@@ -1,14 +1,33 @@
 import "./style.scss"
 import { Link } from "react-router-dom"
-import { ShieldCheck, Leaf, Truck, Heart, ArrowRight, Sparkles, Check } from "lucide-react"
+import {
+    ShieldCheck, Leaf, Truck, Heart, ArrowRight, Sparkles, Check,
+    Wheat, Carrot, Milk, CupSoda, Cookie, Candy, Soup, Pill, Droplets
+} from "lucide-react"
 import { ProductCard } from "@components/ProductCard/index.jsx"
 import { ProductCardSkeleton } from "@components/Skeleton/index.jsx"
 import { ScrollReveal } from "@components/ScrollReveal/index.jsx"
-import { IgMeter } from "@components/IgMeter/index.jsx"
 import { useAuthenticated } from "@hooks/useAuthenticated.js"
 import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
 import { useGetCategoriesQuery } from "@slices/categoryApiSlice.js"
 import { useGetProductsQuery } from "@slices/productApiSlice.js"
+
+// Icone adaptee a chaque categorie (devine via mots-cles du nom, accents
+// optionnels car la base stocke les noms sans accents). Ordre : du plus
+// specifique au plus general ; fallback "feuille" (bio) si rien ne matche.
+const CATEGORY_ICONS = [
+    { re: /c[ée]r[ée]ale|f[ée]culent|farine|p[âa]tes|\briz\b|pain/i, Icon: Wheat },
+    { re: /fruit|l[ée]gume/i, Icon: Carrot },
+    { re: /laitier|\blait\b|yaourt|fromage|cr[èe]me/i, Icon: Milk },
+    { re: /boisson|th[ée]|caf[ée]|\bjus\b|\beau/i, Icon: CupSoda },
+    { re: /snack|en-?cas|barre|biscuit|collation/i, Icon: Cookie },
+    { re: /[ée]dulcor|miel|sirop|st[ée]via/i, Icon: Droplets },
+    { re: /sucr|chocolat|confiture|dessert/i, Icon: Candy },
+    { re: /sal[ée]|conserve|condiment|sauce/i, Icon: Soup },
+    { re: /compl[ée]ment|prot[ée]ine|vitamine|sportif/i, Icon: Pill }
+]
+const getCategoryIcon = (name = "") =>
+    CATEGORY_ICONS.find((c) => c.re.test(name))?.Icon || Leaf
 
 export const Home = () => {
     const { authUser } = useAuthenticated()
@@ -62,25 +81,6 @@ export const Home = () => {
                             <li><Leaf size={16} aria-hidden="true" /> Selection bio</li>
                         </ul>
                     </div>
-
-                    {/* Showcase card - vitrine produit (statique) */}
-                    <div className="hero__showcase" aria-hidden="true">
-                        <article className="showcase-card">
-                            <div className="showcase-card__media">
-                                <div className="showcase-card__placeholder" />
-                                <span className="showcase-card__ig">IG 19 · BAS</span>
-                            </div>
-                            <div className="showcase-card__body">
-                                <p className="showcase-card__category">Sucrants naturels</p>
-                                <h2 className="showcase-card__name">Sirop d&apos;agave bio</h2>
-                                <IgMeter ig={19} size="md" />
-                                <div className="showcase-card__buy">
-                                    <span className="showcase-card__price">7,90&nbsp;€</span>
-                                    <span className="showcase-card__add">Ajouter</span>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
                 </div>
             </section>
 
@@ -92,7 +92,7 @@ export const Home = () => {
                             <Leaf size={22} aria-hidden="true" />
                         </span>
                         <div className="trust-strip__copy">
-                            <h3>100% Naturel</h3>
+                            <p className="trust-strip__title">100% Naturel</p>
                             <p>Produits selectionnes pour leur qualite nutritionnelle</p>
                         </div>
                     </div>
@@ -101,7 +101,7 @@ export const Home = () => {
                             <ShieldCheck size={22} aria-hidden="true" />
                         </span>
                         <div className="trust-strip__copy">
-                            <h3>IG Controle</h3>
+                            <p className="trust-strip__title">IG Controle</p>
                             <p>Chaque produit affiche son index glycemique verifie</p>
                         </div>
                     </div>
@@ -110,7 +110,7 @@ export const Home = () => {
                             <Truck size={22} aria-hidden="true" />
                         </span>
                         <div className="trust-strip__copy">
-                            <h3>Livraison rapide</h3>
+                            <p className="trust-strip__title">Livraison rapide</p>
                             <p>Livraison en 24h a 72h partout en France</p>
                         </div>
                     </div>
@@ -119,7 +119,7 @@ export const Home = () => {
                             <Heart size={22} aria-hidden="true" />
                         </span>
                         <div className="trust-strip__copy">
-                            <h3>Bien-etre</h3>
+                            <p className="trust-strip__title">Bien-etre</p>
                             <p>Pour diabetiques, sportifs et soucieux de leur sante</p>
                         </div>
                     </div>
@@ -132,23 +132,34 @@ export const Home = () => {
                     <div className="section-head">
                         <div>
                             <span className="section-head__eyebrow">Categories</span>
-                            <h3 className="section-head__title">Parcourir par categorie</h3>
+                            <h2 className="section-head__title">Parcourir par categorie</h2>
                         </div>
                     </div>
                     <div className="home-categories__grid">
-                        {categories.map((cat) => (
-                            <Link
-                                key={cat.id}
-                                to={`/catalogue?category=${cat.id}`}
-                                className="category-card"
-                            >
-                                <span className="category-card__icon" aria-hidden="true">
-                                    <Leaf size={20} />
-                                </span>
-                                <h3>{cat.name}</h3>
-                                {cat.description && <p>{cat.description}</p>}
-                            </Link>
-                        ))}
+                        {categories.map((cat) => {
+                            const Icon = getCategoryIcon(cat.name)
+                            return (
+                                <Link
+                                    key={cat.id}
+                                    to={`/catalogue?category=${cat.id}`}
+                                    className="category-card"
+                                >
+                                    <span className="category-card__icon" aria-hidden="true">
+                                        <Icon size={22} strokeWidth={2} />
+                                    </span>
+                                    <div className="category-card__body">
+                                        <h3 className="category-card__name">{cat.name}</h3>
+                                        {cat.description && (
+                                            <p className="category-card__desc">{cat.description}</p>
+                                        )}
+                                    </div>
+                                    <span className="category-card__cta" aria-hidden="true">
+                                        Découvrir
+                                        <ArrowRight size={15} strokeWidth={2.25} />
+                                    </span>
+                                </Link>
+                            )
+                        })}
                     </div>
                 </ScrollReveal>
             )}
@@ -158,7 +169,7 @@ export const Home = () => {
                 <div className="section-head">
                     <div>
                         <span className="section-head__eyebrow">Vedettes</span>
-                        <h3 className="section-head__title">Produits a faible IG</h3>
+                        <h2 className="section-head__title">Produits a faible IG</h2>
                     </div>
                     <Link to="/catalogue" className="btn btn--outline section-head__cta">
                         Tout voir

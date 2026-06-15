@@ -13,6 +13,8 @@ import { productApiSlice } from "@slices/productApiSlice.js"
 import { resolveImageUrl } from "@utils/imageUrl.js"
 import { buildSrcset, SRCSET_PRESETS } from "@utils/imageSrcset.js"
 import { formatPrice } from "@utils/formatPrice.js"
+import { FREE_SHIPPING_THRESHOLD, VAT_RATE } from "@utils/constants.js"
+import { igLevelOf, IG_LEVEL_LABELS } from "@utils/ig.js"
 import { CartItemSkeleton } from "@components/Skeleton/index.jsx"
 import { IgMeter } from "@components/IgMeter/index.jsx"
 import {
@@ -66,13 +68,11 @@ const computeAvgIg = (items) => {
 }
 
 const IG_VERDICTS = {
-    bas:   "excellent équilibre 👏",
+    bas:   "excellent équilibre",
     moyen: "équilibre correct",
     eleve: "à surveiller"
 }
-
-const igLevelOf = (ig) => (ig <= 55 ? "bas" : ig <= 69 ? "moyen" : "eleve")
-const igLevelLabel = { bas: "bas", moyen: "modéré", eleve: "élevé" }
+// igLevelOf + libelles : importes de @utils/ig.js (source unique de verite).
 
 export const Cart = () => {
     const { isAuthenticated, isUserLoading } = useAuthenticated()
@@ -84,6 +84,7 @@ export const Cart = () => {
     const [guestLoading, setGuestLoading] = useState(true)
     const [errors, setErrors] = useState({})
     const [brokenImages, setBrokenImages] = useState(() => new Set())
+    const [confirmingId, setConfirmingId] = useState(null)   // retrait : confirmation en 2 temps
 
     // ----- Panier serveur (utilisateur connecte) via RTK Query -----
     const {
@@ -96,7 +97,11 @@ export const Cart = () => {
     const [removeCartItem] = useRemoveCartItemMutation()
 
     // ----- Panier guest (localStorage) -----
-    const loadGuestCart = useCallback(async () => {
+    // refresh=true (montage) : rafraichit prix/stock depuis l'API.
+    // refresh=false (mutation +/-/suppression) : reutilise les snapshots deja
+    // stockes en localStorage -> AUCUNE requete reseau. Corrige la tempete N+1
+    // (1 requete par article a CHAQUE changement de quantite).
+    const loadGuestCart = useCallback(async ({ refresh = true } = {}) => {
         const guestItems = getGuestCart()
         if (guestItems.length === 0) {
             setGuestCart(emptyCart)
@@ -104,36 +109,37 @@ export const Cart = () => {
             return
         }
 
-        // Rafraichit les snapshots depuis l'API (prix / stock recent) en parallele
-        const refreshed = await Promise.all(
-            guestItems.map(async (it) => {
-                try
-                {
-                    const product = await dispatch(
-                        productApiSlice.endpoints.getProduct.initiate(it.product_id, { forceRefetch: true })
-                    ).unwrap()
-                    refreshGuestCartSnapshot(it.product_id, product)
-                    return {
-                        ...it,
-                        snapshot: {
-                            name: product.name,
-                            price: product.price,
-                            image: product.image,
-                            stock: product.stock,
-                            glycemic_index: product.glycemic_index,
-                            ig_category: product.ig_category,
-                            slug: product.slug
+        const source = refresh
+            ? await Promise.all(
+                guestItems.map(async (it) => {
+                    try
+                    {
+                        const product = await dispatch(
+                            productApiSlice.endpoints.getProduct.initiate(it.product_id, { forceRefetch: true })
+                        ).unwrap()
+                        refreshGuestCartSnapshot(it.product_id, product)
+                        return {
+                            ...it,
+                            snapshot: {
+                                name: product.name,
+                                price: product.price,
+                                image: product.image,
+                                stock: product.stock,
+                                glycemic_index: product.glycemic_index,
+                                ig_category: product.ig_category,
+                                slug: product.slug
+                            }
                         }
                     }
-                }
-                catch
-                {
-                    return it
-                }
-            })
-        )
+                    catch
+                    {
+                        return it
+                    }
+                })
+            )
+            : guestItems   // snapshots existants, zero appel reseau
 
-        const items = refreshed.map(guestItemToDisplay)
+        const items = source.map(guestItemToDisplay)
         const total = computeTotal(items)
         const itemCount = items.reduce((sum, it) => sum + it.quantity, 0)
         setGuestCart({ items, total, itemCount })
@@ -173,7 +179,7 @@ export const Cart = () => {
         if (isGuest) {
             const res = setGuestCartItemQuantity(item.product_id, newQuantity, stock)
             if (res.ok) {
-                await loadGuestCart()
+                await loadGuestCart({ refresh: false })
             } else {
                 setErrors((prev) => ({ ...prev, [item.id]: res.message || "Erreur de mise a jour." }))
             }
@@ -194,7 +200,7 @@ export const Cart = () => {
     const removeItem = async (item) => {
         if (isGuest) {
             removeGuestCartItem(item.product_id)
-            await loadGuestCart()
+            await loadGuestCart({ refresh: false })
             return
         }
         try
@@ -289,7 +295,8 @@ export const Cart = () => {
         return Number.isFinite(ig) && ig <= 55
     })
     const subtotalNum = parseFloat(cart.total) || 0
-    const vatNum = subtotalNum * (0.2 / 1.2)   // TVA incluse a 20%
+    const freeShipping = subtotalNum >= FREE_SHIPPING_THRESHOLD
+    const vatNum = subtotalNum * (VAT_RATE / (1 + VAT_RATE))   // part de TVA incluse (prix TTC)
 
     return (
         <div className="cart">
@@ -395,14 +402,34 @@ export const Cart = () => {
                                 </div>
                             </div>
 
-                            <button
-                                type="button"
-                                className="cart-item__remove"
-                                onClick={() => removeItem(item)}
-                                aria-label={`Retirer ${item.name} du panier`}
-                            >
-                                <Trash2 size={18} aria-hidden="true" />
-                            </button>
+                            {confirmingId === item.id ? (
+                                <div className="cart-item__confirm" role="group" aria-label={`Confirmer le retrait de ${item.name}`}>
+                                    <span className="cart-item__confirm-q">Retirer&nbsp;?</span>
+                                    <button
+                                        type="button"
+                                        className="cart-item__confirm-yes"
+                                        onClick={() => { setConfirmingId(null); removeItem(item) }}
+                                    >
+                                        Oui
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="cart-item__confirm-no"
+                                        onClick={() => setConfirmingId(null)}
+                                    >
+                                        Non
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="cart-item__remove"
+                                    onClick={() => setConfirmingId(item.id)}
+                                    aria-label={`Retirer ${item.name} du panier`}
+                                >
+                                    <Trash2 size={18} aria-hidden="true" />
+                                </button>
+                            )}
 
                             {errors[item.id] && (
                                 <p className="cart-item__error" role="alert">
@@ -429,13 +456,12 @@ export const Cart = () => {
                             </p>
                             <IgMeter ig={avgIg} size="sm" />
                             <p className="cart__ig-load-verdict">
-                                IG moyen <strong>{avgIg}</strong> · {igLevelLabel[avgLevel]} — {IG_VERDICTS[avgLevel]}
+                                IG moyen <strong>{avgIg}</strong> · {IG_LEVEL_LABELS[avgLevel]?.toLowerCase()} — {IG_VERDICTS[avgLevel]}
                             </p>
                         </div>
                     )}
 
                     {(() => {
-                        const FREE_SHIPPING_THRESHOLD = 49
                         const subtotal = parseFloat(cart.total) || 0
                         const remaining = FREE_SHIPPING_THRESHOLD - subtotal
                         if (remaining > 0) {
@@ -464,7 +490,11 @@ export const Cart = () => {
                     </div>
                     <div className="cart__summary-line">
                         <span>Livraison</span>
-                        <span className="cart__summary-free">Offerte</span>
+                        {/* Coherent avec Checkout : le port n'est offert qu'au-dela
+                            du seuil ; sinon il est calcule a l'etape Livraison. */}
+                        <span className={freeShipping ? "cart__summary-free" : ""}>
+                            {freeShipping ? "Offerte" : "Calculée à l'étape suivante"}
+                        </span>
                     </div>
                     <div className="cart__summary-line">
                         <span>TVA incluse</span>

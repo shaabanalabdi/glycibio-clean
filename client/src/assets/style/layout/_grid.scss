@@ -22,6 +22,9 @@
   @include container;
   min-height: calc(100dvh - 10rem); // dynamic viewport — accounts for mobile UI chrome
   padding-block: $space-fluid-md;   // top/bottom: 1rem → 2rem fluid
+
+  // Focus programmatique au changement de route (a11y) : pas de halo visuel
+  &:focus { outline: none; }
 }
 
 // ============================================================

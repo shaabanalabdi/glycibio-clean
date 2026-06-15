@@ -44,7 +44,7 @@ export const ForgotPassword = () => {
                         </p>
 
                         <form onSubmit={handleSubmit} className="auth__form">
-                            {msg && <p className="auth__error">{msg}</p>}
+                            {msg && <p className="auth__error" role="alert">{msg}</p>}
 
                             <div className="auth__field">
                                 <label htmlFor="email">Adresse email</label>

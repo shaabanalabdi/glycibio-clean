@@ -1,0 +1,29 @@
+# ============================================================
+# GlyciBio — sauvegarde MySQL (unite systemd, oneshot)
+# Installation (VPS) :
+#   sudo cp deploy/systemd/glycibio-backup.* /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now glycibio-backup.timer
+#   systemctl list-timers glycibio-backup.timer   # verifier la planification
+# ============================================================
+[Unit]
+Description=GlyciBio - sauvegarde MySQL (dump compresse + retention)
+After=network-online.target mysql.service mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=glycibio
+Group=glycibio
+WorkingDirectory=/home/glycibio/glycibio/server
+# Charge DB_USER / DB_PASSWORD / DB_NAME / BACKUP_DIR / BACKUP_RETENTION_DAYS
+EnvironmentFile=/home/glycibio/glycibio/server/.env
+ExecStart=/usr/bin/node scripts/backup-db.cjs
+
+# --- COPIE HORS-SITE (recommande) -------------------------------------------
+# Une sauvegarde stockee uniquement sur le meme disque que la BDD ne protege
+# PAS d'une perte de disque/VPS. Decommentez et configurez UNE des options :
+#   rclone (S3 / OVH Object Storage / Backblaze) :
+# ExecStartPost=/usr/bin/rclone copy /home/glycibio/glycibio/server/backups remote:glycibio-backups --max-age 25h
+#   ou scp vers un hote distant :
+# ExecStartPost=/usr/bin/scp -r /home/glycibio/glycibio/server/backups backup@hote-distant:/backups/glycibio/

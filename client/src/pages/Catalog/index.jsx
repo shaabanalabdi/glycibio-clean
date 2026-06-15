@@ -10,6 +10,7 @@ import { EmptyState } from "@components/EmptyState/index.jsx"
 import { ProductCardGridSkeleton } from "@components/Skeleton/index.jsx"
 import { SORT_OPTIONS } from "@components/ProductFilter/index.jsx"
 import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
+import { useDebouncedValue } from "@hooks/useDebouncedValue.js"
 import { useGetProductsQuery } from "@slices/productApiSlice.js"
 import { useGetCategoriesQuery } from "@slices/categoryApiSlice.js"
 
@@ -44,15 +45,22 @@ export const Catalog = () => {
     // Charger les categories
     const { data: categories = [] } = useGetCategoriesQuery()
 
-    // Charger les produits (a chaque changement de filtre)
-    // Construire les params avec les filtres
+    // Recherche / prix : champs texte "debounced" pour NE PAS declencher une
+    // requete API (et un scan SQL) a chaque frappe. RTK Query dedupe les args
+    // identiques -> la rafale de frappes se reduit a une requete a la pause.
+    // Les filtres discrets (categorie, IG, tri, allergenes) restent instantanes.
+    const debouncedSearch = useDebouncedValue(filters.search, 350)
+    const debouncedPriceMin = useDebouncedValue(filters.price_min, 400)
+    const debouncedPriceMax = useDebouncedValue(filters.price_max, 400)
+
+    // Construire les params avec les filtres (valeurs debouncees pour le texte)
     const params = { page: filters.page, limit: 8 }
-    if (filters.search) params.search = filters.search
+    if (debouncedSearch) params.search = debouncedSearch
     if (filters.category) params.category = filters.category
     if (filters.ig) params.ig = filters.ig
     if (filters.sort) params.sort = filters.sort
-    if (filters.price_min) params.price_min = filters.price_min
-    if (filters.price_max) params.price_max = filters.price_max
+    if (debouncedPriceMin) params.price_min = debouncedPriceMin
+    if (debouncedPriceMax) params.price_max = debouncedPriceMax
     if (filters.exclude_allergens) params.exclude_allergens = filters.exclude_allergens
 
     const { data, isLoading: loading, isError: error, refetch } = useGetProductsQuery(params)

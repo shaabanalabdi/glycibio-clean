@@ -30,7 +30,12 @@ export const isAuthenticated = async (req, res, next) => {
 
     // Invalidation de session : si l'utilisateur a reinitialise son mot de
     // passe (users.tokens_valid_after), tout jeton emis AVANT cette date est
-    // rejete. Fail-open : un incident BDD ne doit pas casser l'authentification.
+    // rejete (evince un attaquant qui aurait vole une session).
+    // FAIL-CLOSED : si la verification echoue (BDD indisponible), on REFUSE le
+    // jeton. Rationale securite : un jeton vole ne doit pas survivre a la fenetre
+    // de reset a cause d'un incident BDD. Compromis d'accessibilite acceptable
+    // car toute route authentifiee touche de toute facon la BDD : si elle est
+    // indisponible, la requete echouerait juste apres.
     try
     {
         const validAfter = await userRepository.getTokensValidAfter(decoded.id)
@@ -41,7 +46,8 @@ export const isAuthenticated = async (req, res, next) => {
     }
     catch (freshnessErr)
     {
-        Logger.warn("[isAuthenticated] Verification de fraicheur ignoree:", { msg: freshnessErr.message })
+        Logger.error("[isAuthenticated] Verification de fraicheur impossible (fail-closed):", { msg: freshnessErr.message })
+        return next(new UnauthorizedException("Service d'authentification temporairement indisponible. Veuillez reessayer."))
     }
 
     next()

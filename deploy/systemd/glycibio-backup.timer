@@ -1,0 +1,14 @@
+# ============================================================
+# GlyciBio — planification de la sauvegarde MySQL (tous les jours a 03:00)
+# ============================================================
+[Unit]
+Description=GlyciBio - planification de la sauvegarde quotidienne de la BDD
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+# Rattrape un declenchement manque (machine eteinte a 03:00)
+Persistent=true
+Unit=glycibio-backup.service
+
+[Install]
+WantedBy=timers.target

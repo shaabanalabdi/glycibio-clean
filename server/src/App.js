@@ -69,7 +69,8 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"]
 }))
 
-// Rate Limiting global : 100 requetes/minute par IP
+// Rate Limiting global : 300 requetes/minute par IP (garde-fou anti-abus,
+// au-dessus des limites par zone — cf. rateLimiter.js)
 app.use("/api/", globalLimiter)
 
 // Webhook Stripe (doit etre AVANT express.json() — necessite le raw body)

@@ -62,18 +62,23 @@ export const AdminMessages = () => {
     return (
         <div className="admin-panel">
             {notice.text && (
-                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`}>
+                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`} role={notice.type === "error" ? "alert" : "status"} aria-live={notice.type === "error" ? "assertive" : "polite"}>
                     {notice.text}
                 </p>
             )}
-            <div className="admin-panel__toolbar">
-                <h2>Messages clients</h2>
-                <div className="admin-filter-group">
-                    <button type="button" className={messageFilter === "all" ? "admin-pill admin-pill--active" : "admin-pill"} onClick={() => setMessageFilter("all")}>Tous</button>
-                    <button type="button" className={messageFilter === "unread" ? "admin-pill admin-pill--active" : "admin-pill"} onClick={() => setMessageFilter("unread")}>Non lus</button>
-                    <button type="button" className={messageFilter === "read" ? "admin-pill admin-pill--active" : "admin-pill"} onClick={() => setMessageFilter("read")}>Lus</button>
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Messages clients <span className="admin-count-badge">{messages.length}</span></h2>
+                    <p className="admin-head__subtitle">Demandes recues via le formulaire de contact.</p>
                 </div>
-            </div>
+                <div className="admin-head__controls">
+                    <div className="admin-filter-group">
+                        <button type="button" className={messageFilter === "all" ? "admin-pill admin-pill--active" : "admin-pill"} onClick={() => setMessageFilter("all")}>Tous</button>
+                        <button type="button" className={messageFilter === "unread" ? "admin-pill admin-pill--active" : "admin-pill"} onClick={() => setMessageFilter("unread")}>Non lus</button>
+                        <button type="button" className={messageFilter === "read" ? "admin-pill admin-pill--active" : "admin-pill"} onClick={() => setMessageFilter("read")}>Lus</button>
+                    </div>
+                </div>
+            </header>
             {filteredMessages.length === 0 ? <p className="admin-panel__empty">Aucun message pour ce filtre.</p> : (
                 <div className="admin-table-wrap">
                     <table>

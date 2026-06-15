@@ -47,13 +47,13 @@ export const Login = () => {
     return (
         <div className="auth-page">
             <form onSubmit={handleSubmit} className="auth-form" noValidate>
-                <h2>Connexion</h2>
+                <h1>Connexion</h1>
                 <p className="auth-form__subtitle">Connectez-vous a votre compte</p>
 
                 {error && <p className="auth-form__error" role="alert">{error}</p>}
 
                 <div className="auth-form__field">
-                    <label htmlFor="login-email">Email</label>
+                    <label htmlFor="login-email">Email <span aria-hidden="true">*</span></label>
                     <input
                         id="login-email"
                         type="email"
@@ -66,7 +66,7 @@ export const Login = () => {
                 </div>
 
                 <div className="auth-form__field">
-                    <label htmlFor="login-password">Mot de passe</label>
+                    <label htmlFor="login-password">Mot de passe <span aria-hidden="true">*</span></label>
                     <input
                         id="login-password"
                         type={showPassword ? "text" : "password"}

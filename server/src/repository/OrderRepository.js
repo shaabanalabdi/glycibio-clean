@@ -3,6 +3,7 @@ import {db, withTransaction} from "../core/database.js";
 import {Order} from "../entity/Order.js";
 import {ValidationException} from "../error/HttpException.js";
 import {Logger} from "../services/Logger.js";
+import {computeOrderTotals} from "../services/OrderPricing.js";
 
 class OrderRepository extends Repository {
 
@@ -82,8 +83,9 @@ class OrderRepository extends Repository {
                 }
             }
 
-            const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0)
-            const total = subtotal + shippingCost
+            // Calcul des montants delegue a une fonction pure (testable + arrondi
+            // centimes coherent). Cf. services/OrderPricing.js.
+            const { subtotal, total } = computeOrderTotals(cartItems, shippingCost)
 
             const [orderResult] = await connection.query(
                 `INSERT INTO orders (user_id, shipping_address, shipping_method_id, shipping_cost, subtotal, total, status)
@@ -108,21 +110,29 @@ class OrderRepository extends Repository {
             return { orderId, cartItems, subtotal, shippingCost, shippingName, total }
         })
 
-    // Idempotent : ne touche qu'une commande encore 'en_attente'.
-    // Retourne la commande marquee payee, ou null si deja traitee.
+    // Idempotent ET atomique : la transition 'en_attente' -> 'payee' est faite
+    // dans UNE seule requete avec la garde `AND status = 'en_attente'`. La 1re
+    // requete qui passe "gagne" (affectedRows === 1) ; toute execution
+    // concurrente (le webhook Stripe ET le retour /payments/success arrivent
+    // souvent en parallele) verra affectedRows === 0 et renverra null.
+    // -> garantit l'envoi d'UN SEUL email de confirmation (exactly-once).
+    // Avant : SELECT puis UPDATE separes laissaient une fenetre de course ou
+    // deux appels lisaient 'en_attente' avant que l'un n'ecrive -> double email.
     markPaid = async (orderId, paymentIntentId) => {
-        const [orders] = await db.query(
-            "SELECT id, total, shipping_address, user_id, status FROM orders WHERE id = ? AND status = ?",
-            [orderId, "en_attente"]
-        )
-        if (orders.length === 0) return null
-
-        await db.query(
-            "UPDATE orders SET status = 'payee', stripe_payment_id = ? WHERE id = ?",
+        const [result] = await db.query(
+            "UPDATE orders SET status = 'payee', stripe_payment_id = ? WHERE id = ? AND status = 'en_attente'",
             [paymentIntentId || null, orderId]
         )
 
-        return orders[0]
+        // affectedRows === 0 : commande inexistante OU deja traitee par un appel
+        // concurrent -> on NE renvoie PAS la commande, donc PAS de second email.
+        if (result.affectedRows === 0) return null
+
+        const [orders] = await db.query(
+            "SELECT id, total, shipping_address, user_id, status FROM orders WHERE id = ?",
+            [orderId]
+        )
+        return orders.length === 0 ? null : orders[0]
     }
 
     // Annule une commande "en_attente" et restaure le stock des produits.

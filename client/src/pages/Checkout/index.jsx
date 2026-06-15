@@ -28,6 +28,7 @@ export const Checkout = () => {
     const [cgvAccepted, setCgvAccepted] = useState(false)
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState("")
+    const [fieldErrors, setFieldErrors] = useState({})
     const [success, setSuccess] = useState(false)
     const navigate = useNavigate()
     const { resetCart, refreshCartCount } = useCart()
@@ -51,26 +52,42 @@ export const Checkout = () => {
     const handleIdentityChange = (field) => (e) =>
         setIdentity((prev) => ({ ...prev, [field]: e.target.value }))
 
-    const validate = () => {
-        if (!identity.first_name.trim() || !identity.last_name.trim()) {
-            return "Veuillez completer tous les champs obligatoires"
-        }
-        const err = validateAddress(address, { phone: identity.phone })
-        if (err) return err
-        if (!shippingMethodId) return "Veuillez selectionner un mode de livraison"
-        if (!cgvAccepted) return "Vous devez accepter les Conditions Generales de Vente pour passer commande"
-        return null
+    // Validation par champ -> { champ: message }. Permet d'afficher l'erreur
+    // SOUS chaque champ (et non un seul message en haut) + de focaliser le
+    // premier champ invalide a la soumission.
+    const FIELD_ORDER = ["first_name", "last_name", "phone", "street", "postal_code", "city"]
+    const validateFields = () => {
+        const errs = {}
+        if (!identity.first_name.trim()) errs.first_name = "Prénom requis"
+        if (!identity.last_name.trim()) errs.last_name = "Nom requis"
+        if (!identity.phone.trim()) errs.phone = "Téléphone requis"
+        else if (identity.phone.replace(/\D/g, "").length < 10) errs.phone = "Numéro de téléphone invalide (10 chiffres)"
+        if (!address.street.trim()) errs.street = "Adresse requise"
+        if (!/^\d{5}$/.test((address.postal_code || "").trim())) errs.postal_code = "Code postal à 5 chiffres"
+        if (!address.city.trim()) errs.city = "Ville requise"
+        // Garde-fou supplementaire (regles metier de validateAddress)
+        const addrErr = validateAddress(address, { phone: identity.phone })
+        if (addrErr && !errs.street && !errs.postal_code && !errs.city && !errs.phone) errs.street = addrErr
+        if (!shippingMethodId) errs.shipping = "Sélectionnez un mode de livraison"
+        if (!cgvAccepted) errs.cgv = "Vous devez accepter les CGV pour commander"
+        return errs
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError("")
 
-        const validationError = validate()
-        if (validationError) {
-            setError(validationError)
+        const errs = validateFields()
+        if (Object.keys(errs).length) {
+            setFieldErrors(errs)
+            setError("Veuillez corriger les champs indiqués ci-dessous.")
+            const firstText = FIELD_ORDER.find((k) => errs[k])
+            if (firstText) document.getElementById(firstText)?.focus()
+            else if (errs.shipping) document.querySelector('input[name="shipping"]')?.focus()
+            else if (errs.cgv) document.getElementById("cgv-checkbox")?.focus()
             return
         }
+        setFieldErrors({})
 
         setSubmitting(true)
 
@@ -163,7 +180,7 @@ export const Checkout = () => {
 
             <div className="checkout__content">
                 <form onSubmit={handleSubmit} className="checkout__form" noValidate>
-                    {error && <p className="checkout__error">{error}</p>}
+                    {error && <p className="checkout__error" role="alert">{error}</p>}
 
                     {/* Etape 1: Adresse */}
                     <section className="checkout__step">
@@ -190,7 +207,10 @@ export const Checkout = () => {
                                     value={identity.first_name}
                                     onChange={handleIdentityChange("first_name")}
                                     required
+                                    aria-invalid={fieldErrors.first_name ? "true" : undefined}
+                                    aria-describedby={fieldErrors.first_name ? "first_name-error" : undefined}
                                 />
+                                {fieldErrors.first_name && <small id="first_name-error" className="checkout__field-error">{fieldErrors.first_name}</small>}
                             </div>
                             <div className="checkout__field">
                                 <label htmlFor="last_name">Nom <span aria-hidden="true">*</span></label>
@@ -201,7 +221,10 @@ export const Checkout = () => {
                                     value={identity.last_name}
                                     onChange={handleIdentityChange("last_name")}
                                     required
+                                    aria-invalid={fieldErrors.last_name ? "true" : undefined}
+                                    aria-describedby={fieldErrors.last_name ? "last_name-error" : undefined}
                                 />
+                                {fieldErrors.last_name && <small id="last_name-error" className="checkout__field-error">{fieldErrors.last_name}</small>}
                             </div>
                         </div>
 
@@ -216,8 +239,12 @@ export const Checkout = () => {
                                 value={identity.phone}
                                 onChange={handleIdentityChange("phone")}
                                 required
+                                aria-invalid={fieldErrors.phone ? "true" : undefined}
+                                aria-describedby={fieldErrors.phone ? "phone-error" : "phone-hint"}
                             />
-                            <small className="checkout__hint">Utilise par le livreur en cas de besoin.</small>
+                            {fieldErrors.phone
+                                ? <small id="phone-error" className="checkout__field-error">{fieldErrors.phone}</small>
+                                : <small id="phone-hint" className="checkout__hint">Utilise par le livreur en cas de besoin.</small>}
                         </div>
 
                         <div className="checkout__field">
@@ -230,7 +257,10 @@ export const Checkout = () => {
                                 value={address.street}
                                 onChange={handleAddressChange("street")}
                                 required
+                                aria-invalid={fieldErrors.street ? "true" : undefined}
+                                aria-describedby={fieldErrors.street ? "street-error" : undefined}
                             />
+                            {fieldErrors.street && <small id="street-error" className="checkout__field-error">{fieldErrors.street}</small>}
                         </div>
 
                         <div className="checkout__field">
@@ -259,7 +289,10 @@ export const Checkout = () => {
                                     value={address.postal_code}
                                     onChange={handleAddressChange("postal_code")}
                                     required
+                                    aria-invalid={fieldErrors.postal_code ? "true" : undefined}
+                                    aria-describedby={fieldErrors.postal_code ? "postal_code-error" : undefined}
                                 />
+                                {fieldErrors.postal_code && <small id="postal_code-error" className="checkout__field-error">{fieldErrors.postal_code}</small>}
                             </div>
                             <div className="checkout__field">
                                 <label htmlFor="city">Ville <span aria-hidden="true">*</span></label>
@@ -271,7 +304,10 @@ export const Checkout = () => {
                                     value={address.city}
                                     onChange={handleAddressChange("city")}
                                     required
+                                    aria-invalid={fieldErrors.city ? "true" : undefined}
+                                    aria-describedby={fieldErrors.city ? "city-error" : undefined}
                                 />
+                                {fieldErrors.city && <small id="city-error" className="checkout__field-error">{fieldErrors.city}</small>}
                             </div>
                         </div>
 
@@ -304,6 +340,7 @@ export const Checkout = () => {
                                 </label>
                             ))}
                         </div>
+                        {fieldErrors.shipping && <small className="checkout__field-error" role="alert">{fieldErrors.shipping}</small>}
                     </section>
 
                     {/* Etape 3: Confirmer */}
@@ -332,23 +369,27 @@ export const Checkout = () => {
 
                         <label className="checkout__cgv">
                             <input
+                                id="cgv-checkbox"
                                 type="checkbox"
                                 checked={cgvAccepted}
                                 onChange={(e) => setCgvAccepted(e.target.checked)}
                                 required
+                                aria-invalid={fieldErrors.cgv ? "true" : undefined}
+                                aria-describedby={fieldErrors.cgv ? "cgv-error" : undefined}
                             />
                             <span>
                                 J&apos;ai lu et j&apos;accepte les{" "}
-                                <Link to="/cgv" target="_blank" rel="noopener noreferrer">
+                                <Link to="/cgv" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                     Conditions Generales de Vente
                                 </Link>
                                 {" "}et la{" "}
-                                <Link to="/politique-confidentialite" target="_blank" rel="noopener noreferrer">
+                                <Link to="/politique-confidentialite" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                     politique de confidentialite
                                 </Link>
                                 . Je reconnais que ma commande est avec obligation de paiement.
                             </span>
                         </label>
+                        {fieldErrors.cgv && <small id="cgv-error" className="checkout__field-error" role="alert">{fieldErrors.cgv}</small>}
 
                         <button
                             type="submit"

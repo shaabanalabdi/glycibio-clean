@@ -107,27 +107,32 @@ export const AdminUsers = () => {
     return (
         <div className="admin-panel">
             {notice.text && (
-                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`}>
+                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`} role={notice.type === "error" ? "alert" : "status"} aria-live={notice.type === "error" ? "assertive" : "polite"}>
                     {notice.text}
                 </p>
             )}
-            <div className="admin-panel__toolbar">
-                <h2>Utilisateurs</h2>
-                <div className="admin-filter-inline">
-                    <input
-                        type="search"
-                        placeholder="Rechercher un utilisateur..."
-                        value={userFilter}
-                        onChange={(event) => setUserFilter(event.target.value)}
-                    />
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Utilisateurs <span className="admin-count-badge">{users.length}</span></h2>
+                    <p className="admin-head__subtitle">Comptes clients et administrateurs.</p>
                 </div>
-            </div>
+                <div className="admin-head__controls">
+                    <div className="admin-filter-inline">
+                        <input
+                            type="search"
+                            placeholder="Rechercher un utilisateur..."
+                            value={userFilter}
+                            onChange={(event) => setUserFilter(event.target.value)}
+                        />
+                    </div>
+                </div>
+            </header>
             {filteredUsers.length === 0 ? (
                 <p className="admin-panel__empty">Aucun utilisateur trouve.</p>
             ) : (
                 <div className="admin-table-wrap">
                     <table>
-                        <thead><tr><th>Utilisateur</th><th>Email</th><th>Role</th><th>Etat</th><th>Inscription</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>Utilisateur</th><th>Email</th><th>Role</th><th>Etat</th><th>Inscription</th><th className="admin-col-actions">Actions</th></tr></thead>
                         <tbody>
                             {filteredUsers.map((row) => (
                                 <tr key={row.id}>
@@ -153,13 +158,13 @@ export const AdminUsers = () => {
                                                 onClick={() => { void handleSaveUserRole(row) }}
                                                 disabled={row.id === currentUserId || busyUserRoleId === row.id || (userRoleDrafts[row.id] || row.role) === row.role}
                                             >
-                                                {busyUserRoleId === row.id ? "..." : "Save"}
+                                                {busyUserRoleId === row.id ? "..." : "Enregistrer"}
                                             </button>
                                         </div>
                                     </td>
                                     <td>{row.is_active ? "Actif" : "Inactif"}</td>
                                     <td>{formatDate(row.created_at)}</td>
-                                    <td>
+                                    <td className="admin-col-actions">
                                         <button
                                             type="button"
                                             className="btn btn--outline admin-danger"

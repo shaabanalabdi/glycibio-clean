@@ -1,0 +1,7 @@
+# ============================================================
+# GlyciBio — sauvegarde MySQL via cron (alternative a systemd)
+# Installation : sudo cp deploy/cron/glycibio-backup.cron /etc/cron.d/glycibio-backup
+# (fichier /etc/cron.d : le 6e champ est l'utilisateur)
+# ============================================================
+# m h dom mon dow user        command
+  0 3 *   *   *   glycibio    cd /home/glycibio/glycibio/server && /usr/bin/node scripts/backup-db.cjs >> /var/log/glycibio-backup.log 2>&1

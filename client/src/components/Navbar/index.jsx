@@ -16,6 +16,7 @@ export const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const drawerCloseRef = useRef(null);
+    const menuTriggerRef = useRef(null);   // burger — pour restaurer le focus a la fermeture
 
     useEffect(() => {
         if (authUser) refreshCartCount();
@@ -53,7 +54,7 @@ export const Navbar = () => {
 
     // Escape to close
     useEffect(() => {
-        const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+        const onKey = (e) => { if (e.key === "Escape") { setMenuOpen(false); menuTriggerRef.current?.focus(); } };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, []);
@@ -69,7 +70,12 @@ export const Navbar = () => {
         navigate(q ? `/catalogue?search=${encodeURIComponent(q)}` : "/catalogue");
     };
 
-    const closeMenu = useCallback(() => setMenuOpen(false), []);
+    // Ferme le drawer ET restaure le focus sur le burger (sauf si une
+    // navigation suit : App deplace alors le focus vers <main>).
+    const closeMenu = useCallback(() => {
+        setMenuOpen(false);
+        menuTriggerRef.current?.focus();
+    }, []);
 
     return (
         <>
@@ -94,6 +100,7 @@ export const Navbar = () => {
                 <div className="navbar__container">
                     {/* LEFT — mobile: burger / desktop: logo */}
                     <button
+                        ref={menuTriggerRef}
                         type="button"
                         className="navbar__icon-btn navbar__burger"
                         onClick={() => setMenuOpen(true)}
@@ -105,7 +112,7 @@ export const Navbar = () => {
                     </button>
 
                     <Link to="/" className="navbar__logo" aria-label="GlyciBio - accueil" viewTransition>
-                        <img src="/icon-512.png" alt="" className="navbar__logo-mark" width="38" height="38" />
+                        <img src="/favicon-96x96.png" alt="" className="navbar__logo-mark" width="38" height="38" loading="eager" decoding="async" />
                         <span className="navbar__logo-text">GlyciBio</span>
                     </Link>
 

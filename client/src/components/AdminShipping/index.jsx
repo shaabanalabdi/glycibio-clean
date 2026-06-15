@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Plus } from "lucide-react"
 import {
     useGetAdminShippingQuery,
     useCreateShippingMethodMutation,
@@ -21,9 +22,31 @@ export const AdminShipping = () => {
     const [shippingForm, setShippingForm] = useState(emptyForm)
     const [busyShippingId, setBusyShippingId] = useState(null)
     const [notice, setNotice] = useState({ type: "", text: "" })
+    const [formOpen, setFormOpen] = useState(false)
+    const formRef = useRef(null)
+    const addBtnRef = useRef(null)
 
     const savingShipping = isCreating || isUpdating
     const resetForm = () => setShippingForm(emptyForm)
+
+    useEffect(() => {
+        if (formOpen && formRef.current) {
+            const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+            formRef.current.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
+            formRef.current.querySelector("input, select, textarea")?.focus()
+        }
+    }, [formOpen, shippingForm.id])
+
+    const openCreate = () => {
+        resetForm()
+        setFormOpen(true)
+    }
+
+    const closeForm = () => {
+        resetForm()
+        setFormOpen(false)
+        addBtnRef.current?.focus()
+    }
 
     const handleSubmit = async (event) => {
         event.preventDefault()
@@ -42,6 +65,8 @@ export const AdminShipping = () => {
             }
             setNotice({ type: "success", text: shippingForm.id ? "Mode de livraison mis a jour." : "Mode de livraison cree." })
             resetForm()
+            setFormOpen(false)
+            addBtnRef.current?.focus()
         }
         catch (error)
         {
@@ -57,6 +82,7 @@ export const AdminShipping = () => {
             estimated_days: method.estimated_days ?? "",
             is_active: !!method.is_active
         })
+        setFormOpen(true)
     }
 
     const handleToggle = async (method) => {
@@ -100,14 +126,25 @@ export const AdminShipping = () => {
     return (
         <div className="admin-panel">
             {notice.text && (
-                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`}>
+                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`} role={notice.type === "error" ? "alert" : "status"} aria-live={notice.type === "error" ? "assertive" : "polite"}>
                     {notice.text}
                 </p>
             )}
-            <h2>Modes de livraison</h2>
-            <div className="admin-split admin-split--balanced">
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Modes de livraison <span className="admin-count-badge">{shippingMethods.length}</span></h2>
+                    <p className="admin-head__subtitle">Tarifs et delais proposes au checkout.</p>
+                </div>
+                <div className="admin-head__controls">
+                    <button type="button" className="btn btn--primary" onClick={openCreate} ref={addBtnRef}>
+                        <Plus size={16} aria-hidden="true" /> Ajouter
+                    </button>
+                </div>
+            </header>
+            {formOpen && (
                 <form
                     className="admin-form-card"
+                    ref={formRef}
                     onSubmit={(event) => { void handleSubmit(event) }}
                 >
                     <h3>{shippingForm.id ? `Modifier mode #${shippingForm.id}` : "Ajouter un mode de livraison"}</h3>
@@ -158,13 +195,14 @@ export const AdminShipping = () => {
                         <button type="submit" className="btn btn--primary" disabled={savingShipping}>
                             {savingShipping ? "Sauvegarde..." : shippingForm.id ? "Mettre a jour" : "Creer le mode"}
                         </button>
-                        <button type="button" className="btn btn--outline" onClick={resetForm}>Reinitialiser</button>
+                        <button type="button" className="btn btn--outline" onClick={closeForm}>Annuler</button>
                     </div>
                 </form>
+            )}
 
-                <div className="admin-table-wrap">
+            <div className="admin-table-wrap">
                     <table>
-                        <thead><tr><th>Nom</th><th>Prix</th><th>Delai</th><th>Statut</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>Nom</th><th>Prix</th><th>Delai</th><th>Statut</th><th className="admin-col-actions">Actions</th></tr></thead>
                         <tbody>
                             {shippingMethods.map((method) => (
                                 <tr key={method.id}>
@@ -176,7 +214,7 @@ export const AdminShipping = () => {
                                             {method.is_active ? "Actif" : "Inactif"}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td className="admin-col-actions">
                                         <div className="admin-inline-actions">
                                             <button type="button" className="btn btn--outline" onClick={() => handleEdit(method)}>Modifier</button>
                                             <button
@@ -197,7 +235,6 @@ export const AdminShipping = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
         </div>
     )
 }

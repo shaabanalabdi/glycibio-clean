@@ -5,10 +5,16 @@ import rateLimit from "express-rate-limit";
 // en developpement et en production.
 const skipInTest = () => process.env.NODE_ENV === "test"
 
-// 100 requetes/minute global
+// Backstop global : 300 requetes/minute par IP. Volontairement AU-DESSUS des
+// limites par zone (login/register 5, admin 200) pour ne servir que de garde-fou
+// anti-abus grossier : une SPA legitime declenche plusieurs requetes par page
+// (catalogue, panier, /auth/me a chaque chargement, dashboard ~8 requetes), et
+// 100/min bloquait des utilisateurs reels (429 sur /api/auth/me au chargement,
+// + rendait le plafond admin de 200 inatteignable). La vraie protection des
+// endpoints sensibles reste assuree par authLimiter / contactLimiter.
 export const globalLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 100,
+    max: 300,
     standardHeaders: true,
     legacyHeaders: false,
     skip: skipInTest,

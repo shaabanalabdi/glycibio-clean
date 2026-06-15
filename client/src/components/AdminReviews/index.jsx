@@ -52,13 +52,16 @@ export const AdminReviews = () => {
     return (
         <div className="admin-panel">
             {notice.text && (
-                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`}>
+                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`} role={notice.type === "error" ? "alert" : "status"} aria-live={notice.type === "error" ? "assertive" : "polite"}>
                     {notice.text}
                 </p>
             )}
-            <div className="admin-panel__toolbar">
-                <h2>Moderation des avis ({pendingReviews.length})</h2>
-            </div>
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Moderation des avis <span className="admin-count-badge">{pendingReviews.length}</span></h2>
+                    <p className="admin-head__subtitle">Avis clients en attente de validation.</p>
+                </div>
+            </header>
             {pendingReviews.length === 0 ? (
                 <p className="admin-panel__empty">Aucun avis en attente de moderation.</p>
             ) : (

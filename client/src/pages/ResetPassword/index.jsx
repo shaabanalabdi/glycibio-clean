@@ -33,6 +33,7 @@ export const ResetPassword = () => {
 
         if (passwords.new_password !== passwords.confirm_password) {
             setError("Les mots de passe ne correspondent pas")
+            document.getElementById("confirm_password")?.focus()
             return
         }
 
@@ -63,7 +64,7 @@ export const ResetPassword = () => {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="auth__form">
-                        {error && <p className="auth__error">{error}</p>}
+                        {error && <p className="auth__error" role="alert">{error}</p>}
 
                         <div className="auth__field">
                             <label htmlFor="new_password">Nouveau mot de passe</label>

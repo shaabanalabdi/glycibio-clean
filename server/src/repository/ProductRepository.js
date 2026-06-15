@@ -34,9 +34,26 @@ class ProductRepository extends Repository {
         }
 
         if (search) {
-            sql += " AND (p.name LIKE ? OR p.description LIKE ?)"
-            const searchTerm = `%${search}%`
-            params.push(searchTerm, searchTerm)
+            const term = String(search).trim()
+            // On exploite l'index FULLTEXT idx_products_search (name, description)
+            // via MATCH ... AGAINST en mode booleen, au lieu d'un LIKE '%...%'
+            // a joker initial qu'AUCUN index ne peut servir (scan complet).
+            // Les caracteres speciaux du mode booleen (+ - * " ( ) ~ < > @) sont
+            // neutralises pour eviter une erreur de syntaxe / injection d'operateur.
+            const tokens = term
+                .replace(/[+\-><()~*"@]+/g, " ")
+                .split(/\s+/)
+                .filter((t) => t.length >= 2)
+
+            if (term.length >= 3 && tokens.length > 0) {
+                const booleanExpr = tokens.map((t) => `+${t}*`).join(" ")
+                sql += " AND MATCH(p.name, p.description) AGAINST (? IN BOOLEAN MODE)"
+                params.push(booleanExpr)
+            } else {
+                // Repli LIKE pour les termes tres courts (< longueur mini fulltext)
+                sql += " AND (p.name LIKE ? OR p.description LIKE ?)"
+                params.push(`%${term}%`, `%${term}%`)
+            }
         }
 
         if (price_min !== undefined && price_min !== "") {

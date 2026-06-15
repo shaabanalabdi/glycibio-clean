@@ -1,0 +1,86 @@
+name: CI
+
+# Pipeline d'integration continue GlyciBio.
+# Se declenche sur push/PR vers main. Deux jobs paralleles : API et Front.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Annule les runs precedents encore en cours sur la meme ref (economise du CI).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------
+  # API Node/Express : install -> tests (node:test) -> audit securite
+  # ----------------------------------------------------------------
+  server:
+    name: API (server)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install (npm ci)
+        run: npm ci
+
+      - name: Tests (node:test)
+        run: npm test
+        env:
+          NODE_ENV: test
+          DISABLE_CRON: "1"
+          JWT_SECRET: ci_test_secret_de_32_caracteres_minimum_xx
+
+      - name: Audit securite (dependances de prod, niveau high+)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
+
+  # ----------------------------------------------------------------
+  # Front React/Vite : install -> lint -> build -> audit securite
+  # ----------------------------------------------------------------
+  client:
+    name: Front (client)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      # --legacy-peer-deps : aligne sur docker/Dockerfile.client (conflits de
+      # peer-deps autour de React 19 / react-router 7).
+      - name: Install (npm ci)
+        run: npm ci --legacy-peer-deps
+
+      - name: Lint (eslint)
+        run: npm run lint
+
+      - name: Build (vite)
+        run: npm run build
+        env:
+          VITE_API_URL: /api
+
+      - name: Audit securite (dependances de prod, niveau high+)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true

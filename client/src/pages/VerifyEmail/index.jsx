@@ -36,7 +36,7 @@ export const VerifyEmail = () => {
 
                 {status === "missing" && (
                     <>
-                        <p className="auth__error">Lien de confirmation invalide : aucun jeton fourni.</p>
+                        <p className="auth__error" role="alert">Lien de confirmation invalide : aucun jeton fourni.</p>
                         <Link to="/" className="btn btn--primary btn--full auth__cta">
                             Retour a l'accueil
                         </Link>
@@ -58,7 +58,7 @@ export const VerifyEmail = () => {
 
                 {status === "error" && (
                     <>
-                        <p className="auth__error">{message}</p>
+                        <p className="auth__error" role="alert">{message}</p>
                         <p>Connectez-vous puis demandez un nouveau lien depuis la banniere en haut de page.</p>
                         <Link to="/login" className="btn btn--primary btn--full auth__cta">
                             Se connecter

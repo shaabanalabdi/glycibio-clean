@@ -34,6 +34,10 @@ const findAbandonedCarts = async () => {
           JOIN users u ON ci.user_id = u.id
           JOIN products p ON ci.product_id = p.id
          WHERE ci.created_at < NOW() - INTERVAL ? HOUR
+           -- RGPD / ePrivacy : email marketing UNIQUEMENT aux utilisateurs ayant
+           -- explicitement consenti (newsletter_opt_in = 1). Un rappel de panier
+           -- est une sollicitation commerciale, soumise au consentement.
+           AND u.newsletter_opt_in = 1
            AND NOT EXISTS (
              SELECT 1 FROM abandoned_cart_sent acs
               WHERE acs.user_id = u.id

@@ -90,28 +90,33 @@ export const AdminOrders = () => {
     return (
         <div className="admin-panel">
             {notice.text && (
-                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`}>
+                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`} role={notice.type === "error" ? "alert" : "status"} aria-live={notice.type === "error" ? "assertive" : "polite"}>
                     {notice.text}
                 </p>
             )}
-            <div className="admin-panel__toolbar">
-                <h2>Gestion des commandes</h2>
-                <div className="admin-filter-inline">
-                    <input
-                        type="search"
-                        placeholder="Rechercher #id, client, email..."
-                        value={orderFilter.search}
-                        onChange={(event) => setOrderFilter((prev) => ({ ...prev, search: event.target.value }))}
-                    />
-                    <select
-                        value={orderFilter.status}
-                        onChange={(event) => setOrderFilter((prev) => ({ ...prev, status: event.target.value }))}
-                    >
-                        <option value="all">Tous statuts</option>
-                        {ORDER_STATUSES.map((status) => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}
-                    </select>
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Gestion des commandes <span className="admin-count-badge">{orders.length}</span></h2>
+                    <p className="admin-head__subtitle">Suivi des commandes et mise a jour des statuts.</p>
                 </div>
-            </div>
+                <div className="admin-head__controls">
+                    <div className="admin-filter-inline">
+                        <input
+                            type="search"
+                            placeholder="Rechercher #id, client, email..."
+                            value={orderFilter.search}
+                            onChange={(event) => setOrderFilter((prev) => ({ ...prev, search: event.target.value }))}
+                        />
+                        <select
+                            value={orderFilter.status}
+                            onChange={(event) => setOrderFilter((prev) => ({ ...prev, status: event.target.value }))}
+                        >
+                            <option value="all">Tous statuts</option>
+                            {ORDER_STATUSES.map((status) => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}
+                        </select>
+                    </div>
+                </div>
+            </header>
 
             {filteredOrders.length === 0 ? (
                 <EmptyState icon={Inbox} size="sm" title="Aucune commande" hint="Aucune commande ne correspond aux filtres actuels." />
@@ -155,7 +160,7 @@ export const AdminOrders = () => {
                                                 onClick={() => { void handleSaveStatus(order.id) }}
                                                 disabled={busyOrderId === order.id || (orderDrafts[order.id] || order.status) === order.status}
                                             >
-                                                {busyOrderId === order.id ? "..." : "Save"}
+                                                {busyOrderId === order.id ? "..." : "Enregistrer"}
                                             </button>
                                         </div>
                                     </td>

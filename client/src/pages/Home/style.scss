@@ -89,15 +89,6 @@
   &__grid {
     position: relative;
     z-index: 1;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: $space-xl;
-    align-items: center;
-
-    @include breakpoint(lg) {
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: $space-2xl;
-    }
   }
 
   &__content {
@@ -240,98 +231,6 @@
     }
   }
 
-  // Showcase column
-  &__showcase {
-    display: flex;
-    justify-content: center;
-
-    @include breakpoint(lg) {
-      justify-content: flex-end;
-    }
-  }
-}
-
-// Showcase card — vitrine produit flottante
-.showcase-card {
-  width: 100%;
-  max-width: 22rem;
-  background: $surface;
-  border: 1px solid $border;
-  border-radius: $radius-2xl;
-  box-shadow: $shadow-lg;
-  overflow: hidden;
-
-  &__media {
-    position: relative;
-    aspect-ratio: 4 / 3;
-  }
-
-  &__placeholder {
-    position: absolute;
-    inset: 0;
-    background: $placeholder-hatch;
-  }
-
-  &__ig {
-    position: absolute;
-    top: $space-sm;
-    inset-inline-start: $space-sm;
-    display: inline-block;
-    padding: 0.3rem 0.7rem;
-    background: $primary;
-    color: $white;
-    font-size: $fs-xs;
-    font-weight: $fw-bold;
-    letter-spacing: 0.02em;
-    border-radius: $radius-pill;
-    white-space: nowrap;
-  }
-
-  &__body {
-    padding: $space-md;
-    display: flex;
-    flex-direction: column;
-    gap: $space-2xs;
-  }
-
-  &__category {
-    font-size: $fs-xs;
-    font-weight: $fw-semibold;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: $text-faint;
-    margin: 0;
-  }
-
-  &__name {
-    font-family: $font-heading;
-    font-size: $fs-lg;
-    color: $text-strong;
-    margin: 0;
-  }
-
-  &__buy {
-    @include flex-between;
-    margin-top: $space-2xs;
-  }
-
-  &__price {
-    font-family: $font-heading;
-    font-size: $fs-xl;
-    font-weight: $fw-bold;
-    color: $price;
-  }
-
-  &__add {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.55rem 1.1rem;
-    background: $secondary-dark;
-    color: $white;
-    font-size: $fs-sm;
-    font-weight: $fw-semibold;
-    border-radius: $radius;
-  }
 }
 
 // Orb keyframes — translate + scale
@@ -394,9 +293,10 @@
   }
 
   &__copy {
-    h3 {
+    .trust-strip__title {
       font-family: $font-heading;
       font-size: $fs-base;
+      font-weight: $fw-semibold;
       color: $text-strong;
       margin: 0 0 $space-3xs;
     }
@@ -417,47 +317,107 @@
   margin-bottom: $space-fluid-xl;
 
   &__grid {
-    @include auto-grid(11rem, $space-sm);
+    @include auto-grid(13rem, $space-md);
   }
 }
 
+// Carte categorie — meme langage que la ProductCard refondue : surface chaude,
+// bord net + ombre douce, tuile d'icone aux tons de marque (alternance
+// vert/bleu), liisere IG signature au survol, nom en police display, et un
+// "Decouvrir ->" qui glisse. Tout en tokens (dark mode + AA automatiques).
 .category-card {
-  display: block;
-  background: $surface;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2xs;
   padding: $space-md;
+  background: $surface;
+  border: 1px solid $border;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
-  text-align: center;
+  color: $text;
+  overflow: hidden;
   transition: transform $t-base $ease, box-shadow $t-base $ease, border-color $t-base $ease;
-  border: 1px solid $border;
+
+  // Liisere gradient IG (motif signature) revele au survol, en haut de la carte
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: $ig-gradient;
+    opacity: 0;
+    transition: opacity $t-base $ease;
+  }
 
   @include hover {
-    transform: translateY(-0.125rem);
-    box-shadow: $shadow-md;
+    transform: translateY(-0.25rem);
+    box-shadow: $shadow-lg;
     border-color: $primary;
+
+    &::before { opacity: 1; }
+    .category-card__icon { transform: scale(1.06) rotate(-3deg); }
+    .category-card__cta svg { transform: translateX(3px); }
   }
 
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    @include hover {
+      transform: none;
+      .category-card__icon { transform: none; }
+      .category-card__cta svg { transform: none; }
+    }
+  }
+
+  // Tuile d'icone — ton vert de marque (alterne en bleu une carte sur deux)
   &__icon {
     @include flex-center;
-    width: 2.75rem;
-    height: 2.75rem;
-    margin: 0 auto $space-2xs;
-    border-radius: $radius-lg;
+    width: 3rem;
+    height: 3rem;
+    border-radius: $radius;
     background: $tint-green-bg;
+    color: $tint-green-fg;
+    transition: transform $t-base $ease;
 
-    svg { color: $tint-green-fg; }
+    svg { color: inherit; }
   }
 
-  h3 {
+  &:nth-child(2n) &__icon {
+    background: $tint-blue-bg;
+    color: $tint-blue-fg;
+  }
+
+  &__body { flex: 1; }
+
+  &__name {
     font-family: $font-heading;
-    font-size: $fs-base;
+    font-size: $fs-md;
+    font-weight: $fw-semibold;
+    line-height: $lh-snug;
     color: $text-strong;
-    margin-bottom: $space-3xs;
+    margin: 0 0 $space-3xs;
   }
 
-  p {
-    font-size: $fs-xs;
+  &__desc {
+    font-size: $fs-sm;
     color: $text-muted;
+    line-height: $lh-snug;
+    margin: 0;
+    @include truncate(2);
+  }
+
+  // Affordance "Decouvrir ->" — vert accent (theme-aware), fleche qui glisse
+  &__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    margin-top: $space-2xs;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $accent;
+
+    svg { transition: transform $t-base $ease; }
   }
 }
 

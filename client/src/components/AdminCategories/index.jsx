@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Plus } from "lucide-react"
 import {
     useGetAdminCategoriesQuery,
     useCreateCategoryMutation,
@@ -23,10 +24,32 @@ export const AdminCategories = () => {
     const [categoryForm, setCategoryForm] = useState(emptyForm)
     const [busyCategoryId, setBusyCategoryId] = useState(null)
     const [notice, setNotice] = useState({ type: "", text: "" })
+    const [formOpen, setFormOpen] = useState(false)
+    const formRef = useRef(null)
+    const addBtnRef = useRef(null)
 
     const savingCategory = isCreating || isUpdating
 
     const resetForm = () => setCategoryForm(emptyForm)
+
+    useEffect(() => {
+        if (formOpen && formRef.current) {
+            const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+            formRef.current.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
+            formRef.current.querySelector("input, select, textarea")?.focus()
+        }
+    }, [formOpen, categoryForm.id])
+
+    const openCreate = () => {
+        resetForm()
+        setFormOpen(true)
+    }
+
+    const closeForm = () => {
+        resetForm()
+        setFormOpen(false)
+        addBtnRef.current?.focus()
+    }
 
     const handleSubmit = async (event) => {
         event.preventDefault()
@@ -40,6 +63,8 @@ export const AdminCategories = () => {
             }
             setNotice({ type: "success", text: categoryForm.id ? "Categorie mise a jour." : "Categorie creee." })
             resetForm()
+            setFormOpen(false)
+            addBtnRef.current?.focus()
         }
         catch (error)
         {
@@ -49,6 +74,7 @@ export const AdminCategories = () => {
 
     const handleEdit = (category) => {
         setCategoryForm({ id: category.id, name: category.name || "", description: category.description || "" })
+        setFormOpen(true)
     }
 
     const handleDelete = async (category) => {
@@ -89,14 +115,25 @@ export const AdminCategories = () => {
     return (
         <div className="admin-panel">
             {notice.text && (
-                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`}>
+                <p className={`admin-console__notice admin-console__notice--${notice.type || "info"}`} role={notice.type === "error" ? "alert" : "status"} aria-live={notice.type === "error" ? "assertive" : "polite"}>
                     {notice.text}
                 </p>
             )}
-            <h2>Gestion des categories</h2>
-            <div className="admin-split admin-split--balanced">
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Gestion des categories <span className="admin-count-badge">{categories.length}</span></h2>
+                    <p className="admin-head__subtitle">Familles de produits du catalogue.</p>
+                </div>
+                <div className="admin-head__controls">
+                    <button type="button" className="btn btn--primary" onClick={openCreate} ref={addBtnRef}>
+                        <Plus size={16} aria-hidden="true" /> Ajouter
+                    </button>
+                </div>
+            </header>
+            {formOpen && (
                 <form
                     className="admin-form-card"
+                    ref={formRef}
                     onSubmit={(event) => { void handleSubmit(event) }}
                 >
                     <h3>{categoryForm.id ? `Modifier categorie #${categoryForm.id}` : "Ajouter une categorie"}</h3>
@@ -123,13 +160,14 @@ export const AdminCategories = () => {
                         <button type="submit" className="btn btn--primary" disabled={savingCategory}>
                             {savingCategory ? "Sauvegarde..." : categoryForm.id ? "Mettre a jour" : "Creer la categorie"}
                         </button>
-                        <button type="button" className="btn btn--outline" onClick={resetForm}>Reinitialiser</button>
+                        <button type="button" className="btn btn--outline" onClick={closeForm}>Annuler</button>
                     </div>
                 </form>
+            )}
 
-                <div className="admin-table-wrap">
+            <div className="admin-table-wrap">
                     <table>
-                        <thead><tr><th>Nom</th><th>Description</th><th>Produits</th><th>Actifs</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>Nom</th><th>Description</th><th>Produits</th><th>Actifs</th><th className="admin-col-actions">Actions</th></tr></thead>
                         <tbody>
                             {categories.map((category) => (
                                 <tr key={category.id}>
@@ -137,7 +175,7 @@ export const AdminCategories = () => {
                                     <td>{truncate(category.description, 90)}</td>
                                     <td>{category.products_count ?? 0}</td>
                                     <td>{category.active_products_count ?? 0}</td>
-                                    <td>
+                                    <td className="admin-col-actions">
                                         <div className="admin-inline-actions">
                                             <button type="button" className="btn btn--outline" onClick={() => handleEdit(category)}>Modifier</button>
                                             <button
@@ -158,7 +196,6 @@ export const AdminCategories = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
         </div>
     )
 }

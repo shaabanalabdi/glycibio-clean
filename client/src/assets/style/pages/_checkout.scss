@@ -177,6 +177,29 @@
     &--narrow { flex: 0 0 auto; }
   }
 
+  // Erreur par champ (sous le champ) + hint discret
+  &__field-error {
+    display: block;
+    margin-top: $space-3xs;
+    color: $error-fg;
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+  }
+
+  &__hint {
+    display: block;
+    margin-top: $space-3xs;
+    color: $text-muted;
+    font-size: $fs-xs;
+  }
+
+  // Champ invalide -> bord rouge (le message detaille est sous le champ)
+  &__step input[aria-invalid='true'],
+  &__step select[aria-invalid='true'] {
+    border-color: $error;
+    box-shadow: 0 0 0 1px $error;
+  }
+
   &__hint {
     @include form-hint;
   }

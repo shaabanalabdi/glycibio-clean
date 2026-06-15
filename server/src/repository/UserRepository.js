@@ -1,7 +1,17 @@
+import crypto from "node:crypto";
 import {Repository} from "../core/Repository.js";
 import {db} from "../core/database.js";
 import {User} from "../entity/User.js";
 import {Logger} from "../services/Logger.js";
+
+// Les jetons de reset / verification email sont des secrets a usage unique.
+// On NE stocke JAMAIS le jeton brut : on persiste son empreinte SHA-256 (hex 64
+// car -> compatible VARCHAR(64/255)). Le jeton brut n'existe que dans l'email
+// envoye a l'utilisateur. Ainsi une fuite de la table `users` (dump, replica,
+// injection ailleurs) ne donne PAS de jetons directement exploitables.
+// SHA-256 nu suffit ici : le jeton est deja a haute entropie (crypto.randomBytes(32)),
+// donc non bruteforcable -> pas besoin d'un KDF lent comme pour les mots de passe.
+const hashToken = (token) => crypto.createHash("sha256").update(String(token)).digest("hex")
 
 // Colonnes ajoutees par migrations successives : on les cree au demarrage si
 // absentes (INFORMATION_SCHEMA pour compatibilite MySQL 5.7+ et 8.x).
@@ -109,13 +119,13 @@ class UserRepository extends Repository {
     }
 
     setResetToken = async (id, token, expires) => {
-        await db.query("UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?", [token, expires, id])
+        await db.query("UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?", [hashToken(token), expires, id])
     }
 
     findByValidResetToken = async (token) => {
         const [rows] = await db.query(
             "SELECT id FROM users WHERE reset_token = ? AND reset_token_expires > NOW()",
-            [token]
+            [hashToken(token)]
         )
         return rows.length === 0 ? null : rows[0]
     }
@@ -124,7 +134,7 @@ class UserRepository extends Repository {
     setVerificationToken = async (id, token, expires) => {
         await db.query(
             "UPDATE users SET verification_token = ?, verification_token_expires = ? WHERE id = ?",
-            [token, expires, id]
+            [hashToken(token), expires, id]
         )
     }
 
@@ -133,7 +143,7 @@ class UserRepository extends Repository {
     findByValidVerificationToken = async (token) => {
         const [rows] = await db.query(
             "SELECT id FROM users WHERE verification_token = ? AND verification_token_expires > NOW() AND email_verified = 0",
-            [token]
+            [hashToken(token)]
         )
         return rows.length === 0 ? null : rows[0]
     }

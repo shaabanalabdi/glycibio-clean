@@ -88,17 +88,17 @@
     background: transparent;
     border: none;
     border-radius: $radius-sm;
-    color: $gray-700;
+    color: $text-muted;
     font-size: $fs-xl;
     line-height: 1;
     cursor: pointer;
 
-    @include hover { background: $gray-100; }
+    @include hover { background: $button-ghost-hover; }
     &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
   }
 
   &__group {
-    border: 1px solid $gray-200;
+    border: 1px solid $border;
     border-radius: $radius;
     padding: $space-2xs $space-sm;
     margin: 0 0 $space-2xs;
@@ -106,7 +106,7 @@
 
   &__group-title {
     font-weight: $fw-semibold;
-    color: $gray-800;
+    color: $text-strong;
     font-size: $fs-sm;
     padding: 0 $space-3xs;
   }
@@ -117,7 +117,7 @@
     gap: $space-2xs;
     padding: $space-2xs 0;
     font-size: $fs-sm;
-    color: $gray-700;
+    color: $text;
     cursor: pointer;
 
     input[type='checkbox'] {

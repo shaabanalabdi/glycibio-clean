@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Inbox, LayoutDashboard, Mail, Package, PackageSearch, ShoppingBag, Users } from "lucide-react"
+import { AlertTriangle, Inbox, Mail, Package, PackageSearch, PackageX, ShoppingBag, TrendingUp, Truck, Users } from "lucide-react"
 import {
     useGetDashboardQuery,
     useGetAdminProductsQuery,
@@ -69,15 +69,46 @@ export const AdminOverview = () => {
 
     return (
         <div className="admin-overview">
+            <header className="admin-head">
+                <div className="admin-head__titles">
+                    <h2>Vue d'ensemble</h2>
+                    <p className="admin-head__subtitle">Indicateurs cles, ventes et activite recente.</p>
+                </div>
+            </header>
+
             <div className="admin-kpi-grid">
-                <article className="admin-kpi-card"><ShoppingBag size={18} /><p>Commandes valides</p><strong>{kpi.total_commandes_payees || 0}</strong></article>
-                <article className="admin-kpi-card"><LayoutDashboard size={18} /><p>Chiffre d affaires</p><strong>{formatPrice(kpi.chiffre_affaires)}</strong></article>
-                <article className="admin-kpi-card"><Users size={18} /><p>Clients actifs</p><strong>{kpi.total_clients || 0}</strong></article>
-                <article className="admin-kpi-card"><Package size={18} /><p>Produits actifs</p><strong>{activeProductsCount}</strong></article>
-                <article className="admin-kpi-card"><Package size={18} /><p>Produits inactifs</p><strong>{inactiveProductsCount}</strong></article>
-                <article className="admin-kpi-card"><Package size={18} /><p>Stock critique (&lt;= 5)</p><strong>{lowStockCount}</strong></article>
-                <article className="admin-kpi-card"><ShoppingBag size={18} /><p>Livraisons actives</p><strong>{activeShippingCount}</strong></article>
-                <article className="admin-kpi-card"><Mail size={18} /><p>Messages non lus</p><strong>{kpi.messages_non_lus || unreadMessagesCount}</strong></article>
+                <article className="admin-kpi-card admin-kpi-card--green">
+                    <span className="admin-kpi-card__icon"><ShoppingBag size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Commandes valides</p><strong>{kpi.total_commandes_payees || 0}</strong></div>
+                </article>
+                <article className="admin-kpi-card admin-kpi-card--blue">
+                    <span className="admin-kpi-card__icon"><TrendingUp size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Chiffre d affaires</p><strong>{formatPrice(kpi.chiffre_affaires)}</strong></div>
+                </article>
+                <article className="admin-kpi-card admin-kpi-card--green">
+                    <span className="admin-kpi-card__icon"><Users size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Clients actifs</p><strong>{kpi.total_clients || 0}</strong></div>
+                </article>
+                <article className="admin-kpi-card admin-kpi-card--green">
+                    <span className="admin-kpi-card__icon"><Package size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Produits actifs</p><strong>{activeProductsCount}</strong></div>
+                </article>
+                <article className="admin-kpi-card admin-kpi-card--neutral">
+                    <span className="admin-kpi-card__icon"><PackageX size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Produits inactifs</p><strong>{inactiveProductsCount}</strong></div>
+                </article>
+                <article className={`admin-kpi-card ${lowStockCount > 0 ? "admin-kpi-card--amber" : "admin-kpi-card--neutral"}`}>
+                    <span className="admin-kpi-card__icon"><AlertTriangle size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Stock critique (&lt;= 5)</p><strong>{lowStockCount}</strong></div>
+                </article>
+                <article className="admin-kpi-card admin-kpi-card--blue">
+                    <span className="admin-kpi-card__icon"><Truck size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Livraisons actives</p><strong>{activeShippingCount}</strong></div>
+                </article>
+                <article className={`admin-kpi-card ${(kpi.messages_non_lus || unreadMessagesCount) > 0 ? "admin-kpi-card--amber" : "admin-kpi-card--neutral"}`}>
+                    <span className="admin-kpi-card__icon"><Mail size={20} aria-hidden="true" /></span>
+                    <div className="admin-kpi-card__body"><p>Messages non lus</p><strong>{kpi.messages_non_lus || unreadMessagesCount}</strong></div>
+                </article>
             </div>
 
             {overview.revenue30d && overview.revenue30d.length > 0 && (

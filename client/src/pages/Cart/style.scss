@@ -530,6 +530,51 @@
     &:focus-visible { outline: 2px solid $error; outline-offset: 2px; }
   }
 
+  // Confirmation de retrait en 2 temps (remplace l'icone poubelle au clic)
+  &__confirm {
+    grid-area: remove;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3xs;
+    margin-inline-start: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  &__confirm-q {
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  &__confirm-yes,
+  &__confirm-no {
+    min-height: 2.25rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: $radius-sm;
+    font-size: $fs-xs;
+    font-weight: $fw-bold;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity $t-fast $ease, background $t-fast $ease;
+
+    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  }
+
+  &__confirm-yes {
+    background: $error;
+    color: $white;
+    @include hover { opacity: 0.9; }
+  }
+
+  &__confirm-no {
+    background: $surface-alt;
+    color: $text;
+    border-color: $border;
+    @include hover { background: $button-ghost-hover; }
+  }
+
   &__error {
     grid-area: error;
     margin: 0;

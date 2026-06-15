@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Mail, X } from "lucide-react"
+import { Mail, CircleCheck, X } from "lucide-react"
 import {
     useGetAuthenticatedUserQuery,
     useResendVerificationMutation
@@ -32,32 +32,48 @@ export const EmailVerificationBanner = () => {
         }
     }
 
+    const Icon = sent ? CircleCheck : Mail
+    const title = sent
+        ? "Lien de confirmation renvoye"
+        : error
+            ? "Envoi impossible"
+            : "Confirmez votre adresse email"
+    const text = sent
+        ? "Verifiez votre boite mail (pensez aux spams)."
+        : error || "Cliquez sur le lien recu par email pour securiser votre compte."
+
     return (
-        <div className="verify-banner" role="alert">
-            <Mail size={20} aria-hidden="true" className="verify-banner__icon" />
-            <p className="verify-banner__text">
-                {sent
-                    ? "Lien de confirmation renvoye. Verifiez votre boite mail (pensez aux spams)."
-                    : error || "Confirmez votre adresse email pour securiser votre compte."}
-            </p>
-            {!sent && (
+        <div className="verify-banner" role="status" aria-live="polite">
+            <div className={`verify-banner__card${sent ? " verify-banner__card--success" : ""}`}>
+                <span className="verify-banner__icon" aria-hidden="true">
+                    <Icon size={20} strokeWidth={2} />
+                </span>
+
+                <div className="verify-banner__content">
+                    <p className="verify-banner__title">{title}</p>
+                    <p className="verify-banner__text">{text}</p>
+                </div>
+
+                {!sent && (
+                    <button
+                        type="button"
+                        className="btn btn--sm btn--outline verify-banner__action"
+                        onClick={handleResend}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Envoi…" : "Renvoyer le lien"}
+                    </button>
+                )}
+
                 <button
                     type="button"
-                    className="btn btn--sm btn--outline verify-banner__action"
-                    onClick={handleResend}
-                    disabled={isLoading}
+                    className="verify-banner__close"
+                    onClick={() => setDismissed(true)}
+                    aria-label="Masquer cette notification"
                 >
-                    {isLoading ? "Envoi..." : "Renvoyer le lien"}
+                    <X size={18} aria-hidden="true" />
                 </button>
-            )}
-            <button
-                type="button"
-                className="verify-banner__close"
-                onClick={() => setDismissed(true)}
-                aria-label="Masquer cette notification"
-            >
-                <X size={18} aria-hidden="true" />
-            </button>
+            </div>
         </div>
     )
 }
