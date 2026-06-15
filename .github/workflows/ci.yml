@@ -137,3 +137,56 @@ jobs:
           TEST_DB_USER: root
           TEST_DB_PASSWORD: root
           TEST_DB_NAME: glycibio_test
+
+  # ----------------------------------------------------------------
+  # Audit web NON BLOQUANT : performance + accessibilite (Lighthouse CI
+  # + Pa11y) sur le build du front. Remplace l'execution locale (ces outils
+  # sont absents de l'environnement de dev). Toutes les etapes tolerent les
+  # erreurs (continue-on-error) -> informatif, ne bloque jamais la CI.
+  # ----------------------------------------------------------------
+  audit-web:
+    name: Audit web (Lighthouse + Pa11y, non bloquant)
+    runs-on: ubuntu-latest
+    needs: client
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install (npm ci)
+        run: npm ci --legacy-peer-deps
+        continue-on-error: true
+
+      - name: Build (vite)
+        run: npm run build
+        env:
+          VITE_API_URL: /api
+        continue-on-error: true
+
+      - name: Lighthouse CI (perf / a11y / SEO / best-practices)
+        run: npx --yes @lhci/cli@0.14.x autorun --collect.staticDistDir=./dist --collect.numberOfRuns=1 --upload.target=filesystem --upload.outputDir=./.lighthouseci
+        continue-on-error: true
+
+      - name: Pa11y (accessibilite WCAG2AA)
+        run: |
+          npx --yes serve -s dist -l 4173 &
+          npx --yes wait-on http://127.0.0.1:4173 -t 30000
+          npx --yes pa11y --standard WCAG2AA http://127.0.0.1:4173/
+        continue-on-error: true
+
+      - name: Publier le rapport Lighthouse (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: client/.lighthouseci
+          if-no-files-found: ignore
