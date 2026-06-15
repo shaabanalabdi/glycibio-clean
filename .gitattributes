@@ -1,0 +1,3 @@
+# Les scripts shell DOIVENT rester en LF, meme commits depuis Windows :
+# un CRLF casse l'execution sur Linux ("bad interpreter: /usr/bin/env bash^M").
+*.sh text eol=lf
