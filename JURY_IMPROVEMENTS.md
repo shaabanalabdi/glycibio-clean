@@ -260,3 +260,28 @@ $ TEST_DB_* ... npm test
 - **Problème :** `npm run lint` échouait (aucun `eslint.config.js`), comme les scripts de test cassés.
 - **Solution :** config « flat » ESLint 9 (React 19 + hooks + refresh) — `npm run lint` passe désormais à **0 erreur**.
 - **Fichier :** `client/eslint.config.js` (nouveau)
+
+---
+
+## PHASE 9 — Sécurité CSRF & architecture RTK Query
+
+### 23. Protection CSRF (double-submit cookie)
+- **Problème :** l'authentification reposait UNIQUEMENT sur le cookie + `SameSite=lax`, sans jeton anti-CSRF, et `COOKIE_SAMESITE` pouvait être affaibli à `none`.
+- **Risque :** falsification de requête inter-site (CSRF) sur les routes mutantes (ajout panier, création commande, changement de mot de passe, suppression de compte) si SameSite était contourné/désactivé.
+- **Solution :** patron **double-submit** — le serveur dépose un jeton aléatoire dans un cookie **lisible par le JS** (`csrf_token`), le front le renvoie dans l'en-tête `X-CSRF-Token`, le serveur exige `header === cookie` (comparaison à temps constant) sur POST/PUT/PATCH/DELETE. Le webhook Stripe est exclu (déjà protégé par signature). En complément, `COOKIE_SAMESITE` est **clampé** (`none` refusé → `lax`).
+- **Justification :** un site attaquant ne peut NI lire le cookie CSRF de la victime (same-origin) NI poser l'en-tête custom cross-origin → il ne peut pas faire correspondre header et cookie. Défense en profondeur du SameSite.
+- **Fichiers :** `server/src/middleware/csrf.js` (nouveau), `server/src/App.js`, `server/src/services/AuthHelper.js`, `client/src/store/apiSlice/baseQuery.js`
+- **Vérifié (serveur réel) :**
+```text
+1) GET /api/health        -> 200, cookie csrf_token émis
+2) POST /login SANS header -> 403 (bloqué)
+3) POST /login AVEC header -> 401 (CSRF passé, atteint l'auth)
+```
+
+### 24. Consolidation RTK Query : 11 `createApi` → 1 API unique
+- **Problème :** 11 instances `createApi` séparées → l'invalidation par tags ne traversait pas les instances ; d'où une « god-slice » admin de 216 lignes pour contourner, et l'impossibilité d'invalider le cache produit public depuis une mutation.
+- **Solution :** une **API unique** (`baseApi`) ; chaque domaine **injecte** ses endpoints via `baseApi.injectEndpoints(...)`. `store.js` passe de 11 reducers/middlewares à **un seul**. Les hooks sont ré-exportés à l'identique → **zéro changement dans les composants** (63 endpoints vérifiés injectés au runtime).
+- **Bénéfice concret :** au login/logout, `useAuthenticated` invalide désormais **cibléement** les tags inter-domaines (`cart`, `wishlist`, `profile`, `orders`) au lieu de réinitialiser des caches entiers domaine par domaine — et `setupListeners` est branché (refetch on focus/reconnect).
+- **Justification :** c'est le patron recommandé par l'équipe RTK ; il rétablit la cohérence de cache inter-domaines et supprime un dette d'architecture.
+- **Fichiers :** `client/src/store/apiSlice/baseApi.js` (nouveau), les 11 `*ApiSlice.js`, `client/src/store/store.js`, `client/src/hooks/useAuthenticated.js`
+- **Vérifié :** `npm run lint` = 0 erreur · `npm run build` = succès · smoke runtime = **63 endpoints** sur une seule API (`reducerPath: "api"`).

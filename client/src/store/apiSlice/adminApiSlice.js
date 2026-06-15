@@ -1,23 +1,9 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQuery } from "./baseQuery.js"
+import { baseApi } from "./baseApi.js"
 
-// Un seul createApi pour tout le back-office : l'invalidation par tags ne
-// fonctionne qu'a l'interieur d'un meme createApi, et les ressources admin
-// s'invalident entre elles (ex. produit cree -> dashboard a rafraichir).
-export const adminApiSlice = createApi({
-    reducerPath: "adminApi",
-    baseQuery,
-    tagTypes: [
-        "adminDashboard",
-        "adminProducts",
-        "adminGallery",
-        "adminCategories",
-        "adminOrders",
-        "adminContacts",
-        "adminUsers",
-        "adminShipping",
-        "adminReviews"
-    ],
+// Endpoints du back-office injectes dans l'API UNIQUE (baseApi). Les tagTypes
+// admin sont declares dans baseApi : l'invalidation peut desormais traverser
+// les domaines (ex. produit modifie en admin -> liste publique rafraichie).
+export const adminApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
         // --- Dashboard ---
         getDashboard: build.query({

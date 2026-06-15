@@ -1,15 +1,12 @@
 import { useDispatch } from "react-redux"
+import { baseApi } from "../store/apiSlice/baseApi.js"
 import {
-    authApiSlice,
     useGetAuthenticatedUserQuery,
     useLoginMutation,
     useRegisterMutation,
     useLogoutMutation
 } from "../store/apiSlice/authApiSlice.js"
-import { cartApiSlice, useMergeCartMutation } from "../store/apiSlice/cartApiSlice.js"
-import { wishlistApiSlice } from "../store/apiSlice/wishlistApiSlice.js"
-import { userApiSlice } from "../store/apiSlice/userApiSlice.js"
-import { orderApiSlice } from "../store/apiSlice/orderApiSlice.js"
+import { useMergeCartMutation } from "../store/apiSlice/cartApiSlice.js"
 import { getGuestCart, clearGuestCart } from "../Utils/guestCart.js"
 
 // Hook central d'authentification : etat de session (via RTK Query, cache
@@ -33,11 +30,11 @@ export const useAuthenticated = () => {
     const [logoutMutation] = useLogoutMutation()
     const [mergeCartMutation] = useMergeCartMutation()
 
+    // Cache UNIQUE : on invalide CIBLEEMENT les donnees dependantes de la session
+    // (panier, favoris, profil, commandes), sans purger les caches publics
+    // (produits, categories) — possible grace au partage de tags inter-domaines.
     const resetSessionCaches = () => {
-        dispatch(cartApiSlice.util.resetApiState())
-        dispatch(wishlistApiSlice.util.resetApiState())
-        dispatch(userApiSlice.util.resetApiState())
-        dispatch(orderApiSlice.util.resetApiState())
+        dispatch(baseApi.util.invalidateTags(["cart", "wishlist", "profile", "orders"]))
     }
 
     // Fusionne le panier guest (localStorage) dans le panier serveur apres login.
@@ -81,8 +78,8 @@ export const useAuthenticated = () => {
         {
             // best-effort : on deconnecte cote client meme si l'appel echoue
         }
-        dispatch(authApiSlice.util.resetApiState())
-        resetSessionCaches()
+        // Deconnexion : on vide TOUT le cache RTK Query (donnees utilisateur).
+        dispatch(baseApi.util.resetApiState())
     }
 
     return {

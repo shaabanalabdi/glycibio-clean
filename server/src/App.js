@@ -8,6 +8,7 @@ import path from "node:path"
 import {fileURLToPath} from "node:url"
 import {errorHandler} from "./middleware/errorHandler.js";
 import {globalLimiter} from "./middleware/rateLimiter.js";
+import {csrfProtection} from "./middleware/csrf.js";
 import {router} from "./router/index.js";
 import {seoRoutes} from "./router/routes/seoRoutes.js";
 import {webhookRoutes} from "./router/routes/webhookRoutes.js";
@@ -93,6 +94,12 @@ app.use(
 
 // SEO (sitemap.xml — servi a la racine, sans prefixe /api)
 app.use("/", seoRoutes)
+
+// Protection CSRF (double-submit cookie). Montee APRES cookieParser et AVANT le
+// routeur API. Le webhook Stripe (/api/webhooks) est traite plus haut (avant
+// cookieParser) : il n'est donc PAS concerne ici et reste protege par la
+// verification de signature Stripe.
+app.use("/api", csrfProtection)
 
 // API
 app.use("/api", router)

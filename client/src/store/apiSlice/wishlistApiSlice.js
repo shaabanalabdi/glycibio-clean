@@ -1,10 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQuery } from "./baseQuery.js"
+import { baseApi } from "./baseApi.js"
 
-export const wishlistApiSlice = createApi({
-    reducerPath: "wishlistApi",
-    baseQuery,
-    tagTypes: ["wishlist"],
+export const wishlistApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getWishlist: build.query({
             query: () => ({ url: "/wishlist", method: "GET" }),

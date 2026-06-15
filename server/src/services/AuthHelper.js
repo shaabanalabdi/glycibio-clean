@@ -11,13 +11,19 @@ dotenv.config();
 const COOKIE_NAME = "token"
 const MAX_AGE_MS = 24 * 60 * 60 * 1000
 
-const cookieOptions = () => ({
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.COOKIE_SAMESITE || "lax",
-    maxAge: MAX_AGE_MS,
-    path: "/"
-})
+const cookieOptions = () => {
+    // SameSite : on REFUSE 'none' (qui exposerait au CSRF cross-site). On clampe
+    // a 'lax' par defaut ; seule l'alternative plus stricte ('strict') est admise.
+    const requested = String(process.env.COOKIE_SAMESITE || "lax").toLowerCase()
+    const sameSite = requested === "strict" ? "strict" : "lax"
+    return {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite,
+        maxAge: MAX_AGE_MS,
+        path: "/"
+    }
+}
 
 export class AuthHelper {
 

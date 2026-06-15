@@ -1,10 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQuery } from "./baseQuery.js"
+import { baseApi } from "./baseApi.js"
 
-export const cartApiSlice = createApi({
-    reducerPath: "cartApi",
-    baseQuery,
-    tagTypes: ["cart"],
+export const cartApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getCart: build.query({
             query: () => ({ url: "/cart", method: "GET" }),

@@ -1,10 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQuery } from "./baseQuery.js"
+import { baseApi } from "./baseApi.js"
 
-export const categoryApiSlice = createApi({
-    reducerPath: "categoryApi",
-    baseQuery,
-    tagTypes: ["categories"],
+export const categoryApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getCategories: build.query({
             query: () => ({ url: "/categories", method: "GET" }),

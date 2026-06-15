@@ -1,9 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQuery } from "./baseQuery.js"
+import { baseApi } from "./baseApi.js"
 
-export const paymentApiSlice = createApi({
-    reducerPath: "paymentApi",
-    baseQuery,
+export const paymentApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
         createCheckout: build.mutation({
             query: (data) => ({

@@ -1,10 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQuery } from "./baseQuery.js"
+import { baseApi } from "./baseApi.js"
 
-export const productApiSlice = createApi({
-    reducerPath: "productApi",
-    baseQuery,
-    tagTypes: ["products", "product", "reviews"],
+export const productApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getProducts: build.query({
             query: (params = {}) => ({

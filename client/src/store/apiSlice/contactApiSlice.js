@@ -1,9 +1,6 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQuery } from "./baseQuery.js"
+import { baseApi } from "./baseApi.js"
 
-export const contactApiSlice = createApi({
-    reducerPath: "contactApi",
-    baseQuery,
+export const contactApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
         sendMessage: build.mutation({
             query: (data) => ({
