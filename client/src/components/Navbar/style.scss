@@ -188,6 +188,15 @@
       object-fit: contain;
     }
 
+    // Logo complet (wordmark GLYCIBIO) restaure dans la navbar
+    &-image {
+      display: block;
+      height: 2.25rem;                 // 36px
+      width: auto;
+      max-width: 11rem;                // ~176px
+      object-fit: contain;
+    }
+
     &-text {
       display: none;                   // mobile : marque seule, gain de place
       font-family: $font-heading;

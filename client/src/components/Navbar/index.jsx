@@ -112,8 +112,7 @@ export const Navbar = () => {
                     </button>
 
                     <Link to="/" className="navbar__logo" aria-label="GlyciBio - accueil" viewTransition>
-                        <img src="/favicon-96x96.png" alt="" className="navbar__logo-mark" width="38" height="38" loading="eager" decoding="async" />
-                        <span className="navbar__logo-text">GlyciBio</span>
+                        <img src={logo} alt="GlyciBio" className="navbar__logo-image" width="180" height="40" loading="eager" decoding="async" />
                     </Link>
 
                     {/* CENTER-LEFT — primary nav links (desktop) */}
