@@ -67,7 +67,9 @@ app.use(cors({
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    // X-CSRF-Token : requis par le front (protection CSRF double-submit). Sans
+    // lui, le preflight CORS bloque toutes les requetes cross-origin (dev 5173).
+    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"]
 }))
 
 // Rate Limiting global : 300 requetes/minute par IP (garde-fou anti-abus,
