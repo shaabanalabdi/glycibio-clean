@@ -5,10 +5,11 @@
 > Justification → Fichiers → Avant / Après**.
 >
 > **Vérifications réalisées après les correctifs :**
-> - ✅ Tests back-end : **43 tests, 100 % au vert** (`cd server && npm test`)
+> - ✅ Tests back-end unitaires : **43 tests au vert** (`cd server && npm test`)
+> - ✅ Tests d'**intégration** (MySQL réel) : **4 tests au vert** — commande/stock/paiement vérifiés contre une vraie base (total **47/47**)
 > - ✅ Lint front : **0 erreur** (`cd client && npm run lint`)
 > - ✅ Build front : **succès** (`cd client && npm run build`)
-> - ✅ Import de tout le graphe serveur : OK (aucun chemin d'import cassé)
+> - ✅ Démarrage serveur réel : OK (santé `/api/health` → `{"status":"OK","db":"up"}`)
 
 ---
 
@@ -162,10 +163,28 @@ assertEnv(Logger)   // exit 1 si JWT_SECRET < 32 car., vars BDD manquantes, etc.
 - **Justification :** les flux critiques étaient non testables car la logique vivait dans des couches à E/S. On a **extrait des fonctions pures** (`OrderPricing`, `WebhookEvents`) testables sans BDD ni Stripe — bénéfice double (architecture + tests).
 - **Fichiers :** `server/tests/*.test.js`, `server/src/services/{OrderPricing,WebhookEvents}.js`, `server/package.json` (scripts réparés)
 ```text
-$ npm test
-ℹ tests 43
-ℹ pass 43
-ℹ fail 0
+$ npm test               # sans BDD : 43 tests unitaires (integration ignoree)
+ℹ tests 43  ℹ pass 43  ℹ fail 0
+```
+
+### PHASE 3-bis — Tests d'INTÉGRATION (base MySQL réelle)
+- **Problème :** les tests unitaires valident la logique pure, mais pas le comportement **transactionnel réel** (verrous `FOR UPDATE`, triggers, contraintes, rollback) — le cœur du risque pour le paiement et le stock.
+- **Solution :** suite d'intégration (`server/tests/order.integration.test.js`) qui exécute le **vrai code des repositories** contre une **vraie MySQL**, couvrant :
+  1. `createPendingFromCart` → stock décrémenté, total calculé, panier vidé ;
+  2. stock insuffisant → rejet **+ rollback** (stock inchangé) ;
+  3. `markPaid` → transition **atomique exactly-once** (le 2ᵉ appel concurrent renvoie `null`) ;
+  4. `cancelPendingAndRestoreStock` → stock restauré, **idempotent**.
+- **Sécurité d'exécution :** les tests **s'auto-ignorent** si `TEST_DB_*` n'est pas défini (ils ne touchent JAMAIS la base de dev par accident, et `npm test` reste vert). Un **job CI dédié** lance un service MySQL 8, charge le schéma, puis exécute la suite (`TEST_DB_*` renseignés).
+- **Justification :** prouve concrètement au jury que « les paiements/stocks sont protégés contre la régression » — la garantie la plus crédible pour une boutique e-commerce.
+- **Fichiers :** `server/tests/order.integration.test.js`, `.github/workflows/ci.yml` (job `integration`)
+```text
+# avec une BDD de test (vérifié localement contre MySQL Docker)
+$ TEST_DB_* ... npm test
+✔ createPendingFromCart : decremente le stock, calcule le total, vide le panier
+✔ createPendingFromCart : stock insuffisant -> rejet, stock inchange (rollback)
+✔ markPaid : transition atomique exactly-once (anti double traitement)
+✔ cancelPendingAndRestoreStock : restaure le stock, idempotent
+ℹ tests 47  ℹ pass 47  ℹ fail 0  ℹ skipped 0
 ```
 
 ---
