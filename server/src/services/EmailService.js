@@ -36,6 +36,12 @@ const createTransporter = () => {
 
 export class EmailService {
 
+    // Vrai si le SMTP est configure (SMTP_HOST/USER/PASS presents). Permet aux
+    // appelants de ne pas declencher de logique de retry quand aucun email ne
+    // peut etre envoye (ex: environnement de dev sans SMTP).
+    static isConfigured = () =>
+        Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
+
     static sendEmail = async ({ to, subject, html, text }) => {
         const transporter = createTransporter()
 
@@ -83,7 +89,7 @@ export class EmailService {
               </tr>
               <tr style="background: #f4f4f4;">
                 <td style="padding: 8px; border: 1px solid #ddd;"><strong>Statut</strong></td>
-                <td style="padding: 8px; border: 1px solid #ddd;">En attente de paiement</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Paiement confirme</td>
               </tr>
             </table>
             <p>Vous pouvez suivre votre commande dans <a href="${clientUrl}/profil">votre espace client</a>.</p>

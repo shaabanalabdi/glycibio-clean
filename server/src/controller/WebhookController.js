@@ -1,18 +1,14 @@
 import {orderRepository} from "../repository/OrderRepository.js";
-import {userRepository} from "../repository/UserRepository.js";
 import {StripeService} from "../services/StripeService.js";
-import {EmailService} from "../services/EmailService.js";
 import {Logger} from "../services/Logger.js";
 import {resolveWebhookAction} from "../services/WebhookEvents.js";
+import {sendOrderConfirmationOnce} from "../services/OrderConfirmation.js";
 
 const markOrderPaid = async (orderId, paymentIntentId) => {
-    const order = await orderRepository.markPaid(orderId, paymentIntentId)
-    if (!order) return
-
-    const user = await userRepository.find(order.user_id)
-    if (user) {
-        await EmailService.sendOrderConfirmation(user.email, order)
-    }
+    await orderRepository.markPaid(orderId, paymentIntentId)
+    // Email decouple + idempotent : peut throw sur echec SMTP -> le handler
+    // repond 500 -> Stripe retente -> l'email est renvoye (jamais perdu, jamais double).
+    await sendOrderConfirmationOnce(orderId)
 }
 
 export class WebhookController {
@@ -63,6 +59,20 @@ export class WebhookController {
                 await markOrderPaid(orderId, paymentIntentId)
             } else if (action === "cancelRestoreStock") {
                 await orderRepository.cancelPendingAndRestoreStock(orderId, event.type)
+            } else if (action === "refund") {
+                // L'objet `charge` ne porte pas metadata.order_id : on resout la
+                // commande via le PaymentIntent (stocke dans stripe_payment_id).
+                await orderRepository.ensureColumns()
+                let id = orderId
+                if (!id) {
+                    const found = await orderRepository.findByPaymentIntent(paymentIntentId)
+                    id = found ? found.id : null
+                }
+                if (id) {
+                    await orderRepository.refundAndRestoreStock(id, event.type)
+                } else {
+                    Logger.warn(`[Webhook] Remboursement sans commande resolvable (pi=${paymentIntentId})`)
+                }
             }
             // action === "ignore" : evenement non pertinent -> aucune action
         }

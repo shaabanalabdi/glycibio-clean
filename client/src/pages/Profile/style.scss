@@ -200,4 +200,9 @@
     background: $error-bg;
     color: $error-fg;
   }
+
+  &__order-status--remboursee {
+    background: $warning-bg;
+    color: $warning-fg;
+  }
 }

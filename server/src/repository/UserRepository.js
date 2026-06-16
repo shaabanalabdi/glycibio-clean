@@ -182,8 +182,12 @@ class UserRepository extends Repository {
         return this.find(id)
     }
 
+    // tokens_valid_after = NOW() : le role est embarque dans le JWT. En changeant
+    // de role (promotion OU retrogradation), on invalide les jetons deja emis pour
+    // que le nouveau role prenne effet immediatement (sinon un admin retrograde
+    // garderait ses droits jusqu'a expiration de son jeton, jusqu'a 24h).
     updateRole = async (id, role) => {
-        await db.query("UPDATE users SET role = ? WHERE id = ?", [role, id])
+        await db.query("UPDATE users SET role = ?, tokens_valid_after = NOW() WHERE id = ?", [role, id])
     }
 
     deleteById = async (id) => {

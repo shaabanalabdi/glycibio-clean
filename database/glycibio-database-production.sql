@@ -182,11 +182,15 @@ CREATE TABLE orders (
   subtotal           DECIMAL(10,2) NOT NULL DEFAULT 0.00 CHECK (subtotal >= 0),
   shipping_cost      DECIMAL(10,2) NOT NULL DEFAULT 0.00 CHECK (shipping_cost >= 0),
   total              DECIMAL(10,2) NOT NULL DEFAULT 0.00 CHECK (total >= 0),
-  status             ENUM('en_attente','payee','en_preparation','expediee','livree','annulee') NOT NULL DEFAULT 'en_attente',
+  status             ENUM('en_attente','payee','en_preparation','expediee','livree','annulee','remboursee') NOT NULL DEFAULT 'en_attente',
   shipping_address   TEXT NOT NULL,
   shipping_method_id INT NULL,
   stripe_session_id  VARCHAR(255) NULL,
   stripe_payment_id  VARCHAR(255) NULL,
+  -- 1 une fois l'email de confirmation envoye (verrou d'idempotence : decouple
+  -- l'envoi du marquage 'payee' -> un echec SMTP transitoire est retente sans
+  -- doublon, cf. OrderRepository.claimConfirmationEmail).
+  confirmation_email_sent TINYINT(1) NOT NULL DEFAULT 0,
   notes              TEXT NULL,
   created_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

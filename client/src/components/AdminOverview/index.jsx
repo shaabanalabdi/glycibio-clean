@@ -19,7 +19,8 @@ const STATUS_LABELS = {
     en_preparation: "En preparation",
     expediee: "Expediee",
     livree: "Livree",
-    annulee: "Annulee"
+    annulee: "Annulee",
+    remboursee: "Remboursee"
 }
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString("fr-FR") : "-")

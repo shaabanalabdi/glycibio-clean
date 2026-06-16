@@ -1,8 +1,8 @@
 import {orderRepository} from "../repository/OrderRepository.js";
-import {userRepository} from "../repository/UserRepository.js";
 import {StripeService} from "../services/StripeService.js";
-import {EmailService} from "../services/EmailService.js";
 import {Validator} from "../services/Validator.js";
+import {Logger} from "../services/Logger.js";
+import {sendOrderConfirmationOnce} from "../services/OrderConfirmation.js";
 import {
     ValidationException,
     NotFoundException,
@@ -113,14 +113,18 @@ export class PaymentController {
             }
 
             if (order.status === "en_attente") {
-                const paidOrder = await orderRepository.markPaid(orderId, session.payment_intent)
+                await orderRepository.markPaid(orderId, session.payment_intent)
+            }
 
-                if (paidOrder) {
-                    const user = await userRepository.find(req.user.id)
-                    if (user) {
-                        await EmailService.sendOrderConfirmation(user.email, paidOrder)
-                    }
-                }
+            // Email de confirmation idempotent et decouple. Best-effort cote
+            // utilisateur : un echec d'envoi ne doit PAS casser la page de succes
+            // (le webhook Stripe, lui, retentera l'envoi). On l'appelle aussi si la
+            // commande etait deja 'payee' (webhook arrive avant) pour rattraper un
+            // eventuel email non encore parti.
+            try {
+                await sendOrderConfirmationOnce(orderId)
+            } catch (mailErr) {
+                Logger.warn(`[PaymentController] Email confirmation differe pour #${orderId}: ${mailErr.message}`)
             }
 
             const updatedOrder = await orderRepository.find(orderId)

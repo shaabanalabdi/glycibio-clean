@@ -34,6 +34,24 @@ test("payment_intent.payment_failed / canceled -> cancelRestoreStock", () => {
     }
 })
 
+test("charge.refunded TOTAL -> refund (resolu via payment_intent)", () => {
+    const event = {
+        type: "charge.refunded",
+        data: { object: { refunded: true, payment_intent: "pi_777", metadata: {} } }
+    }
+    assert.deepEqual(resolveWebhookAction(event), {
+        action: "refund", orderId: null, paymentIntentId: "pi_777"
+    })
+})
+
+test("charge.refunded PARTIEL -> ignore (non traite automatiquement)", () => {
+    const event = {
+        type: "charge.refunded",
+        data: { object: { refunded: false, amount: 5000, amount_refunded: 1000, payment_intent: "pi_888" } }
+    }
+    assert.equal(resolveWebhookAction(event).action, "ignore")
+})
+
 test("evenement sans order_id -> ignore", () => {
     const event = { type: "checkout.session.expired", data: { object: { metadata: {} } } }
     assert.equal(resolveWebhookAction(event).action, "ignore")

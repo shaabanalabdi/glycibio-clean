@@ -780,6 +780,10 @@
   &--annulee {
     background: $error;
   }
+
+  &--remboursee {
+    background: $gray-600;
+  }
 }
 
 .admin-muted {

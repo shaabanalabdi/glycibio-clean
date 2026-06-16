@@ -19,7 +19,8 @@ const STATUS_LABELS = {
     en_preparation: "En preparation",
     expediee:       "Expediee",
     livree:         "Livree",
-    annulee:        "Annulee"
+    annulee:        "Annulee",
+    remboursee:     "Remboursee"
 }
 
 export const Profile = () => {
@@ -189,17 +190,21 @@ export const Profile = () => {
 
                     <div className="profile__row">
                         <div className="profile__field">
-                            <label>Prenom</label>
+                            <label htmlFor="first_name">Prenom</label>
                             <input
+                                id="first_name"
                                 type="text"
+                                autoComplete="given-name"
                                 value={profile.first_name}
                                 onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
                             />
                         </div>
                         <div className="profile__field">
-                            <label>Nom</label>
+                            <label htmlFor="last_name">Nom</label>
                             <input
+                                id="last_name"
                                 type="text"
+                                autoComplete="family-name"
                                 value={profile.last_name}
                                 onChange={(e) => setProfile({ ...profile, last_name: e.target.value })}
                             />
@@ -207,9 +212,11 @@ export const Profile = () => {
                     </div>
 
                     <div className="profile__field">
-                        <label>Telephone</label>
+                        <label htmlFor="phone">Telephone</label>
                         <input
+                            id="phone"
                             type="tel"
+                            autoComplete="tel"
                             value={profile.phone}
                             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                             placeholder="+33 6 12 34 56 78"

@@ -129,6 +129,25 @@ test("markPaid : transition atomique exactly-once + vide le panier au paiement",
     assert.equal(afterPay.length, 0, "panier VIDE apres paiement confirme")
 })
 
+test("claimConfirmationEmail : verrou idempotent, libere -> re-claimable, exige status 'payee'", { skip }, async () => {
+    await orderRepo.ensureColumns() // garantit la colonne confirmation_email_sent
+    await addToCart(1)
+    const { orderId } = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
+
+    // Avant paiement : commande 'en_attente' -> claim refuse (pas d'email premature).
+    assert.equal(await orderRepo.claimConfirmationEmail(orderId), false, "pas de claim tant que non payee")
+
+    await orderRepo.markPaid(orderId, "pi_test_mail")
+
+    // 1er claim gagne, 2e refuse -> un seul email meme si webhook + /success se croisent.
+    assert.equal(await orderRepo.claimConfirmationEmail(orderId), true, "1er claim gagne")
+    assert.equal(await orderRepo.claimConfirmationEmail(orderId), false, "2e claim refuse (deja envoye)")
+
+    // Liberation (simulant un echec d'envoi SMTP) -> re-claimable pour retry.
+    await orderRepo.releaseConfirmationEmail(orderId)
+    assert.equal(await orderRepo.claimConfirmationEmail(orderId), true, "re-claim possible apres liberation")
+})
+
 test("cancelPendingAndRestoreStock : restaure le stock, idempotent", { skip }, async () => {
     await addToCart(4)
     const { orderId } = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
@@ -147,6 +166,59 @@ test("cancelPendingAndRestoreStock : restaure le stock, idempotent", { skip }, a
 
     const [[order]] = await db.query("SELECT status FROM orders WHERE id = ?", [orderId])
     assert.equal(order.status, "annulee")
+})
+
+test("findByPaymentIntent : resout la commande via stripe_payment_id", { skip }, async () => {
+    await addToCart(1)
+    const { orderId } = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
+    await orderRepo.markPaid(orderId, "pi_lookup_test")
+
+    const found = await orderRepo.findByPaymentIntent("pi_lookup_test")
+    assert.ok(found, "commande trouvee via payment_intent")
+    assert.equal(found.id, orderId)
+    assert.equal(await orderRepo.findByPaymentIntent("pi_inexistant"), null, "pi inconnu -> null")
+})
+
+test("refundAndRestoreStock : remboursement total d'une commande 'payee' restaure le stock, idempotent", { skip }, async () => {
+    await orderRepo.ensureColumns()
+    await addToCart(3)
+    const { orderId } = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
+    await orderRepo.markPaid(orderId, "pi_refund_test")
+
+    const [[afterPay]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(afterPay.stock, 7, "stock = 10 - 3 apres paiement")
+
+    const refunded = await orderRepo.refundAndRestoreStock(orderId, "test")
+    assert.equal(refunded, true)
+
+    const [[afterRefund]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(afterRefund.stock, 10, "stock restaure (commande payee non expediee)")
+    const [[order]] = await db.query("SELECT status FROM orders WHERE id = ?", [orderId])
+    assert.equal(order.status, "remboursee")
+
+    const again = await orderRepo.refundAndRestoreStock(orderId, "test")
+    assert.equal(again, false, "2e remboursement = no-op (idempotent)")
+    const [[afterTwice]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(afterTwice.stock, 10, "stock inchange apres 2e appel")
+})
+
+test("refundAndRestoreStock : commande 'expediee' remboursee -> statut remboursee SANS restaurer le stock", { skip }, async () => {
+    await orderRepo.ensureColumns()
+    await addToCart(2)
+    const { orderId } = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)
+    await orderRepo.markPaid(orderId, "pi_refund_ship")
+    await db.query("UPDATE orders SET status = 'expediee' WHERE id = ?", [orderId]) // pas de trigger sur orders
+
+    const [[afterShip]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(afterShip.stock, 8, "stock = 10 - 2")
+
+    const refunded = await orderRepo.refundAndRestoreStock(orderId, "test")
+    assert.equal(refunded, true)
+
+    const [[afterRefund]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(afterRefund.stock, 8, "stock INCHANGE (marchandise deja expediee)")
+    const [[order]] = await db.query("SELECT status FROM orders WHERE id = ?", [orderId])
+    assert.equal(order.status, "remboursee")
 })
 
 test("createPendingFromCart : un 2e checkout annule la commande en_attente precedente (pas de reservation double)", { skip }, async () => {

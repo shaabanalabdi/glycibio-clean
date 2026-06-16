@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { ShoppingCart, Heart, Check } from "lucide-react"
 import { ProductImage } from "@components/ProductImage/index.jsx"
@@ -27,6 +27,15 @@ export const ProductCard = ({ product }) => {
         !outOfStock && product.stock !== undefined && product.stock <= 5
     const inWishlist = has(product.id)
 
+    // Remet le bouton a l'etat initial 2s apres l'ajout. En useEffect (et non
+    // dans le handler) pour nettoyer le timer si la carte se demonte avant la fin
+    // -> evite un setState sur composant demonte.
+    useEffect(() => {
+        if (!added) return
+        const timer = setTimeout(() => setAdded(false), 2000)
+        return () => clearTimeout(timer)
+    }, [added])
+
     const toggleWishlist = async (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -42,7 +51,6 @@ export const ProductCard = ({ product }) => {
         const { ok } = await addCart(product, 1)
         if (ok) {
             setAdded(true)
-            setTimeout(() => setAdded(false), 2000)
         }
     }
 

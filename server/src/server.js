@@ -17,6 +17,25 @@ const { expiredCheckout } = await import("./cron/expiredCheckout.js")
 
 await SentryService.init()
 
+// Filet de securite global : un rejet de promesse / une exception non gere dans
+// une tache de fond (crons, appels fire-and-forget comme warnIfDefaultAdmin) ne
+// doit pas passer inapercu ou tuer le process silencieusement.
+//   - unhandledRejection : on logue + capture (Sentry si configure), sans sortir
+//     (resilience : une tache de fond fautive ne fait pas tomber l'API).
+//   - uncaughtException   : etat potentiellement corrompu -> on logue, capture,
+//     puis on sort (code 1) pour laisser PM2 / Docker (restart: unless-stopped)
+//     repartir proprement (comportement Node par defaut, mais avec capture).
+process.on("unhandledRejection", (reason) => {
+    const err = reason instanceof Error ? reason : new Error(String(reason))
+    Logger.error("[process] unhandledRejection:", err.message)
+    SentryService.captureException(err)
+})
+process.on("uncaughtException", (error) => {
+    Logger.error("[process] uncaughtException:", error.message)
+    SentryService.captureException(error)
+    process.exit(1)
+})
+
 // Avertissement de securite : detecte si le compte admin d'usine utilise encore
 // le mot de passe par defaut livre dans le dump SQL (hash bcrypt connu).
 const warnIfDefaultAdmin = async () => {
@@ -36,6 +55,24 @@ const warnIfDefaultAdmin = async () => {
     {
         // BDD pas encore prete / table absente : on ignore, ce n'est qu'un garde-fou.
     }
+}
+
+// Migrations additives idempotentes (colonnes / valeurs ENUM ajoutees au fil des
+// versions) appliquees AU DEMARRAGE sur une BDD existante, plutot que
+// paresseusement au 1er evenement -> evite toute fenetre ou un nouveau statut ou
+// une nouvelle colonne n'existe pas encore (ex: passage manuel d'une commande a
+// 'remboursee' avant tout paiement). Non bloquant : si la BDD est indisponible
+// on logue et on continue (les appels lazy restent un filet de securite).
+try
+{
+    const { userRepository } = await import("./repository/UserRepository.js")
+    const { orderRepository } = await import("./repository/OrderRepository.js")
+    await Promise.all([userRepository.ensureColumns(), orderRepository.ensureColumns()])
+    Logger.info("[migration] Schema verifie au demarrage (ensureColumns)")
+}
+catch (e)
+{
+    Logger.warn("[migration] ensureColumns au demarrage a echoue (poursuite):", e.message)
 }
 
 const PORT = process.env.PORT || 5000

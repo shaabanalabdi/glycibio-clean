@@ -65,6 +65,10 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
       # SameSite des cookies d'auth (lax par defaut ; 'none' est ramene a lax)
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
+      # Derriere Nginx (reverse proxy, 1 hop) : recupere la vraie IP cliente via
+      # X-Forwarded-For -> indispensable au rate-limiting par IP (sinon tous les
+      # clients partagent l'IP interne du conteneur Nginx). Aligne sur PM2 (ecosystem.config.cjs).
+      TRUST_PROXY: ${TRUST_PROXY:-1}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USER: ${SMTP_USER}

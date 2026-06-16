@@ -32,14 +32,23 @@ export const Cookies = () => {
 
                     <h3>Cookies strictement necessaires (sans consentement)</h3>
                     <table className="legal-table">
-                        <thead><tr><th>Nom</th><th>Finalite</th><th>Duree</th><th>Editeur</th></tr></thead>
+                        <thead><tr><th>Nom</th><th>Type</th><th>Finalite</th><th>Duree</th><th>Editeur</th></tr></thead>
                         <tbody>
-                            <tr><td><code>token</code> (localStorage)</td><td>Maintenir la session connectee (JWT)</td><td>24h</td><td>GlyciBio</td></tr>
-                            <tr><td><code>user</code> (localStorage)</td><td>Identite affichee (prenom, role)</td><td>Session</td><td>GlyciBio</td></tr>
-                            <tr><td><code>cart_count</code> (localStorage)</td><td>Compteur panier (UX)</td><td>Session</td><td>GlyciBio</td></tr>
-                            <tr><td><code>glycibio_consent</code></td><td>Memoriser votre choix concernant les cookies</td><td>13 mois</td><td>GlyciBio</td></tr>
+                            <tr><td><code>token</code></td><td>Cookie (HttpOnly)</td><td>Maintenir la session connectee (jeton JWT, inaccessible au JavaScript)</td><td>24h</td><td>GlyciBio</td></tr>
+                            <tr><td><code>csrf_token</code></td><td>Cookie</td><td>Protection contre la falsification de requete (CSRF)</td><td>Session</td><td>GlyciBio</td></tr>
+                            <tr><td><code>glycibio_consent</code></td><td>Stockage local</td><td>Memoriser votre choix concernant les cookies</td><td>13 mois</td><td>GlyciBio</td></tr>
+                            <tr><td><code>glycibio-guest-cart</code></td><td>Stockage local</td><td>Conserver le panier avant connexion</td><td>Persistant</td><td>GlyciBio</td></tr>
+                            <tr><td><code>glycibio-theme</code></td><td>Stockage local</td><td>Memoriser le theme clair / sombre choisi</td><td>Persistant</td><td>GlyciBio</td></tr>
                         </tbody>
                     </table>
+                    <p className="legal-page__note">
+                        <em>
+                            Le cookie de session <code>token</code> est <strong>HttpOnly</strong> : il n&apos;est jamais
+                            accessible au JavaScript de la page, ce qui le protege contre le vol par injection de script
+                            (XSS). Les elements de &laquo;&nbsp;stockage local&nbsp;&raquo; (localStorage) ne sont pas
+                            des cookies et ne sont jamais transmis a nos serveurs ; ils restent sur votre appareil.
+                        </em>
+                    </p>
 
                     <h3>Cookies soumis a consentement</h3>
                     <p>

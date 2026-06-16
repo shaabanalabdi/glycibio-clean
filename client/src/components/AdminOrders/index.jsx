@@ -10,7 +10,7 @@ import { Skeleton } from "@components/Skeleton/index.jsx"
 import { useSortedRows } from "@hooks/useSortedRows.js"
 import { formatPrice } from "@utils/formatPrice.js"
 
-const ORDER_STATUSES = ["en_attente", "payee", "en_preparation", "expediee", "livree", "annulee"]
+const ORDER_STATUSES = ["en_attente", "payee", "en_preparation", "expediee", "livree", "annulee", "remboursee"]
 
 const STATUS_LABELS = {
     en_attente: "En attente",
@@ -18,7 +18,8 @@ const STATUS_LABELS = {
     en_preparation: "En preparation",
     expediee: "Expediee",
     livree: "Livree",
-    annulee: "Annulee"
+    annulee: "Annulee",
+    remboursee: "Remboursee"
 }
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString("fr-FR") : "-")
