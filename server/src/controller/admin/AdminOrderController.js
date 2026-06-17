@@ -1,19 +1,6 @@
 import {orderRepository} from "../../repository/OrderRepository.js";
 import {ValidationException, NotFoundException} from "../../error/HttpException.js";
-
-const VALID_STATUSES = ["en_attente", "payee", "en_preparation", "expediee", "livree", "annulee", "remboursee"]
-
-// Machine à états : transitions de statut autorisées. Sécurise le cycle de vie de
-// la commande — empêche les sauts illogiques (ex. en_attente -> livree sans paiement).
-const STATUS_TRANSITIONS = {
-    en_attente:     ["payee", "annulee"],
-    payee:          ["en_preparation", "expediee", "annulee", "remboursee"],
-    en_preparation: ["expediee", "annulee", "remboursee"],
-    expediee:       ["livree", "remboursee"],
-    livree:         ["remboursee"],
-    annulee:        [],
-    remboursee:     []
-}
+import {VALID_STATUSES, isValidStatusTransition} from "../../services/OrderStatus.js";
 
 export class AdminOrderController {
 
@@ -52,11 +39,8 @@ export class AdminOrderController {
 
             // Machine à états : refuse les transitions illogiques (ex. en_attente ->
             // livree sans paiement). No-op accepté si le statut est inchangé.
-            if (status !== order.status) {
-                const allowed = STATUS_TRANSITIONS[order.status] || []
-                if (!allowed.includes(status)) {
-                    throw new ValidationException(`Transition de statut invalide : ${order.status} -> ${status}`)
-                }
+            if (!isValidStatusTransition(order.status, status)) {
+                throw new ValidationException(`Transition de statut invalide : ${order.status} -> ${status}`)
             }
 
             // 'remboursee' : meme chemin que le webhook Stripe (restaure le stock si

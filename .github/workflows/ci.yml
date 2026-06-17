@@ -76,6 +76,9 @@ jobs:
       - name: Lint (eslint)
         run: npm run lint
 
+      - name: Tests (node:test)
+        run: npm test
+
       - name: Build (vite)
         run: npm run build
         env:
