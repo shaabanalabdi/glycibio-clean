@@ -464,7 +464,36 @@
   margin-bottom: $space-fluid-xl;
 
   &__grid {
-    @include auto-grid(14rem, 1.375rem);   // gap 22px
+    // Mobile : carrousel horizontal au swipe (scroll-snap), sans JS.
+    // 1 carte visible + aperçu de la suivante pour signaler le défilement.
+    display: flex;
+    gap: 1.375rem;                     // 22px
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-block: 0.25rem 0.75rem;    // évite de rogner l'ombre des cartes
+    scrollbar-width: none;             // Firefox
+    &::-webkit-scrollbar { display: none; } // WebKit/Chrome
+
+    > * {
+      flex: 0 0 80%;                   // ~1 produit visible + aperçu
+      scroll-snap-align: start;
+    }
+
+    // ≥ sm : 2 produits visibles dans le carrousel
+    @include breakpoint(sm) {
+      > * { flex-basis: 47%; }
+    }
+
+    // ≥ lg (grand écran) : grille 3 colonnes => 6 produits sur 2 rangées,
+    // le carrousel est désactivé.
+    @include breakpoint(lg) {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: visible;
+      scroll-snap-type: none;
+      > * { flex: initial; }           // reset du flex-basis du carrousel
+    }
   }
 }
 
