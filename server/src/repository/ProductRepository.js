@@ -13,9 +13,11 @@ class ProductRepository extends Repository {
         const offset = (page - 1) * limit
 
         let sql = `
-          SELECT p.*, c.name AS category_name
+          SELECT p.*, c.name AS category_name,
+                 vpr.avg_rating, vpr.reviews_count
           FROM products p
           JOIN categories c ON p.category_id = c.id
+          LEFT JOIN v_product_ratings vpr ON vpr.product_id = p.id
           WHERE p.is_active = TRUE
         `
         const params = []
@@ -80,7 +82,9 @@ class ProductRepository extends Repository {
             }
         }
 
-        const countSql = sql.replace("SELECT p.*, c.name AS category_name", "SELECT COUNT(*) AS total")
+        // Compte robuste : on remplace toute la liste SELECT (quelles que soient
+        // les colonnes ajoutees, ex. notes) par COUNT(*).
+        const countSql = sql.replace(/SELECT[\s\S]*?\sFROM/, "SELECT COUNT(*) AS total FROM")
         const [countResult] = await db.query(countSql, params)
         const total = countResult[0].total
 
@@ -107,9 +111,11 @@ class ProductRepository extends Repository {
     findActiveByIdOrSlug = async (key) => {
         const lookupByNumericId = /^\d+$/.test(key)
         const [rows] = await db.query(
-            `SELECT p.*, c.name AS category_name
+            `SELECT p.*, c.name AS category_name,
+                    vpr.avg_rating, vpr.reviews_count
              FROM products p
              JOIN categories c ON p.category_id = c.id
+             LEFT JOIN v_product_ratings vpr ON vpr.product_id = p.id
              WHERE p.is_active = TRUE AND ${lookupByNumericId ? "p.id = ?" : "p.slug = ?"}
              LIMIT 1`,
             [key]
@@ -119,9 +125,11 @@ class ProductRepository extends Repository {
 
     findRelated = async (categoryId, excludeId) => {
         const [rows] = await db.query(
-            `SELECT p.id, p.slug, p.name, p.price, p.image, p.stock, p.glycemic_index, p.ig_category, c.name AS category_name
+            `SELECT p.id, p.slug, p.name, p.price, p.image, p.stock, p.glycemic_index, p.ig_category, c.name AS category_name,
+                    vpr.avg_rating, vpr.reviews_count
                FROM products p
                JOIN categories c ON p.category_id = c.id
+               LEFT JOIN v_product_ratings vpr ON vpr.product_id = p.id
               WHERE p.is_active = TRUE
                 AND p.category_id = ?
                 AND p.id <> ?

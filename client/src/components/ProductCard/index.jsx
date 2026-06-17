@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { ShoppingCart, Heart, Check } from "lucide-react"
 import { ProductImage } from "@components/ProductImage/index.jsx"
 import { IgMeter } from "@components/IgMeter/index.jsx"
+import { RatingStars } from "@components/RatingStars/index.jsx"
 import { useAuthenticated } from "@hooks/useAuthenticated.js"
 import { useCart } from "@hooks/useCart.js"
 import { useWishlist } from "@hooks/useWishlist.js"
@@ -132,6 +133,14 @@ export const ProductCard = ({ product }) => {
                     )}
 
                     <h3 className="product-card__name">{product.name}</h3>
+
+                    {Number(product.reviews_count) > 0 && (
+                        <RatingStars
+                            rating={product.avg_rating}
+                            count={Number(product.reviews_count)}
+                            size={14}
+                        />
+                    )}
 
                     {/* Bande signature : l'index glycemique reste le differenciateur */}
                     <div className="product-card__ig">

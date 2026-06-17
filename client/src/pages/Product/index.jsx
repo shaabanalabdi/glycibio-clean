@@ -13,6 +13,7 @@ import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
 import { useGetProductQuery, useGetRelatedProductsQuery } from "@slices/productApiSlice.js"
 import { formatPrice } from "@utils/formatPrice.js"
 import { FREE_SHIPPING_THRESHOLD } from "@utils/constants.js"
+import { RatingStars } from "@components/RatingStars/index.jsx"
 
 const SITE_BASE = "https://glycibio.fr"
 
@@ -214,6 +215,14 @@ export const Product = () => {
                         </div>
                     )}
                     <h1 className="product-page__name">{product.name}</h1>
+
+                    {Number(product.reviews_count) > 0 && (
+                        <RatingStars
+                            rating={product.avg_rating}
+                            count={Number(product.reviews_count)}
+                            size={16}
+                        />
+                    )}
 
                     {/* Grande carte Index glycemique (signature) */}
                     <div className="product-page__ig-card">

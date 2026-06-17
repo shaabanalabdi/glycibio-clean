@@ -1,0 +1,29 @@
+@use "../../assets/style/abstracts/variables" as *;
+@use "../../assets/style/abstracts/theme-tokens" as *;
+
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  line-height: 1;
+
+  &__row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.0625rem;
+    color: $border;                 // etoile vide (neutre, theme-aware)
+  }
+
+  &__star {
+    flex-shrink: 0;
+
+    &--on { color: #f5a623; }       // dore — note remplie
+  }
+
+  &__count {
+    font-size: $fs-xs;
+    font-weight: $fw-medium;
+    color: $text-muted;
+    font-variant-numeric: tabular-nums;
+  }
+}
