@@ -22,6 +22,7 @@
   box-shadow: $shadow-sm;
   overflow: hidden;
   color: $text;
+  container-type: inline-size;     // adapte le contenu à la largeur de LA carte (container queries)
 
   // Couleur de niveau IG — pilote le point + le libelle de bande
   &[data-ig="bas"]   { --ig-color: #{$ig-bas}; }
@@ -264,10 +265,12 @@
     border-top: 1px solid $border;
   }
 
-  // Tres petits ecrans (grille 2 colonnes, cartes etroites) : typographie et
-  // espacements reduits proportionnellement, et footer empile (prix au-dessus,
-  // bouton "Ajouter" en pleine largeur) pour rester lisible et aligne.
-  @media (max-width: 30em) {
+  // Carte ETROITE — on s'adapte à la largeur de LA CARTE (container query, pas la
+  // fenêtre) : dès que la carte est trop étroite pour aligner prix + bouton, la
+  // typographie est réduite et le footer s'empile (prix centré au-dessus, bouton
+  // "Ajouter" pleine largeur). Évite tout débordement/rognage du bouton, quel que
+  // soit le contexte (carrousel accueil, grilles serrées, mobile).
+  @container (max-width: 21rem) {
     &__body    { padding: $space-xs; gap: $space-2xs; }
     &__category { font-size: 0.625rem; }     // ~10px
     &__name    { font-size: $fs-sm; min-height: 2.6em; }
