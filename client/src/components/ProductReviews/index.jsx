@@ -12,11 +12,13 @@ const Stars = ({ value, size = 16, interactive = false, onChange }) => {
                     <button
                         key={n}
                         type="button"
+                        role="radio"
+                        aria-checked={value === n}
                         className={`stars__btn ${filled ? "stars__btn--filled" : ""}`}
                         onClick={() => onChange(n)}
                         aria-label={`${n} etoile${n > 1 ? "s" : ""}`}
                     >
-                        <Star size={size} fill={filled ? "currentColor" : "none"} />
+                        <Star size={size} fill={filled ? "currentColor" : "none"} aria-hidden="true" />
                     </button>
                 ) : (
                     <Star
@@ -24,6 +26,7 @@ const Stars = ({ value, size = 16, interactive = false, onChange }) => {
                         size={size}
                         className={filled ? "stars__star--filled" : "stars__star--empty"}
                         fill={filled ? "currentColor" : "none"}
+                        aria-hidden="true"
                     />
                 )
             })}

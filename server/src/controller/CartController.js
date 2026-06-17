@@ -145,19 +145,22 @@ export class CartController {
                 throw new ValidationException("Trop d'articles a fusionner")
             }
 
-            for (const item of items) {
-                const productId = Number(item?.product_id)
-                const qty = Math.floor(Number(item?.quantity))
-                // Rejet explicite des quantités invalides (≤0 / NaN) au lieu d'un clamp silencieux.
-                if (!productId || !Number.isFinite(qty) || qty < 1) continue
+            // Normalise + rejette les quantités invalides (≤0 / NaN) explicitement,
+            // puis charge TOUS les produits en 1 requête (évite le N+1).
+            const normalized = items
+                .map((item) => ({ productId: Number(item?.product_id), qty: Math.floor(Number(item?.quantity)) }))
+                .filter((i) => i.productId && Number.isFinite(i.qty) && i.qty >= 1)
 
-                const product = await productRepository.findActiveById(productId)
-                if (!product) continue
+            const products = await productRepository.findActiveByIds(normalized.map((i) => i.productId))
+            const stockById = new Map(products.map((p) => [p.id, p.stock]))
+
+            for (const { productId, qty } of normalized) {
+                const stock = stockById.get(productId)
+                if (stock === undefined) continue
 
                 const currentQty = await cartItemRepository.findQuantity(req.user.id, productId)
-                const targetQty = Math.min(product.stock, currentQty + qty)
-
-                if (targetQty === currentQty) continue
+                const targetQty = Math.min(stock, currentQty + qty)
+                if (targetQty <= currentQty) continue
 
                 await cartItemRepository.upsertItem(req.user.id, productId, targetQty - currentQty)
             }

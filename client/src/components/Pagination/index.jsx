@@ -26,11 +26,12 @@ export const Pagination = ({ page, totalPages, onPageChange }) => {
     const items = buildPageList(page, totalPages)
 
     return (
-        <div className="pagination">
+        <nav className="pagination" aria-label="Pagination">
             <button
                 className="pagination__btn"
                 onClick={() => onPageChange(page - 1)}
                 disabled={page === 1}
+                aria-label="Aller à la page précédente"
             >
                 &laquo; Precedent
             </button>
@@ -55,9 +56,10 @@ export const Pagination = ({ page, totalPages, onPageChange }) => {
                 className="pagination__btn"
                 onClick={() => onPageChange(page + 1)}
                 disabled={page === totalPages}
+                aria-label="Aller à la page suivante"
             >
                 Suivant &raquo;
             </button>
-        </div>
+        </nav>
     )
 }

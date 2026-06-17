@@ -148,6 +148,18 @@ class ProductRepository extends Repository {
         return rows.length === 0 ? null : rows[0]
     }
 
+    // Chargement par lot (évite le N+1 dans la fusion de panier guest->connecté).
+    findActiveByIds = async (ids) => {
+        const valid = [...new Set((ids || []).map((id) => parseInt(id, 10)).filter((id) => Number.isInteger(id) && id > 0))]
+        if (valid.length === 0) return []
+        const placeholders = valid.map(() => "?").join(",")
+        const [rows] = await db.query(
+            `SELECT id, name, stock FROM products WHERE id IN (${placeholders}) AND is_active = TRUE`,
+            valid
+        )
+        return rows
+    }
+
     findAllForAdmin = async ({ search, category, status }) => {
         let sql = `
           SELECT p.*, c.name AS category_name

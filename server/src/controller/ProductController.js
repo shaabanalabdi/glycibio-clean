@@ -16,6 +16,9 @@ export class ProductController {
                 category, ig, search, sort, price_min, price_max, exclude_allergens, page, limit
             })
 
+            // Cache navigateur/proxy court : catalogue semi-statique (anonyme, sans
+            // données utilisateur). Les notes/prix se rafraîchissent sous 2 min.
+            res.set("Cache-Control", "public, max-age=120")
             return res.status(200).json({
                 message: "Products fetched successfully",
                 products,
@@ -41,6 +44,7 @@ export class ProductController {
             // Images de la galerie (image principale = products.image)
             const gallery = await productImageRepository.findByProduct(product.id)
 
+            res.set("Cache-Control", "public, max-age=120")
             return res.status(200).json({
                 message: "Product fetched successfully",
                 product: { ...product, gallery }
@@ -64,6 +68,7 @@ export class ProductController {
 
             const products = await productRepository.findRelated(current.category_id, current.id)
 
+            res.set("Cache-Control", "public, max-age=300")
             return res.status(200).json({
                 message: "Related products fetched successfully",
                 products
