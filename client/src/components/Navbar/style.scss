@@ -124,7 +124,8 @@
     display: flex;
     align-items: center;
     gap: $space-2xs;                       // 8px
-    flex-wrap: wrap;                       // mobile : la recherche passe sur sa propre ligne
+    flex-wrap: nowrap;                     // navbar TOUJOURS sur une seule ligne
+    position: relative;                    // ancre le tiroir de recherche (mobile)
   }
 
   // ------------------------------------------------------------
@@ -177,7 +178,8 @@
     line-height: 1;
     padding: $space-3xs;
     border-radius: $radius-sm;
-    flex-shrink: 0;
+    flex-shrink: 1;                    // peut retrecir pour garder la navbar sur 1 ligne
+    min-width: 0;
     text-decoration: none;
 
     &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
@@ -194,7 +196,7 @@
       display: block;
       height: 2.25rem;                 // 36px
       width: auto;
-      max-width: 11rem;                // ~176px
+      max-width: 100%;                 // suit le retrecissement du lien (navbar 1 ligne)
       object-fit: contain;
     }
 
@@ -230,10 +232,13 @@
   // CENTER zone: inline search bar (pill, flex:1)
   // ------------------------------------------------------------
   &__search {
-    order: 1;                          // mobile : après les icônes -> 2e ligne pleine largeur
-    flex: 1 1 100%;
+    // mobile : tiroir déroulant absolu SOUS la navbar (hors flux -> navbar sur 1 ligne)
+    position: absolute;
+    top: calc(100% + #{$space-3xs});
+    inset-inline: $space-sm;
+    z-index: 20;
     min-width: 0;
-    display: none;                     // mobile : cachée, ouverte via le bouton loupe (.navbar__search--open)
+    display: none;                     // caché, ouvert via le bouton loupe (.navbar__search--open)
     align-items: center;
     gap: $space-2xs;
     height: 2.625rem;                  // 42px
@@ -241,6 +246,7 @@
     background: $surface;
     border: 1px solid $border;
     border-radius: $radius-pill;       // pill
+    box-shadow: $shadow-lg;            // détache le tiroir du contenu
     transition: background $t-fast $ease, border-color $t-fast $ease, box-shadow $t-fast $ease;
 
     &:hover { border-color: $border-strong; }
@@ -379,9 +385,11 @@
     &__right { margin-left: 0; }       // desktop : la recherche centrée gère l'espace
 
     &__search {
-      order: 0;                        // desktop : barre centrale
-      display: flex;                   // desktop : toujours visible (bouton loupe masqué)
+      position: static;                // desktop : barre centrale dans le flux
+      order: 0;
+      display: flex;                   // toujours visible (bouton loupe masqué)
       flex: 1 1 0%;
+      box-shadow: none;
       max-width: 26rem;                // 416px
       margin-inline: auto;
       height: $tap-target;             // 44px
