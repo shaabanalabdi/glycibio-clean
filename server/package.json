@@ -8,7 +8,9 @@
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage",
     "start": "node src/server.js",
-    "backup:db": "node scripts/backup-db.cjs"
+    "backup:db": "node scripts/backup-db.cjs",
+    "seed:demo": "node scripts/seed-demo.js",
+    "process:demo-images": "node scripts/process-demo-images.js"
   },
   "keywords": [],
   "author": "",
