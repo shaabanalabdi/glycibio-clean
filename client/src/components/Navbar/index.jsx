@@ -13,10 +13,12 @@ export const Navbar = () => {
     const { cartCount, refreshCartCount } = useCart();
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [searchOpen, setSearchOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const drawerCloseRef = useRef(null);
     const menuTriggerRef = useRef(null);   // burger — pour restaurer le focus a la fermeture
+    const searchInputRef = useRef(null);   // focus a l'ouverture de la recherche mobile
 
     useEffect(() => {
         if (authUser) refreshCartCount();
@@ -24,8 +26,10 @@ export const Navbar = () => {
 
     // Close drawer on route change — sync route -> internal state (faux positif set-state-in-effect)
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+        /* eslint-disable react-hooks/set-state-in-effect -- sync route -> ferme menu + recherche */
         setMenuOpen(false);
+        setSearchOpen(false);
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, [location.pathname, location.search]);
 
     // Body scroll lock while drawer is open
@@ -54,7 +58,7 @@ export const Navbar = () => {
 
     // Escape to close
     useEffect(() => {
-        const onKey = (e) => { if (e.key === "Escape") { setMenuOpen(false); menuTriggerRef.current?.focus(); } };
+        const onKey = (e) => { if (e.key === "Escape") { setMenuOpen(false); setSearchOpen(false); menuTriggerRef.current?.focus(); } };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, []);
@@ -64,10 +68,16 @@ export const Navbar = () => {
         if (menuOpen && drawerCloseRef.current) drawerCloseRef.current.focus();
     }, [menuOpen]);
 
+    // Focus le champ de recherche a son ouverture (mobile)
+    useEffect(() => {
+        if (searchOpen) searchInputRef.current?.focus();
+    }, [searchOpen]);
+
     const submitSearch = (e) => {
         e.preventDefault();
         const q = searchQuery.trim();
         navigate(q ? `/catalogue?search=${encodeURIComponent(q)}` : "/catalogue");
+        setSearchOpen(false);
     };
 
     // Ferme le drawer ET restaure le focus sur le burger (sauf si une
@@ -150,9 +160,10 @@ export const Navbar = () => {
                     </ul>
 
                     {/* CENTER — inline search bar (flex:1 fills space between left and right) */}
-                    <form className="navbar__search" onSubmit={submitSearch} role="search" aria-label="Rechercher un produit">
+                    <form className={`navbar__search ${searchOpen ? "navbar__search--open" : ""}`} id="navbar-search" onSubmit={submitSearch} role="search" aria-label="Rechercher un produit">
                         <Search size={18} strokeWidth={2} className="navbar__search-icon" aria-hidden="true" />
                         <input
+                            ref={searchInputRef}
                             type="search"
                             className="navbar__search-input"
                             placeholder="Rechercher un aliment"
@@ -166,6 +177,18 @@ export const Navbar = () => {
 
                     {/* RIGHT — mobile: cart only / desktop: icons */}
                     <div className="navbar__right">
+                        {/* Bouton loupe — mobile : ouvre/ferme la barre de recherche */}
+                        <button
+                            type="button"
+                            className="navbar__icon-btn navbar__search-toggle"
+                            onClick={() => setSearchOpen((open) => !open)}
+                            aria-label="Rechercher"
+                            aria-expanded={searchOpen}
+                            aria-controls="navbar-search"
+                        >
+                            <Search size={22} strokeWidth={2} aria-hidden="true" />
+                        </button>
+
                         {authUser && isAdmin && <Link to="/admin" className="navbar__nav-link navbar__admin" viewTransition>Dashboard</Link>}
 
                         {authUser && (

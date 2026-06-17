@@ -233,7 +233,7 @@
     order: 1;                          // mobile : après les icônes -> 2e ligne pleine largeur
     flex: 1 1 100%;
     min-width: 0;
-    display: flex;
+    display: none;                     // mobile : cachée, ouverte via le bouton loupe (.navbar__search--open)
     align-items: center;
     gap: $space-2xs;
     height: 2.625rem;                  // 42px
@@ -249,6 +249,13 @@
       border-color: rgba($primary, 0.5);
       box-shadow: 0 0 0 3px rgba($primary, 0.15);
     }
+
+    &--open { display: flex; }         // mobile : visible quand ouverte via le bouton loupe
+  }
+
+  // Bouton loupe — visible en mobile, masqué ≥ md (recherche inline toujours visible)
+  &__search-toggle {
+    @include breakpoint(md) { display: none; }
   }
 
   &__search-icon { color: $text-faint; flex-shrink: 0; }
@@ -373,6 +380,7 @@
 
     &__search {
       order: 0;                        // desktop : barre centrale
+      display: flex;                   // desktop : toujours visible (bouton loupe masqué)
       flex: 1 1 0%;
       max-width: 26rem;                // 416px
       margin-inline: auto;
