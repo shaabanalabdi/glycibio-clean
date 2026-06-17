@@ -464,8 +464,10 @@
   margin-bottom: $space-fluid-xl;
 
   &__grid {
-    // Mobile : carrousel horizontal au swipe (scroll-snap), sans JS.
-    // 1 carte visible + aperçu de la suivante pour signaler le défilement.
+    // Carrousel horizontal (swipe / scroll-snap, sans JS) du mobile jusqu'aux
+    // écrans moyens-larges : la largeur des cartes reste confortable à chaque
+    // palier (jamais trop étroite, sinon le pied prix+bouton casse). Sur très
+    // grand écran -> rangée fixe de 6.
     display: flex;
     gap: 1.375rem;                     // 22px
     overflow-x: auto;
@@ -476,23 +478,21 @@
     &::-webkit-scrollbar { display: none; } // WebKit/Chrome
 
     > * {
-      flex: 0 0 80%;                   // ~1 produit visible + aperçu
+      flex: 0 0 82%;                   // téléphone : 1 carte + aperçu
       scroll-snap-align: start;
     }
+    @include breakpoint(sm) { > * { flex-basis: 46%; } }    // ~2 cartes
+    @include breakpoint(md) { > * { flex-basis: 31%; } }    // ~3 cartes
+    @include breakpoint(lg) { > * { flex-basis: 23.25%; } } // ~4 cartes
 
-    // ≥ sm : 2 produits visibles dans le carrousel
-    @include breakpoint(sm) {
-      > * { flex-basis: 47%; }
-    }
-
-    // ≥ lg (grand écran) : les 6 produits sur UNE SEULE rangée — cartes
-    // dimensionnées au prorata pour remplir la ligne ; carrousel désactivé.
-    @include breakpoint(lg) {
+    // Très grand écran (≥ 1400px) : les 6 produits sur UNE rangée, cartes
+    // assez larges (~225px+) pour ne pas casser ; carrousel désactivé.
+    @media (min-width: 87.5em) {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       overflow: visible;
       scroll-snap-type: none;
-      > * { flex: initial; }           // reset du flex-basis du carrousel
+      > * { flex: initial; }
     }
   }
 }
