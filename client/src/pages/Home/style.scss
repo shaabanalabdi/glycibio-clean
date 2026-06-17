@@ -485,11 +485,11 @@
       > * { flex-basis: 47%; }
     }
 
-    // ≥ lg (grand écran) : grille 3 colonnes => 6 produits sur 2 rangées,
-    // le carrousel est désactivé.
+    // ≥ lg (grand écran) : les 6 produits sur UNE SEULE rangée — cartes
+    // dimensionnées au prorata pour remplir la ligne ; carrousel désactivé.
     @include breakpoint(lg) {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       overflow: visible;
       scroll-snap-type: none;
       > * { flex: initial; }           // reset du flex-basis du carrousel
