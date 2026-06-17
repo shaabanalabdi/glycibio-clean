@@ -7,11 +7,6 @@ export const orderApiSlice = baseApi.injectEndpoints({
             transformResponse: (response) => response.orders,
             providesTags: ["orders"]
         }),
-        getOrder: build.query({
-            query: (id) => ({ url: `/orders/${id}`, method: "GET" }),
-            transformResponse: (response) => response.order,
-            providesTags: (result, error, id) => [{ type: "orders", id }]
-        }),
         createOrder: build.mutation({
             query: (data) => ({
                 url: "/orders",
@@ -32,7 +27,6 @@ export const orderApiSlice = baseApi.injectEndpoints({
 
 export const {
     useGetOrdersQuery,
-    useGetOrderQuery,
     useCreateOrderMutation,
     useCancelOrderMutation
 } = orderApiSlice

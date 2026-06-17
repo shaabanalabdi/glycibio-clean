@@ -74,7 +74,7 @@ DEPLOY_BRANCH=main PM2_APP=glycibio-api bash deploy/deploy.sh
   -- générer : PW='...' node -e "console.log(require('bcrypt').hashSync(process.env.PW,12))"
   UPDATE users SET password='<hash>' WHERE email='admin@glycibio.fr';
   ```
-- [ ] **Secrets** `server/.env` : `JWT_SECRET` / `JWT_REFRESH_SECRET_KEY` via
+- [ ] **Secrets** `server/.env` : `JWT_SECRET` via
   `openssl rand -base64 48` ; clés **Stripe LIVE** ; SMTP (`noreply@glycibio.fr`).
 - [ ] **Webhook Stripe** → `https://glycibio.fr/api/webhooks/stripe`
   (events : `checkout.session.completed/expired/async_payment_failed`,

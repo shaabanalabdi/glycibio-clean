@@ -54,7 +54,6 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD requis dans docker/.env}
       DB_NAME: ${DB_NAME:-glycibio}
       JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET_KEY: ${JWT_REFRESH_SECRET_KEY}
       JWT_ALGO: HS256
       JWT_EXPIRES_IN: 24h
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}

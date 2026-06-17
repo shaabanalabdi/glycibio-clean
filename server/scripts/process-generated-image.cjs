@@ -1,21 +1,24 @@
 // ============================================================
-// Script helper : process-generated-image.js
+// Script helper : process-generated-image.cjs
 // Importe une image generee (PNG/JPG) et cree l'image produit
-// WebP principale et ses variantes.
+// WebP principale et ses variantes responsives.
 //
 // Utilisation :
-//   node scripts/process-generated-image.js <path_to_png> <target_filename.webp>
+//   node scripts/process-generated-image.cjs <path_to_png> <target_filename.webp>
 // ============================================================
 const path = require('path');
 const fs = require('fs');
-const { processImageWithVariants } = require('../src/utils/imageProcessor');
 
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'products');
 
 const main = async () => {
+  // ImageProcessor est un module ESM (le serveur est en "type":"module").
+  // On le charge via import() dynamique depuis ce script CommonJS.
+  const { ImageProcessor } = await import('../src/services/ImageProcessor.js');
+
   const args = process.argv.slice(2);
   if (args.length < 2) {
-    console.error('Usage: node scripts/process-generated-image.js <input_path> <target_filename.webp>');
+    console.error('Usage: node scripts/process-generated-image.cjs <input_path> <target_filename.webp>');
     process.exit(1);
   }
 
@@ -37,8 +40,9 @@ const main = async () => {
   console.log(`Processing ${inputPath} -> ${outputPath}...`);
 
   try {
+    // sharp accepte un Buffer en entree : on lit le fichier source en memoire.
     const inputBuffer = fs.readFileSync(inputPath);
-    await processImageWithVariants(inputBuffer, outputPath, {
+    await ImageProcessor.processImageWithVariants(inputBuffer, outputPath, {
       mainWidth: 800,
       variants: [480, 1280],
       quality: 85,

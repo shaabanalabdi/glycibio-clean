@@ -2,11 +2,6 @@ import { baseApi } from "./baseApi.js"
 
 export const userApiSlice = baseApi.injectEndpoints({
     endpoints: (build) => ({
-        getProfile: build.query({
-            query: () => ({ url: "/users/me", method: "GET" }),
-            transformResponse: (response) => response.user,
-            providesTags: ["profile"]
-        }),
         updateProfile: build.mutation({
             query: (data) => ({
                 url: "/users/profile",
@@ -39,7 +34,6 @@ export const userApiSlice = baseApi.injectEndpoints({
 })
 
 export const {
-    useGetProfileQuery,
     useUpdateProfileMutation,
     useChangePasswordMutation,
     useDeleteAccountMutation

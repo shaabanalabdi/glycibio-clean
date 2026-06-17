@@ -2,8 +2,6 @@
 // Sentry frontend - conditional initialization
 // Activer : npm i @sentry/react puis ajouter VITE_SENTRY_DSN=...
 // ============================================================
-import { useEffect } from 'react';
-
 let initialized = false;
 
 export const initSentry = async () => {
@@ -27,19 +25,4 @@ export const initSentry = async () => {
   } catch {
     // @sentry/react non installe : silencieux
   }
-};
-
-// Erreurs UI runtime non capturees par les ErrorBoundary React
-export const useGlobalErrorHandler = () => {
-  useEffect(() => {
-    const handler = (event) => {
-      if (import.meta.env.DEV) console.error('[UI]', event.error || event.message);
-    };
-    window.addEventListener('error', handler);
-    window.addEventListener('unhandledrejection', handler);
-    return () => {
-      window.removeEventListener('error', handler);
-      window.removeEventListener('unhandledrejection', handler);
-    };
-  }, []);
 };

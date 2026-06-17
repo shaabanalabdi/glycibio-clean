@@ -28,20 +28,6 @@ export class Repository {
         return rows.length === 0 ? null : Object.assign(new this.entityClass(), rows[0])
     }
 
-    findBy = async (criteria) => {
-        const keys = Object.keys(criteria)
-
-        if (keys.length === 0) {
-            throw new Error("findBy requires at least one constraint")
-        }
-
-        const whereClause = keys.map((key) => `${key} = ?`).join(" AND ")
-        const values = keys.map((key) => criteria[key])
-
-        const [rows] = await db.query(`SELECT * FROM ${this.table} WHERE ${whereClause}`, values)
-        return rows.map((row) => Object.assign(new this.entityClass(), row))
-    }
-
     findAll = async () => {
         const [rows] = await db.query(`SELECT * FROM ${this.table}`, [])
 

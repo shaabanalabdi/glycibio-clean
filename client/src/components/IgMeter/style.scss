@@ -47,19 +47,6 @@
     .ig-meter__marker { width: 24px; height: 24px; border-width: 4px; }
   }
 
-  // --- Badge "IG {n}" (pastille couleur du niveau) ---
-  &__badge {
-    align-self: flex-start;
-    display: inline-block;
-    padding: 0.125rem 0.5rem;
-    border-radius: $radius-pill;
-    background: var(--ig-color);
-    color: $white;
-    font-size: $fs-xs;
-    font-weight: $fw-semibold;
-    white-space: nowrap;
-  }
-
   // --- Echelle (lg) : Bas / Modéré / Élevé ---
   &__scale {
     display: flex;

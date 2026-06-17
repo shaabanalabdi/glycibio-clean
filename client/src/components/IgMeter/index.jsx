@@ -5,9 +5,9 @@ import { igLevelOf, IG_LEVEL_LABELS, IG_LEVEL_RANGES } from "@utils/ig.js"
 // gradient (vert -> orange -> rouge) avec un marqueur blanc borde de la
 // couleur du niveau. Reutilise partout ou un IG apparait.
 // Seuils et libelles proviennent de @utils/ig.js (source unique de verite).
-// API alignee sur le handoff design : ig, size, showBadge, showScale.
+// API : ig, size, showScale.
 
-export const IgMeter = ({ ig, size = "md", showBadge = false, showScale = false }) => {
+export const IgMeter = ({ ig, size = "md", showScale = false }) => {
     const value = Math.max(0, Math.min(100, Math.round(Number(ig) || 0)))
     const level = igLevelOf(value)
     const label = IG_LEVEL_LABELS[level]
@@ -28,8 +28,6 @@ export const IgMeter = ({ ig, size = "md", showBadge = false, showScale = false 
             <div className="ig-meter__track">
                 <span className="ig-meter__marker" style={{ left: `${pos}%` }} />
             </div>
-
-            {showBadge && <span className="ig-meter__badge">IG {value}</span>}
 
             {showScale && (
                 <div className="ig-meter__scale" aria-hidden="true">

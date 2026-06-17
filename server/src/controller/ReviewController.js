@@ -1,7 +1,6 @@
 import {productReviewRepository} from "../repository/ProductReviewRepository.js";
 import {orderItemRepository} from "../repository/OrderItemRepository.js";
 import {ProductReview} from "../entity/ProductReview.js";
-import {Validator} from "../services/Validator.js";
 import {
     ValidationException,
     ForbiddenException,

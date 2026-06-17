@@ -17,14 +17,3 @@ export const formatPrice = (value) => {
   if (!Number.isFinite(num)) return formatter.format(0);
   return formatter.format(num);
 };
-
-// Variante sans le symbole EUR (utile dans les recapitulatifs ou le
-// libelle "Total" est deja affiche separement).
-export const formatPriceNumber = (value) => {
-  const num = typeof value === 'number' ? value : parseFloat(value);
-  if (!Number.isFinite(num)) return '0,00';
-  return new Intl.NumberFormat('fr-FR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
-};

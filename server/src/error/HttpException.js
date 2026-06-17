@@ -54,9 +54,3 @@ export class ServiceUnavailableException extends HttpException {
         super(message, HTTP_STATUS.SERVICE_UNAVAILABLE, errors)
     }
 }
-
-export class InternalServerErrorException extends HttpException {
-    constructor(message = "Internal Server Error", errors) {
-        super(message, HTTP_STATUS.INTERNAL_SERVER_ERROR, errors)
-    }
-}

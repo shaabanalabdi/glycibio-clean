@@ -3,7 +3,7 @@
 // toutes les images produits + galerie deja en BDD.
 //
 // Utilisation :
-//   node server/scripts/regenerate-variants.js
+//   node server/scripts/regenerate-variants.cjs
 //
 // Conditions :
 //   - le fichier "main" (URL stockee en BDD) doit toujours exister
@@ -16,11 +16,6 @@
 require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
-const pool = require('../src/config/database');
-const {
-  processImageWithVariants,
-  RESPONSIVE_VARIANTS,
-} = require('../src/utils/imageProcessor');
 
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'products');
 
@@ -31,37 +26,39 @@ const urlToDiskPath = (url) => {
   return path.join(UPLOAD_DIR, filename);
 };
 
-/**
- * Pour une image deja stockee en BDD, regenere ses variantes a partir du
- * fichier main (qui sert de "source verite"). Les variantes sont sauvegardees
- * a cote selon la convention `<base>-<width>.webp`.
- */
-const regenerateOne = async (url, opts = {}) => {
-  const mainPath = urlToDiskPath(url);
-  if (!mainPath) return { ok: false, reason: 'invalid_url' };
-  if (!fs.existsSync(mainPath)) return { ok: false, reason: 'missing_file' };
-
-  // Le "main" sert de source. Pour les variantes, on relit le main lui-meme.
-  // Pour eviter l'erreur "Cannot use same file for input and output" de Sharp
-  // lors de la re-generation du main, on charge le fichier en memoire (Buffer).
-  try {
-    const inputBuffer = fs.readFileSync(mainPath);
-    await processImageWithVariants(inputBuffer, mainPath, {
-      mainWidth: opts.mainWidth || 800,
-      variants: opts.variants || RESPONSIVE_VARIANTS,
-      quality: opts.quality || 80,
-    });
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, reason: err.message };
-  }
-};
-
 const main = async () => {
+  // Modules ESM du serveur ("type":"module") charges via import() dynamique.
+  // dotenv.config() ci-dessus s'execute AVANT cet import -> le pool DB lit
+  // les bonnes variables d'environnement.
+  const { db } = await import('../src/core/database.js');
+  const { ImageProcessor } = await import('../src/services/ImageProcessor.js');
+
+  // Pour une image deja stockee en BDD, regenere ses variantes a partir du
+  // fichier main (source de verite). Variantes ecrites a cote : `<base>-<width>.webp`.
+  const regenerateOne = async (url, opts = {}) => {
+    const mainPath = urlToDiskPath(url);
+    if (!mainPath) return { ok: false, reason: 'invalid_url' };
+    if (!fs.existsSync(mainPath)) return { ok: false, reason: 'missing_file' };
+
+    // Le main sert de source. On le charge en Buffer pour eviter l'erreur Sharp
+    // "Cannot use same file for input and output" lors de la reecriture du main.
+    try {
+      const inputBuffer = fs.readFileSync(mainPath);
+      await ImageProcessor.processImageWithVariants(inputBuffer, mainPath, {
+        mainWidth: opts.mainWidth || 800,
+        variants: opts.variants || ImageProcessor.RESPONSIVE_VARIANTS,
+        quality: opts.quality || 80,
+      });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, reason: err.message };
+    }
+  };
+
   console.log('=== Regeneration des variantes responsives ===\n');
 
   // 1) Images principales des produits (products.image)
-  const [products] = await pool.query(
+  const [products] = await db.query(
     'SELECT id, image FROM products WHERE image IS NOT NULL AND image LIKE ?',
     ['/uploads/products/%']
   );
@@ -87,7 +84,7 @@ const main = async () => {
   console.log(`\n  -> ${ok} ok, ${skipped} skipped (fichier absent), ${failed} echec`);
 
   // 2) Images de galerie (product_images.url)
-  const [gallery] = await pool.query(
+  const [gallery] = await db.query(
     'SELECT id, url FROM product_images WHERE url IS NOT NULL AND url LIKE ?',
     ['/uploads/products/%']
   );
@@ -112,7 +109,7 @@ const main = async () => {
   console.log(`\n  -> ${ok} ok, ${skipped} skipped, ${failed} echec`);
 
   console.log('\n=== Termine ===');
-  await pool.end();
+  await db.end();
 };
 
 main().catch((err) => {
