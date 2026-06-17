@@ -136,7 +136,21 @@ export const Product = () => {
     )
 
     // Early returns now safe — all hooks have been called above
-    if (loading) return <p className="product-loading">Chargement...</p>
+    if (loading) return (
+        <div className="product-page" aria-busy="true">
+            <div className="product-page__content">
+                <div className="skeleton" style={{ aspectRatio: "1 / 1", borderRadius: "1rem" }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <span className="skeleton" style={{ height: "0.9rem", width: "35%", borderRadius: "6px" }} />
+                    <span className="skeleton" style={{ height: "2rem", width: "75%", borderRadius: "8px" }} />
+                    <span className="skeleton" style={{ height: "5rem", borderRadius: "1rem" }} />
+                    <span className="skeleton" style={{ height: "0.9rem", width: "90%", borderRadius: "6px" }} />
+                    <span className="skeleton" style={{ height: "0.9rem", width: "60%", borderRadius: "6px" }} />
+                    <span className="skeleton" style={{ height: "3.25rem", width: "12rem", borderRadius: "999px", marginTop: "0.5rem" }} />
+                </div>
+            </div>
+        </div>
+    )
     if (!product) {
         return (
             <div className="product-page">

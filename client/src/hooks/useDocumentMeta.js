@@ -56,12 +56,17 @@ export const useDocumentMeta = ({
 } = {}) => {
   useEffect(() => {
     if (title) document.title = title;
+    // Canonical auto-référent par défaut : empêche les pages sans canonical
+    // explicite de retomber sur la racine via le <link> statique d'index.html
+    // (corrige le warning Lighthouse "canonical points to the root URL").
+    const canonicalHref = canonical
+      || (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : null);
     const desc = setOrCreateMeta('meta[name="description"]', 'name', 'description', description);
-    const can = setOrCreateLink('canonical', canonical);
+    const can = setOrCreateLink('canonical', canonicalHref);
     const ogt = setOrCreateMeta('meta[property="og:title"]', 'property', 'og:title', ogTitle || title);
     const ogd = setOrCreateMeta('meta[property="og:description"]', 'property', 'og:description', ogDescription || description);
     const ogi = setOrCreateMeta('meta[property="og:image"]', 'property', 'og:image', ogImage);
-    const ogu = setOrCreateMeta('meta[property="og:url"]', 'property', 'og:url', canonical);
+    const ogu = setOrCreateMeta('meta[property="og:url"]', 'property', 'og:url', canonicalHref);
     const ogty = setOrCreateMeta('meta[property="og:type"]', 'property', 'og:type', ogType);
     const robots = noIndex
       ? setOrCreateMeta('meta[name="robots"]', 'name', 'robots', 'noindex, nofollow')
