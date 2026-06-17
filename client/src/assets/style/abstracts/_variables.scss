@@ -28,7 +28,7 @@ $price:            var(--color-price);
 // Index Glycemique - tous AA (>= 4.5:1 vs white). Les valeurs claires
 // historiques (#51dd0a / #f08833) restaient sous 2.5:1 -> illisibles
 // pour les utilisateurs malvoyants.
-$ig-bas:   #3c7a26;   // <= 55   (5.17:1 vs white)
+$ig-bas:   #2e7d32;   // <= 55   (5.1:1 vs white) — distinct du vert d'action $primary
 $ig-moyen: #b35e10;   // 56-69   (4.63:1 vs white)
 $ig-eleve: #d42b20;   // >= 70   (5.07:1 vs white)
 // Gradient IG — le motif signature (track du composant <IgMeter />)
@@ -36,13 +36,15 @@ $ig-gradient: linear-gradient(90deg, #{$ig-bas} 0%, #{$ig-bas} 40%, #{$ig-moyen}
 
 // Neutres
 $white:    #ffffff;
-$gray-100: #f8f9fa;
-$gray-200: #e9ecef;
-$gray-300: #dee2e6;
-$gray-600: #6c757d;
-$gray-700: #495057;
-$gray-800: #343a40;
-$gray-900: #212529;
+// Neutres CHAUDS accordes au canvas chaud (#e9e6df) — refonte bespoke 2026 :
+// remplace l'echelle Bootstrap froide (bleutee) pour l'harmonie chromatique.
+$gray-100: #f6f5f1;
+$gray-200: #eae7e0;
+$gray-300: #dad6cc;
+$gray-600: #6f6b62;
+$gray-700: #4b4842;
+$gray-800: #33312c;
+$gray-900: #1f201b;
 
 // States
 $success: #28a745;
@@ -74,7 +76,7 @@ $font-size-base: 100%;  // = 16px — root font-size (allow browser zoom)
 $fs-xs:   clamp(0.75rem,   0.715rem + 0.18vw, 0.8125rem);  // 12 → 13
 $fs-sm:   clamp(0.8125rem, 0.78rem  + 0.2vw,  0.875rem);   // 13 → 14
 $fs-base: 1rem;                                            // 16
-$fs-md:   clamp(1rem,      0.965rem + 0.2vw,  1.125rem);   // 16 → 18
+$fs-md:   clamp(1.0625rem, 1rem     + 0.3vw,  1.125rem);   // 17 → 18 (distinct de base 16)
 $fs-lg:   clamp(1.125rem,  1.05rem  + 0.4vw,  1.375rem);   // 18 → 22
 $fs-xl:   clamp(1.375rem,  1.215rem + 0.8vw,  1.75rem);    // 22 → 28
 $fs-2xl:  clamp(1.75rem,   1.52rem  + 1.2vw,  2.25rem);    // 28 → 36
@@ -116,7 +118,7 @@ $spacing-lg:  $space-md;   // 24
 
 // -- Radius scale ---------------------------------------------
 $radius-xs:   0.125rem;   // 2
-$radius-sm:   0.5625rem;  // 9   (refonte 2026)
+$radius-sm:   0.5rem;     // 8   (echelle coherente : 2 · 8 · 12 · 16 · 20)
 $radius:      0.75rem;    // 12
 $radius-lg:   1rem;       // 16
 $radius-xl:   1.25rem;    // 20
@@ -144,10 +146,10 @@ $shadow-md: 0 2px 6px rgba(29, 43, 33, 0.10),
 $shadow-lg: 0 8px 16px rgba(29, 43, 33, 0.12),
             0 24px 48px rgba(29, 43, 33, 0.18);
 // Upward shadows (for sticky bottom bars, cookie banners, etc.)
-$shadow-up-sm: 0 -1px 2px rgba(15, 23, 42, 0.04),
-               0 -4px 12px rgba(15, 23, 42, 0.06);
-$shadow-up-md: 0 -2px 4px rgba(15, 23, 42, 0.04),
-               0 -8px 24px rgba(15, 23, 42, 0.10);
+$shadow-up-sm: 0 -1px 2px rgba(29, 43, 33, 0.05),
+               0 -4px 12px rgba(29, 43, 33, 0.08);
+$shadow-up-md: 0 -2px 4px rgba(29, 43, 33, 0.06),
+               0 -8px 24px rgba(29, 43, 33, 0.12);
 
 // -- Layout ---------------------------------------------------
 $container-max:    110rem;                        // 1760px — remplit mieux les grands ecrans
