@@ -91,7 +91,7 @@ export class CartController {
                 throw new ValidationException(`Stock insuffisant. Disponible : ${item.stock}`)
             }
 
-            await cartItemRepository.updateQuantity(req.params.id, quantity)
+            await cartItemRepository.updateQuantity(req.params.id, quantity, req.user.id)
 
             return res.status(200).json({ message: "Quantite mise a jour" })
         }
@@ -147,8 +147,9 @@ export class CartController {
 
             for (const item of items) {
                 const productId = Number(item?.product_id)
-                const qty = Math.max(1, Math.floor(Number(item?.quantity) || 0))
-                if (!productId || qty < 1) continue
+                const qty = Math.floor(Number(item?.quantity))
+                // Rejet explicite des quantités invalides (≤0 / NaN) au lieu d'un clamp silencieux.
+                if (!productId || !Number.isFinite(qty) || qty < 1) continue
 
                 const product = await productRepository.findActiveById(productId)
                 if (!product) continue

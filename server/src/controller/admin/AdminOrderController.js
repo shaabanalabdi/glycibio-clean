@@ -3,6 +3,18 @@ import {ValidationException, NotFoundException} from "../../error/HttpException.
 
 const VALID_STATUSES = ["en_attente", "payee", "en_preparation", "expediee", "livree", "annulee", "remboursee"]
 
+// Machine à états : transitions de statut autorisées. Sécurise le cycle de vie de
+// la commande — empêche les sauts illogiques (ex. en_attente -> livree sans paiement).
+const STATUS_TRANSITIONS = {
+    en_attente:     ["payee", "annulee"],
+    payee:          ["en_preparation", "expediee", "annulee", "remboursee"],
+    en_preparation: ["expediee", "annulee", "remboursee"],
+    expediee:       ["livree", "remboursee"],
+    livree:         ["remboursee"],
+    annulee:        [],
+    remboursee:     []
+}
+
 export class AdminOrderController {
 
     // GET /api/admin/orders
@@ -32,21 +44,29 @@ export class AdminOrderController {
                 throw new ValidationException(`Statut invalide. Valeurs acceptees : ${VALID_STATUSES.join(", ")}`)
             }
 
-            // 'remboursee' : meme chemin que le webhook Stripe pour rester coherent
-            // -> restaure le stock si la commande etait 'payee' (la marchandise non
-            // expediee revient en stock) et garantit la valeur ENUM (ensureColumns).
-            if (status === "remboursee") {
-                await orderRepository.ensureColumns()
-                const order = await orderRepository.find(req.params.id)
-                if (!order) {
-                    throw new NotFoundException("Commande")
+            await orderRepository.ensureColumns()
+            const order = await orderRepository.find(req.params.id)
+            if (!order) {
+                throw new NotFoundException("Commande")
+            }
+
+            // Machine à états : refuse les transitions illogiques (ex. en_attente ->
+            // livree sans paiement). No-op accepté si le statut est inchangé.
+            if (status !== order.status) {
+                const allowed = STATUS_TRANSITIONS[order.status] || []
+                if (!allowed.includes(status)) {
+                    throw new ValidationException(`Transition de statut invalide : ${order.status} -> ${status}`)
                 }
+            }
+
+            // 'remboursee' : meme chemin que le webhook Stripe (restaure le stock si
+            // la commande etait payee — la marchandise non expediee revient en stock).
+            if (status === "remboursee") {
                 await orderRepository.refundAndRestoreStock(req.params.id, "admin")
                 return res.status(200).json({ message: "Statut mis a jour : remboursee" })
             }
 
             const updated = await orderRepository.updateStatus(req.params.id, status)
-
             if (!updated) {
                 throw new NotFoundException("Commande")
             }

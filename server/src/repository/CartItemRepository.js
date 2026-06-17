@@ -52,8 +52,10 @@ class CartItemRepository extends Repository {
         return rows.length === 0 ? null : rows[0]
     }
 
-    updateQuantity = async (id, quantity) => {
-        await db.query("UPDATE cart_items SET quantity = ? WHERE id = ?", [quantity, id])
+    // user_id dans le WHERE : défense en profondeur (le contrôleur vérifie déjà la
+    // propriété via findItemWithStock, mais l'UPDATE est désormais lui-même scopé).
+    updateQuantity = async (id, quantity, userId) => {
+        await db.query("UPDATE cart_items SET quantity = ? WHERE id = ? AND user_id = ?", [quantity, id, userId])
     }
 
     removeItem = async (id, userId) => {
