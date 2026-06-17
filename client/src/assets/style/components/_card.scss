@@ -272,7 +272,7 @@
     &__category { font-size: 0.625rem; }     // ~10px
     &__name    { font-size: $fs-sm; min-height: 2.6em; }
     &__ig      { padding: $space-3xs $space-2xs; }
-    &__price   { font-size: $fs-md; }
+    &__price   { font-size: $fs-md; text-align: center; }   // prix centré (footer empilé)
     &__footer  { flex-direction: column; align-items: stretch; gap: $space-2xs; }
     &__add     {
       width: 100%;
