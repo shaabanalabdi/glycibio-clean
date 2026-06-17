@@ -12,6 +12,22 @@ const files = [
     {
         input: path.join(brainDir, "chocolat_noir_1781740021253.png"),
         output: path.join(uploadDir, "chocolat-amandes-ig-bas.webp")
+    },
+    {
+        input: path.join(brainDir, "kombucha_gingembre_1781740558904.png"),
+        output: path.join(uploadDir, "kombucha-gingembre-ig-bas.webp")
+    },
+    {
+        input: path.join(brainDir, "pesto_kale_1781740568976.png"),
+        output: path.join(uploadDir, "pesto-kale-ig-bas.webp")
+    },
+    {
+        input: path.join(brainDir, "pates_lentilles_1781740580638.png"),
+        output: path.join(uploadDir, "pates-lentilles-ig-bas.webp")
+    },
+    {
+        input: path.join(brainDir, "puree_patates_1781740589443.png"),
+        output: path.join(uploadDir, "puree-patates-ig-moyen.webp")
     }
 ];
 

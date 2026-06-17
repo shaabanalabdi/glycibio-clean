@@ -24,6 +24,8 @@ async function run() {
         const catCereales = categoryMap["Cereales et feculents"];
         const catBoissons = categoryMap["Boissons"];
         const catLaitiers = categoryMap["Produits laitiers"];
+        const catEpicerieSalee = categoryMap["Epicerie salee"];
+        const catFruitsLegumes = categoryMap["Fruits et legumes"];
 
         if (!catEpicerieSucree) {
             throw new Error("Required category 'Epicerie sucree' not found. Please run base schema import first.");
@@ -56,6 +58,54 @@ async function run() {
                 allergens: JSON.stringify(["fruits_a_coque", "soja"]),
                 nutritional_info: JSON.stringify({ calories: 590, proteines: 10, glucides: 12, lipides: 53, fibres: 14 }),
                 category_id: catEpicerieSucree
+            },
+            {
+                name: "Kombucha Gingembre Bio",
+                slug: "kombucha-gingembre-bio-demo",
+                description: "Une boisson fermentee petillante a base de the noir et de gingembre frais biologique. Naturellement riche en probiotiques et tres faible en sucres, parfaite pour rafraichir a index glycemique bas (IG 15).",
+                price: 2.90,
+                image: "/uploads/products/kombucha-gingembre-ig-bas.webp",
+                stock: 150,
+                glycemic_index: 15,
+                allergens: JSON.stringify([]),
+                nutritional_info: JSON.stringify({ calories: 18, proteines: 0.1, glucides: 4, lipides: 0, fibres: 0.5 }),
+                category_id: catBoissons
+            },
+            {
+                name: "Pesto de Chou Kale et Cajou",
+                slug: "pesto-de-chou-kale-et-cajou-demo",
+                description: "Un pesto artisanal revisite au chou kale bio et noix de cajou cremeuses. Ideal pour accompagner vos pates completes ou napper vos legumes grilles tout en maintenant un IG tres bas (IG 15).",
+                price: 4.50,
+                image: "/uploads/products/pesto-kale-ig-bas.webp",
+                stock: 60,
+                glycemic_index: 15,
+                allergens: JSON.stringify(["fruits_a_coque"]),
+                nutritional_info: JSON.stringify({ calories: 320, proteines: 5, glucides: 8, lipides: 30, fibres: 3 }),
+                category_id: catEpicerieSalee
+            },
+            {
+                name: "Pates de Lentilles Corail",
+                slug: "pates-de-lentilles-corail-demo",
+                description: "Pates 100% farine de lentilles corail biologiques. Riches en proteines et en fibres, elles offrent une excellente alternative sans gluten aux pates de ble avec un IG bas tres stable (IG 30).",
+                price: 3.20,
+                image: "/uploads/products/pates-lentilles-ig-bas.webp",
+                stock: 90,
+                glycemic_index: 30,
+                allergens: JSON.stringify([]),
+                nutritional_info: JSON.stringify({ calories: 340, proteines: 25, glucides: 50, lipides: 1.5, fibres: 12 }),
+                category_id: catCereales
+            },
+            {
+                name: "Puree de Patates Douces et Epices",
+                slug: "puree-de-patates-douces-et-epices-demo",
+                description: "Une puree gourmande de patates douces biologiques cuites a la vapeur douce et parfumees aux epices. Ideale pour accompagner vos plats tout en conservant un index glycemique modere (IG 60).",
+                price: 4.80,
+                image: "/uploads/products/puree-patates-ig-moyen.webp",
+                stock: 70,
+                glycemic_index: 60,
+                allergens: JSON.stringify([]),
+                nutritional_info: JSON.stringify({ calories: 95, proteines: 1.8, glucides: 21, lipides: 0.2, fibres: 3.2 }),
+                category_id: catFruitsLegumes
             }
         ];
 
@@ -122,6 +172,7 @@ async function run() {
                 created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 14 days ago
                 items: [
                     { product_id: productIds["pate-a-tartiner-noisette-cacao-ig-bas-demo"], quantity: 2, unit_price: 5.90 },
+                    { product_id: productIds["kombucha-gingembre-bio-demo"], quantity: 4, unit_price: 2.90 },
                     { product_id: existingProds[0].id, quantity: 1, unit_price: existingProds[0].price }
                 ]
             },
@@ -134,6 +185,7 @@ async function run() {
                 created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
                 items: [
                     { product_id: productIds["chocolat-noir-90-aux-eclats-d-amandes-demo"], quantity: 5, unit_price: 3.90 },
+                    { product_id: productIds["pates-de-lentilles-corail-demo"], quantity: 2, unit_price: 3.20 },
                     { product_id: productIds["pate-a-tartiner-noisette-cacao-ig-bas-demo"], quantity: 6, unit_price: 5.90 }
                 ]
             },
@@ -145,7 +197,7 @@ async function run() {
                 shipping_cost: standardShipping.price,
                 created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
                 items: [
-                    { product_id: existingProds[1].id, quantity: 1, unit_price: existingProds[1].price }
+                    { product_id: productIds["pesto-de-chou-kale-et-cajou-demo"], quantity: 1, unit_price: 4.50 }
                 ]
             },
             {
@@ -157,6 +209,7 @@ async function run() {
                 created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
                 items: [
                     { product_id: productIds["pate-a-tartiner-noisette-cacao-ig-bas-demo"], quantity: 1, unit_price: 5.90 },
+                    { product_id: productIds["puree-de-patates-douces-et-epices-demo"], quantity: 2, unit_price: 4.80 },
                     { product_id: productIds["chocolat-noir-90-aux-eclats-d-amandes-demo"], quantity: 2, unit_price: 3.90 }
                 ]
             },
@@ -220,6 +273,30 @@ async function run() {
                 title: "Très bonne alternative",
                 comment: "Le goût de noisette est bien présent. Moins sucré qu'une pâte classique mais c'est parfait pour s'habituer à l'IG bas.",
                 status: "approved"
+            },
+            {
+                product_id: productIds["kombucha-gingembre-bio-demo"],
+                username: "marie_martin",
+                rating: 5,
+                title: "Délicieux et très rafraîchissant !",
+                comment: "Une excellente boisson fermentée. Le gingembre est bien dosé, ça pique juste ce qu'il faut et c'est très peu sucré.",
+                status: "approved"
+            },
+            {
+                product_id: productIds["pates-de-lentilles-corail-demo"],
+                username: "jean_dupont",
+                rating: 4,
+                title: "Excellente tenue à la cuisson",
+                comment: "Riche en protéines et fibres, ces pâtes ne font pas monter ma glycémie. Idéal pour un repas rapide et sain.",
+                status: "approved"
+            },
+            {
+                product_id: productIds["pesto-de-chou-kale-et-cajou-demo"],
+                username: "sophie_lefevre",
+                rating: 5,
+                title: "Crémeux et original",
+                comment: "Le goût du chou kale est très doux, marié au cajou c'est un pur régal. À valider absolument !",
+                status: "pending" // Admin can approve this one during demo
             },
             {
                 product_id: productIds["pate-a-tartiner-noisette-cacao-ig-bas-demo"],
