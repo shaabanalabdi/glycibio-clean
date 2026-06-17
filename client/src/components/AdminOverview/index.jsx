@@ -6,7 +6,6 @@ import {
     useGetAdminShippingQuery,
     useGetAdminContactsQuery
 } from "@slices/adminApiSlice.js"
-import { RevenueChart } from "@components/RevenueChart/index.jsx"
 import { EmptyState } from "@components/EmptyState/index.jsx"
 import { SortableTh } from "@components/SortableTh/index.jsx"
 import { Skeleton } from "@components/Skeleton/index.jsx"
@@ -25,7 +24,7 @@ const STATUS_LABELS = {
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString("fr-FR") : "-")
 
-// Onglet "Vue d'ensemble" : KPI cards + revenue chart + top produits + dernieres commandes.
+// Onglet "Vue d'ensemble" : KPI cards + top produits + dernieres commandes.
 // Donnees via RTK Query (dashboard + produits/livraisons/messages pour les compteurs derives).
 export const AdminOverview = () => {
     const { data: dashboard, isLoading, isError, refetch } = useGetDashboardQuery()
@@ -35,7 +34,7 @@ export const AdminOverview = () => {
 
     const [topSort, setTopSort] = useState({ col: "total_vendu", dir: "desc" })
 
-    const overview = dashboard ?? { kpi: null, topProducts: [], recentOrders: [], revenue30d: [] }
+    const overview = dashboard ?? { kpi: null, topProducts: [], recentOrders: [] }
     const kpi = overview.kpi || {}
 
     const activeProductsCount = useMemo(() => products.filter((p) => !!p.is_active).length, [products])
@@ -111,10 +110,6 @@ export const AdminOverview = () => {
                     <div className="admin-kpi-card__body"><p>Messages non lus</p><strong>{kpi.messages_non_lus || unreadMessagesCount}</strong></div>
                 </article>
             </div>
-
-            {overview.revenue30d && overview.revenue30d.length > 0 && (
-                <RevenueChart data={overview.revenue30d} />
-            )}
 
             <div className="admin-data-grid">
                 <article className="admin-panel">

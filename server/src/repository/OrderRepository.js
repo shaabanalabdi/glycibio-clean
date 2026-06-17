@@ -393,18 +393,6 @@ class OrderRepository extends Repository {
         return rows
     }
 
-    revenueByDay = async () => {
-        const [rows] = await db.query(
-            `SELECT DATE(created_at) AS date,
-                    SUM(total)       AS revenue
-               FROM orders
-              WHERE status IN ('payee','en_preparation','expediee','livree')
-                AND created_at >= NOW() - INTERVAL 30 DAY
-              GROUP BY DATE(created_at)
-              ORDER BY date ASC`
-        )
-        return rows
-    }
 }
 
 export const orderRepository = new OrderRepository()
