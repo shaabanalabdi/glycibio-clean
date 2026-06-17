@@ -183,6 +183,9 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: $space-sm;
 
+    // Tres petits ecrans : gap reduit -> cartes un peu plus larges
+    @media (max-width: 30em) { gap: $space-2xs; }
+
     @include breakpoint(md) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: $space-md;

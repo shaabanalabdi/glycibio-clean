@@ -264,15 +264,22 @@
     border-top: 1px solid $border;
   }
 
-  // Tres petits ecrans (grille 2 colonnes) : prix + bouton ne tiennent plus
-  // cote a cote -> on empile, bouton "Ajouter" en pleine largeur (tap target net).
+  // Tres petits ecrans (grille 2 colonnes, cartes etroites) : typographie et
+  // espacements reduits proportionnellement, et footer empile (prix au-dessus,
+  // bouton "Ajouter" en pleine largeur) pour rester lisible et aligne.
   @media (max-width: 30em) {
-    &__footer {
-      flex-direction: column;
-      align-items: stretch;
-      gap: $space-2xs;
+    &__body    { padding: $space-xs; gap: $space-2xs; }
+    &__category { font-size: 0.625rem; }     // ~10px
+    &__name    { font-size: $fs-sm; min-height: 2.6em; }
+    &__ig      { padding: $space-3xs $space-2xs; }
+    &__price   { font-size: $fs-md; }
+    &__footer  { flex-direction: column; align-items: stretch; gap: $space-2xs; }
+    &__add     {
+      width: 100%;
+      justify-content: center;
+      font-size: $fs-xs;
+      padding-inline: $space-2xs;
     }
-    &__add { width: 100%; justify-content: center; }
   }
 
   &__price {
