@@ -185,6 +185,15 @@ export const adminApiSlice = baseApi.injectEndpoints({
                 method: "DELETE"
             }),
             invalidatesTags: ["settings"]
+        }),
+        updateHeroContent: build.mutation({
+            // body : { hero_title, hero_text, ... } (champs texte du hero)
+            query: (body) => ({
+                url: "/admin/settings/hero-content",
+                method: "PUT",
+                body
+            }),
+            invalidatesTags: ["settings"]
         })
     })
 })
@@ -218,5 +227,6 @@ export const {
     useGetAdminReviewsQuery,
     useUpdateReviewStatusMutation,
     useUpdateHeroBackgroundMutation,
-    useResetHeroBackgroundMutation
+    useResetHeroBackgroundMutation,
+    useUpdateHeroContentMutation
 } = adminApiSlice

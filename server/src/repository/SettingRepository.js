@@ -1,10 +1,19 @@
 import {db} from "../core/database.js";
 
 // ============================================================
-// Parametres de site (cle/valeur). Ex: image de fond du hero.
+// Parametres de site (cle/valeur). Ex: hero d'accueil (image + textes).
 // Les cles sont WHITELISTEES (anti-injection d'identifiant / anti-abus).
 // ============================================================
-const PUBLIC_KEYS = ["hero_background"]
+
+// Champs TEXTE editables du hero d'accueil (back-office "Apparence").
+export const HERO_TEXT_KEYS = [
+    "hero_eyebrow", "hero_title", "hero_title_highlight", "hero_text",
+    "hero_cta_primary_label", "hero_cta_primary_link",
+    "hero_cta_secondary_label", "hero_cta_secondary_link",
+    "hero_trust_1", "hero_trust_2", "hero_trust_3"
+]
+
+const PUBLIC_KEYS = ["hero_background", ...HERO_TEXT_KEYS]
 const ALLOWED = new Set(PUBLIC_KEYS)
 
 // La table existe dans le dump SQL de prod ; ce CREATE IF NOT EXISTS couvre les
@@ -52,6 +61,19 @@ class SettingRepository {
              ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
             [key, value]
         )
+    }
+
+    // Ecrit plusieurs cles en une fois (cles non whitelistees ignorees).
+    setMany = async (entries) => {
+        await ensureTable()
+        for (const [key, value] of Object.entries(entries)) {
+            if (!ALLOWED.has(key)) continue
+            await db.query(
+                `INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
+                [key, value]
+            )
+        }
     }
 }
 

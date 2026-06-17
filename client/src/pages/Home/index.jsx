@@ -31,6 +31,13 @@ const CATEGORY_ICONS = [
 const getCategoryIcon = (name = "") =>
     CATEGORY_ICONS.find((c) => c.re.test(name))?.Icon || Leaf
 
+// Lien CTA du hero : interne (React Router) ou externe (http) selon la valeur
+// configuree en back-office.
+const HeroLink = ({ to, className, children }) =>
+    /^https?:\/\//.test(to || "")
+        ? <a href={to} className={className}>{children}</a>
+        : <Link to={to} className={className}>{children}</Link>
+
 export const Home = () => {
     const { authUser } = useAuthenticated()
 
@@ -47,6 +54,21 @@ export const Home = () => {
     // Image de fond du hero, configurable depuis la console d'admin (sinon degrade).
     const { data: siteSettings } = useGetSettingsQuery()
     const heroBackground = siteSettings?.hero_background
+
+    // Contenu du hero — editable en back-office (Apparence) ; repli sur les
+    // valeurs par defaut si le champ est vide/absent.
+    const g = (key, fallback) => siteSettings?.[key] || fallback
+    const heroEyebrow   = g("hero_eyebrow", "Selection 2026 · Index glycemique controle")
+    const heroTitle     = g("hero_title", "Mangez sain,")
+    const heroHighlight = g("hero_title_highlight", "maitrisez votre glycemie")
+    const heroText      = g("hero_text", "Une selection d'aliments bio a index glycemique verifie. Chaque produit affiche clairement son IG — pour les diabetiques, les sportifs et tous ceux qui veillent a leur bien-etre.")
+    const ctaPrimary    = { label: g("hero_cta_primary_label", "Voir le catalogue"), link: g("hero_cta_primary_link", "/catalogue") }
+    const ctaSecondary  = { label: g("hero_cta_secondary_label", "Creer un compte"), link: g("hero_cta_secondary_link", "/register") }
+    const heroTrust = [
+        { Icon: Check, label: g("hero_trust_1", "IG verifie") },
+        { Icon: Truck, label: g("hero_trust_2", "Livraison 48h") },
+        { Icon: Leaf,  label: g("hero_trust_3", "Selection bio") }
+    ]
 
     return (
         <div className="home">
@@ -65,32 +87,28 @@ export const Home = () => {
                     <div className="hero__content">
                         <span className="hero__eyebrow">
                             <Sparkles size={14} aria-hidden="true" />
-                            Selection 2026 · Index glycemique controle
+                            {heroEyebrow}
                         </span>
                         <h1 className="hero__title">
-                            Mangez sain,<br />
-                            <span className="hero__highlight">maitrisez votre glycemie</span>
+                            {heroTitle}<br />
+                            <span className="hero__highlight">{heroHighlight}</span>
                         </h1>
-                        <p className="hero__text">
-                            Une selection d&apos;aliments bio a index glycemique verifie. Chaque produit
-                            affiche clairement son IG — pour les diabetiques, les sportifs et tous ceux
-                            qui veillent a leur bien-etre.
-                        </p>
+                        <p className="hero__text">{heroText}</p>
                         <div className="hero__actions">
-                            <Link to="/catalogue" className="btn btn--primary btn--lg hero__cta-primary">
-                                Voir le catalogue
+                            <HeroLink to={ctaPrimary.link} className="btn btn--primary btn--lg hero__cta-primary">
+                                {ctaPrimary.label}
                                 <ArrowRight size={18} aria-hidden="true" />
-                            </Link>
-                            {!authUser && (
-                                <Link to="/register" className="btn btn--ghost btn--lg hero__cta-tertiary">
-                                    Creer un compte
-                                </Link>
+                            </HeroLink>
+                            {!authUser && ctaSecondary.label && (
+                                <HeroLink to={ctaSecondary.link} className="btn btn--ghost btn--lg hero__cta-tertiary">
+                                    {ctaSecondary.label}
+                                </HeroLink>
                             )}
                         </div>
                         <ul className="hero__trust" aria-label="Garanties GlyciBio">
-                            <li><Check size={16} aria-hidden="true" /> IG verifie</li>
-                            <li><Truck size={16} aria-hidden="true" /> Livraison 48h</li>
-                            <li><Leaf size={16} aria-hidden="true" /> Selection bio</li>
+                            {heroTrust.map(({ Icon, label }, i) => (
+                                <li key={i}><Icon size={16} aria-hidden="true" /> {label}</li>
+                            ))}
                         </ul>
                     </div>
                 </div>

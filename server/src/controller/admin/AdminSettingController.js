@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import {fileURLToPath} from "node:url";
-import {settingRepository} from "../../repository/SettingRepository.js";
+import {settingRepository, HERO_TEXT_KEYS} from "../../repository/SettingRepository.js";
 import {ImageProcessor} from "../../services/ImageProcessor.js";
 import {Logger} from "../../services/Logger.js";
 import {ValidationException} from "../../error/HttpException.js";
@@ -61,6 +61,37 @@ export class AdminSettingController {
             if (previous && previous !== url) removeUpload(previous)
 
             return res.status(200).json({ message: "Image de fond mise a jour", hero_background: url })
+        }
+        catch (error)
+        {
+            next(error)
+        }
+    }
+
+    // PUT /api/admin/settings/hero-content  (JSON : champs texte du hero)
+    static updateHeroContent = async (req, res, next) => {
+        try
+        {
+            const body = req.body || {}
+            const MAX = { hero_text: 600, hero_title: 160, hero_title_highlight: 160, hero_eyebrow: 160 }
+            const updates = {}
+            for (const key of HERO_TEXT_KEYS) {
+                if (!(key in body)) continue
+                let value = body[key]
+                if (value === null || value === undefined || value === "") { updates[key] = null; continue }
+                if (typeof value !== "string") throw new ValidationException(`Champ invalide : ${key}`)
+                value = value.trim()
+                const max = MAX[key] || 200
+                if (value.length > max) throw new ValidationException(`Champ trop long : ${key} (max ${max} caracteres)`)
+                // Liens : chemin interne ("/...") ou URL http(s) uniquement (anti-XSS javascript:)
+                if (key.endsWith("_link") && !/^(\/|https?:\/\/)/.test(value)) {
+                    throw new ValidationException(`Lien invalide : ${key} (chemin interne /... ou URL http)`)
+                }
+                updates[key] = value
+            }
+            if (Object.keys(updates).length === 0) throw new ValidationException("Aucun champ a mettre a jour")
+            await settingRepository.setMany(updates)
+            return res.status(200).json({ message: "Contenu du hero mis a jour", updated: Object.keys(updates) })
         }
         catch (error)
         {
