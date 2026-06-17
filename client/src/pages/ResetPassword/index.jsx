@@ -58,7 +58,7 @@ export const ResetPassword = () => {
                 <h1 className="auth__title">Nouveau mot de passe</h1>
 
                 {msg ? (
-                    <div className="auth__success">
+                    <div className="auth__success" role="status" aria-live="polite">
                         <p>{msg}</p>
                         <p>Redirection vers la connexion...</p>
                     </div>
@@ -71,13 +71,15 @@ export const ResetPassword = () => {
                             <input
                                 id="new_password"
                                 type="password"
+                                enterKeyHint="next"
                                 value={passwords.new_password}
                                 onChange={(e) => setPasswords({ ...passwords, new_password: e.target.value })}
                                 required
                                 minLength={12}
                                 autoComplete="new-password"
+                                aria-describedby="reset-password-hint"
                             />
-                            <small>Min. 12 caracteres, 1 majuscule, 1 chiffre, 1 caractere special</small>
+                            <small id="reset-password-hint">Min. 12 caracteres, 1 majuscule, 1 chiffre, 1 caractere special</small>
                         </div>
 
                         <div className="auth__field">
@@ -85,11 +87,13 @@ export const ResetPassword = () => {
                             <input
                                 id="confirm_password"
                                 type="password"
+                                enterKeyHint="go"
                                 value={passwords.confirm_password}
                                 onChange={(e) => setPasswords({ ...passwords, confirm_password: e.target.value })}
                                 required
                                 minLength={12}
                                 autoComplete="new-password"
+                                aria-describedby="reset-password-hint"
                             />
                         </div>
 

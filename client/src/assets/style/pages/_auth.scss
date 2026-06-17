@@ -126,6 +126,15 @@
   @include form-hint;
 }
 
+// Message d'erreur au niveau du champ (WCAG 3.3.1)
+.auth-form__field-error {
+  display: block;
+  margin-top: $space-3xs;
+  color: $error-fg;
+  font-size: $fs-xs;
+  font-weight: $fw-semibold;
+}
+
 .auth-form__toggle {
   display: flex;
   align-items: center;

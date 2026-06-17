@@ -115,6 +115,7 @@ export const Register = () => {
                         name="email"
                         autoComplete="email"
                         inputMode="email"
+                        enterKeyHint="next"
                         value={form.email}
                         onChange={handleChange}
                         required
@@ -128,12 +129,14 @@ export const Register = () => {
                         type={showPassword ? "text" : "password"}
                         name="password"
                         autoComplete="new-password"
+                        enterKeyHint="next"
                         value={form.password}
                         onChange={handleChange}
                         required
                         minLength={12}
+                        aria-describedby="reg-password-hint"
                     />
-                    <small className="auth-form__hint">Min. 12 caracteres, 1 majuscule, 1 chiffre, 1 caractere special</small>
+                    <small id="reg-password-hint" className="auth-form__hint">Min. 12 caracteres, 1 majuscule, 1 chiffre, 1 caractere special</small>
                 </div>
 
                 <div className="auth-form__field">
@@ -143,9 +146,11 @@ export const Register = () => {
                         type={showPassword ? "text" : "password"}
                         name="confirmPassword"
                         autoComplete="new-password"
+                        enterKeyHint="go"
                         value={form.confirmPassword}
                         onChange={handleChange}
                         required
+                        aria-describedby="reg-password-hint"
                     />
                 </div>
 

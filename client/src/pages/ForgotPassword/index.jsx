@@ -30,7 +30,7 @@ export const ForgotPassword = () => {
                 <h1 className="auth__title">Mot de passe oublie ?</h1>
 
                 {submitted ? (
-                    <div className="auth__success">
+                    <div className="auth__success" role="status" aria-live="polite">
                         <p>{msg}</p>
                         <p>Verifiez votre boite email et cliquez sur le lien recu.</p>
                         <Link to="/login" className="btn btn--primary btn--full auth__cta">
@@ -51,6 +51,8 @@ export const ForgotPassword = () => {
                                 <input
                                     id="email"
                                     type="email"
+                                    inputMode="email"
+                                    enterKeyHint="go"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="votre@email.fr"

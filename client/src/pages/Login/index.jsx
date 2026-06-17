@@ -14,6 +14,7 @@ export const Login = () => {
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState("")
+    const [fieldErrors, setFieldErrors] = useState({})
     const [loading, setLoading] = useState(false)
     const { login } = useAuthenticated()
     const navigate = useNavigate()
@@ -27,6 +28,17 @@ export const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError("")
+
+        const errs = {}
+        if (!email.trim()) errs.email = "L'adresse email est requise."
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Adresse email invalide."
+        if (!password) errs.password = "Le mot de passe est requis."
+        setFieldErrors(errs)
+        if (Object.keys(errs).length > 0) {
+            document.getElementById(errs.email ? "login-email" : "login-password")?.focus()
+            return
+        }
+
         setLoading(true)
 
         try
@@ -58,11 +70,15 @@ export const Login = () => {
                         id="login-email"
                         type="email"
                         inputMode="email"
-                        autoComplete="username"
+                        enterKeyHint="next"
+                        autoComplete="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => { setEmail(e.target.value); setFieldErrors((p) => ({ ...p, email: "" })) }}
                         required
+                        aria-invalid={!!fieldErrors.email}
+                        aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
                     />
+                    {fieldErrors.email && <small id="login-email-error" className="auth-form__field-error" role="alert">{fieldErrors.email}</small>}
                 </div>
 
                 <div className="auth-form__field">
@@ -71,10 +87,14 @@ export const Login = () => {
                         id="login-password"
                         type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
+                        enterKeyHint="go"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => { setPassword(e.target.value); setFieldErrors((p) => ({ ...p, password: "" })) }}
                         required
+                        aria-invalid={!!fieldErrors.password}
+                        aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
                     />
+                    {fieldErrors.password && <small id="login-password-error" className="auth-form__field-error" role="alert">{fieldErrors.password}</small>}
                 </div>
 
                 <label className="auth-form__toggle">
