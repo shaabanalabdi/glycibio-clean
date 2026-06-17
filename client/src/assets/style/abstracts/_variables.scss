@@ -69,6 +69,11 @@ $font-display:   'Bricolage Grotesque', $font-system;   // titres, prix, chiffre
 $font-body:      'Hanken Grotesk', $font-system;        // body / UI
 $font-primary:   $font-body;
 $font-heading:   $font-display;
+// Serif éditorial pour les GRANDS titres (contraste de genre avec le corps sans).
+// Pile système (Palatino Linotype sur Windows, Iowan/Palatino sur macOS) — zéro
+// fichier, RGPD-safe. Pour un serif distinctif auto-hébergé (ex. Fraunces),
+// ajouter un @font-face puis préfixer la pile ci-dessous.
+$font-serif:     'Iowan Old Style', 'Palatino Linotype', Palatino, 'Hoefler Text', Georgia, 'Times New Roman', serif;
 $font-size-base: 100%;  // = 16px — root font-size (allow browser zoom)
 
 // Fluid type scale — clamp(min, fluid-formula, max)

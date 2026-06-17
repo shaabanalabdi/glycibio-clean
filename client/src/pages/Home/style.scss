@@ -24,7 +24,7 @@
   }
 
   &__title {
-    font-family: $font-heading;
+    font-family: $font-serif;
     font-size: $fs-2xl;
     color: $text-strong;
     margin: 0;
@@ -136,7 +136,7 @@
   }
 
   &__title {
-    font-family: $font-heading;
+    font-family: $font-serif;
     font-size: clamp(2.375rem, 1.6rem + 3.4vw, 3.625rem);   // 38 → 58
     line-height: 1.05;
     letter-spacing: -0.025em;

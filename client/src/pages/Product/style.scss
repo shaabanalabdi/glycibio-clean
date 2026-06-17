@@ -104,7 +104,7 @@
   }
 
   &__name {
-    font-family: $font-heading;
+    font-family: $font-serif;
     font-size: clamp(2rem, 1.4rem + 2.6vw, 2.375rem);   // ~32 → 38px
     font-weight: $fw-bold;
     letter-spacing: -0.025em;
