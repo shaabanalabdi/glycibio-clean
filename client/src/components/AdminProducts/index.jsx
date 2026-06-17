@@ -183,6 +183,15 @@ export const AdminProducts = () => {
         setFormOpen(true)
     }
 
+    // Champs décimaux : accepte la virgule FR (la normalise en point) et n'autorise
+    // que des chiffres + un seul séparateur. type="number" bloquait la virgule.
+    const onDecimalChange = (field) => (event) => {
+        let v = event.target.value.replace(",", ".").replace(/[^0-9.]/g, "")
+        const dot = v.indexOf(".")
+        if (dot !== -1) v = v.slice(0, dot + 1) + v.slice(dot + 1).replace(/\./g, "")
+        setProductForm((prev) => ({ ...prev, [field]: v }))
+    }
+
     const handleSubmit = async (event) => {
         event.preventDefault()
         const payload = new FormData()
@@ -339,7 +348,7 @@ export const AdminProducts = () => {
                         </label>
                         <label className="admin-field">
                             <span>Prix *</span>
-                            <input type="number" min="0" step="0.01" value={productForm.price} onChange={(event) => setProductForm((prev) => ({ ...prev, price: event.target.value }))} required />
+                            <input type="text" inputMode="decimal" value={productForm.price} onChange={onDecimalChange("price")} placeholder="0,00" required />
                         </label>
                         <label className="admin-field">
                             <span>Stock *</span>
@@ -374,23 +383,23 @@ export const AdminProducts = () => {
                         <div className="admin-form-grid admin-form-grid--tight">
                             <label className="admin-field">
                                 <span>Calories</span>
-                                <input type="number" min="0" value={productForm.nutritionCalories} onChange={(event) => setProductForm((prev) => ({ ...prev, nutritionCalories: event.target.value }))} />
+                                <input type="text" inputMode="decimal" value={productForm.nutritionCalories} onChange={onDecimalChange("nutritionCalories")} />
                             </label>
                             <label className="admin-field">
                                 <span>Proteines</span>
-                                <input type="number" min="0" value={productForm.nutritionProteines} onChange={(event) => setProductForm((prev) => ({ ...prev, nutritionProteines: event.target.value }))} />
+                                <input type="text" inputMode="decimal" value={productForm.nutritionProteines} onChange={onDecimalChange("nutritionProteines")} />
                             </label>
                             <label className="admin-field">
                                 <span>Glucides</span>
-                                <input type="number" min="0" value={productForm.nutritionGlucides} onChange={(event) => setProductForm((prev) => ({ ...prev, nutritionGlucides: event.target.value }))} />
+                                <input type="text" inputMode="decimal" value={productForm.nutritionGlucides} onChange={onDecimalChange("nutritionGlucides")} />
                             </label>
                             <label className="admin-field">
                                 <span>Lipides</span>
-                                <input type="number" min="0" value={productForm.nutritionLipides} onChange={(event) => setProductForm((prev) => ({ ...prev, nutritionLipides: event.target.value }))} />
+                                <input type="text" inputMode="decimal" value={productForm.nutritionLipides} onChange={onDecimalChange("nutritionLipides")} />
                             </label>
                             <label className="admin-field">
                                 <span>Fibres</span>
-                                <input type="number" min="0" value={productForm.nutritionFibres} onChange={(event) => setProductForm((prev) => ({ ...prev, nutritionFibres: event.target.value }))} />
+                                <input type="text" inputMode="decimal" value={productForm.nutritionFibres} onChange={onDecimalChange("nutritionFibres")} />
                             </label>
                         </div>
                     </div>
