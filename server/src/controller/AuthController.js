@@ -203,6 +203,8 @@ export class AuthController {
                     role: user.role,
                     first_name: user.first_name,
                     last_name: user.last_name,
+                    address: user.address,
+                    phone: user.phone,
                     email_verified: !!user.email_verified
                 }
             })
