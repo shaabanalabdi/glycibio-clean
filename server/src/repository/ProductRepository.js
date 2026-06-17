@@ -92,7 +92,7 @@ class ProductRepository extends Repository {
             case "price_asc":  sql += " ORDER BY p.price ASC"; break
             case "price_desc": sql += " ORDER BY p.price DESC"; break
             case "name_asc":   sql += " ORDER BY p.name ASC"; break
-            case "ig_asc":     sql += " ORDER BY p.glycemic_index ASC"; break
+            case "ig_asc":     sql += " ORDER BY p.glycemic_index IS NULL, p.glycemic_index ASC"; break
             default:           sql += " ORDER BY p.created_at DESC"
         }
 

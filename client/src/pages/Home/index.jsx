@@ -41,7 +41,7 @@ export const Home = () => {
     })
 
     const { data: categories = [] } = useGetCategoriesQuery()
-    const { data: featuredData, isLoading: loading } = useGetProductsQuery({ limit: 4, sort: "ig_asc" })
+    const { data: featuredData, isLoading: loading } = useGetProductsQuery({ limit: 8, sort: "ig_asc" })
     const featuredProducts = featuredData?.products ?? []
 
     // Image de fond du hero, configurable depuis la console d'admin (sinon degrade).
@@ -190,7 +190,7 @@ export const Home = () => {
                 </div>
                 <div className="home-products__grid" aria-busy={loading}>
                     {loading
-                        ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+                        ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
                         : featuredProducts.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
