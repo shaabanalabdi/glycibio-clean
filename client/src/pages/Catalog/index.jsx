@@ -1,7 +1,7 @@
 import "./style.scss"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
-import { PackageSearch, AlertTriangle } from "lucide-react"
+import { PackageSearch, AlertTriangle, SlidersHorizontal, ChevronDown } from "lucide-react"
 import { ProductCard } from "@components/ProductCard/index.jsx"
 import { ProductFilter } from "@components/ProductFilter/index.jsx"
 import { Pagination } from "@components/Pagination/index.jsx"
@@ -67,6 +67,16 @@ export const Catalog = () => {
     const products = error ? [] : (data?.products ?? [])
     const pagination = data?.pagination ?? {}
 
+    // Panneau de filtres repliable en mobile/tablette (bouton "Filtres")
+    const [filtersOpen, setFiltersOpen] = useState(false)
+    const activeFilterCount =
+        (filters.search ? 1 : 0) +
+        (filters.category ? 1 : 0) +
+        (filters.ig ? 1 : 0) +
+        (filters.price_min ? 1 : 0) +
+        (filters.price_max ? 1 : 0) +
+        (filters.exclude_allergens || "").split(",").filter(Boolean).length
+
     return (
         <div className="catalog">
             {/* Barre de titre — breadcrumb + titre + compteur + tri */}
@@ -100,11 +110,33 @@ export const Catalog = () => {
             </div>
 
             <div className="catalog__content">
+                {/* Bouton repli des filtres — mobile/tablette uniquement */}
+                <button
+                    type="button"
+                    className="catalog__filters-toggle"
+                    aria-expanded={filtersOpen}
+                    aria-controls="catalog-filters"
+                    onClick={() => setFiltersOpen((open) => !open)}
+                >
+                    <SlidersHorizontal size={18} aria-hidden="true" />
+                    <span>Filtres</span>
+                    {activeFilterCount > 0 && (
+                        <span className="catalog__filters-toggle-badge">{activeFilterCount}</span>
+                    )}
+                    <ChevronDown
+                        size={18}
+                        aria-hidden="true"
+                        className={`catalog__filters-toggle-chevron ${filtersOpen ? "catalog__filters-toggle-chevron--open" : ""}`}
+                    />
+                </button>
+
                 {/* Sidebar filtres */}
                 <ProductFilter
                     filters={filters}
                     setFilters={setFilters}
                     categories={categories}
+                    mobileOpen={filtersOpen}
+                    onCloseMobile={() => setFiltersOpen(false)}
                 />
 
                 {/* Grille produits */}

@@ -62,7 +62,7 @@ const DEFAULT_FILTERS = {
 // Mappe une position 0-100 vers la bande IG correspondante.
 const posToBand = (pos) => (pos <= 55 ? "bas" : pos <= 69 ? "moyen" : "eleve")
 
-export const ProductFilter = ({ filters, setFilters, categories }) => {
+export const ProductFilter = ({ filters, setFilters, categories, mobileOpen = false, onCloseMobile }) => {
     const handleChange = (key, value) => {
         setFilters((prev) => ({ ...prev, [key]: value, page: 1 }))
     }
@@ -196,7 +196,7 @@ export const ProductFilter = ({ filters, setFilters, categories }) => {
     const activeCount = activeChips.length
 
     return (
-        <aside className="filters" aria-label="Filtres de recherche">
+        <aside className={`filters ${mobileOpen ? "filters--open" : ""}`} id="catalog-filters" aria-label="Filtres de recherche">
             {/* Header ----------------------------------------------------- */}
             <div className="filters__header">
                 <h3 className="filters__title">
@@ -394,6 +394,12 @@ export const ProductFilter = ({ filters, setFilters, categories }) => {
                     </div>
                 </div>
             </section>
+            {/* Mobile : valider la selection et replier le panneau */}
+            {onCloseMobile && (
+                <button type="button" className="filters__done" onClick={onCloseMobile}>
+                    Voir les produits
+                </button>
+            )}
         </aside>
     )
 }
