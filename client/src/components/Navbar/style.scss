@@ -124,6 +124,7 @@
     display: flex;
     align-items: center;
     gap: $space-2xs;                       // 8px
+    flex-wrap: wrap;                       // mobile : la recherche passe sur sa propre ligne
   }
 
   // ------------------------------------------------------------
@@ -229,7 +230,8 @@
   // CENTER zone: inline search bar (pill, flex:1)
   // ------------------------------------------------------------
   &__search {
-    flex: 1;
+    order: 1;                          // mobile : après les icônes -> 2e ligne pleine largeur
+    flex: 1 1 100%;
     min-width: 0;
     display: flex;
     align-items: center;
@@ -275,6 +277,7 @@
     align-items: center;
     gap: $space-2xs;                   // 8px between icons
     flex-shrink: 0;
+    margin-left: auto;                 // mobile : pousse les icônes au bord droit (ligne 1)
   }
 
   &__nav-link {
@@ -359,13 +362,18 @@
       padding-block: $space-xs;        // 12px
       min-height: $navbar-min-h-md;    // 4rem (64)
       gap: $space-sm;
+      flex-wrap: nowrap;               // desktop : une seule ligne
     }
 
     &__burger { display: none; }
 
     &__nav { display: flex; }
 
+    &__right { margin-left: 0; }       // desktop : la recherche centrée gère l'espace
+
     &__search {
+      order: 0;                        // desktop : barre centrale
+      flex: 1 1 0%;
       max-width: 26rem;                // 416px
       margin-inline: auto;
       height: $tap-target;             // 44px
