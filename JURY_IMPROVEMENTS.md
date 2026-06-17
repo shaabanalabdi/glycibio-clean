@@ -4,12 +4,11 @@
 > Chaque amélioration suit le même format : **Problème → Risque → Solution →
 > Justification → Fichiers → Avant / Après**.
 >
-> **Vérifications réalisées après les correctifs :**
-> - ✅ Tests back-end unitaires : **43 tests au vert** (`cd server && npm test`)
-> - ✅ Tests d'**intégration** (MySQL réel) : **4 tests au vert** — commande/stock/paiement vérifiés contre une vraie base (total **47/47**)
-> - ✅ Lint front : **0 erreur** (`cd client && npm run lint`)
-> - ✅ Build front : **succès** (`cd client && npm run build`)
-> - ✅ Démarrage serveur réel : OK (santé `/api/health` → `{"status":"OK","db":"up"}`)
+> **État du projet & vérifications :**
+> - ✅ **Déployé en PRODUCTION** sur **https://glycibio.fr** (VPS OVH · Nginx + PM2 + MySQL) — tunnel de paiement **Stripe** + **webhooks** opérationnels (200 OK), e-mails transactionnels (SMTP OVH) actifs.
+> - ✅ Tests automatisés : **47 tests au vert** (`node --test`) + tests d'**intégration MySQL réels** (commande / stock / paiement / livraison gratuite / remboursement) exécutés dans le job CI dédié.
+> - ✅ Lint front : **0 erreur** (`cd client && npm run lint`) · Build front : **succès** · CI GitHub Actions verte.
+> - ✅ Santé serveur : `/api/health` → `{"status":"OK","db":"up"}`.
 
 ---
 
@@ -39,6 +38,30 @@
 | 20 | SEO | Sitemap réellement servi en XML (proxy nginx) | HAUTE |
 | 21 | SEO | Page 404 en `noindex` (fin des *soft 404*) | MOYENNE |
 | 22 | Outillage | Config ESLint manquante ajoutée (`npm run lint` réparé) | MOYENNE |
+| 23 | Commerce | Livraison gratuite réservée aux paniers ≥ 50 € (client + **enforcement serveur**) | MOYENNE |
+| 24 | Commerce | Gestion des **remboursements** Stripe (`charge.refunded` → statut `remboursee` + stock) | MOYENNE |
+| 25 | Fiabilité | E-mail de confirmation **découplé & idempotent** (survit à une panne SMTP, sans doublon) | MOYENNE |
+| 26 | Sécurité | Invalidation de session au **changement de rôle** admin | MOYENNE |
+| 27 | Robustesse | Migration de schéma **au démarrage** + handlers globaux `unhandledRejection`/`uncaughtException` | MOYENNE |
+| 28 | Bug | Variantes d'images générées même pour un upload **déjà `.webp`** (plus de 404) | MOYENNE |
+| 29 | Bug | Nginx `^~ /uploads/` (le regex images détournait les photos produits → 404) | MOYENNE |
+| 30 | Robustesse | CSRF tolérant aux **cookies dupliqués** (transition Secure) + log de diagnostic | FAIBLE |
+| 31 | UX | « Mes commandes » n'affiche que les commandes **payées** | FAIBLE |
+| 32 | UX | Pré-remplissage adresse/téléphone au checkout (`/auth/me`) | FAIBLE |
+| 33 | Qualité | Nettoyage du **code mort** (exports / fichiers / dépendances inutilisés) | FAIBLE |
+
+---
+
+## Mise en production & correctifs post-déploiement (2026-06-17)
+
+Au-delà des 22 améliorations ci-dessus, le projet a été **mis en ligne** et durci lors d'une session de déploiement réelle (VPS OVH) :
+
+- **Déploiement** : Node 20 + PM2 + Nginx (HTTPS / HSTS / CSP) + MySQL local. Les migrations additives (colonne `confirmation_email_sent`, valeur ENUM `remboursee`) s'appliquent **automatiquement au démarrage** (`ensureColumns`) — pas d'ALTER manuel.
+- **Commerce** : règle de **livraison gratuite ≥ 50 €** vérifiée côté serveur (non contournable) ; **remboursements** Stripe (`charge.refunded`) ; e-mail de confirmation **idempotent** (verrou `confirmation_email_sent` — survit à un échec SMTP transitoire sans doublon).
+- **Correctifs post-déploiement** (diagnostiqués via logs PM2 / tableau de bord Stripe) : traitement d'images robuste aux uploads `.webp` (lecture en Buffer), priorité Nginx `^~ /uploads/`, tolérance CSRF aux cookies dupliqués (transition dev→prod du flag `Secure`), `/auth/me` renvoyant `address`/`phone` (pré-remplissage), « Mes commandes » filtré sur les commandes payées.
+- **Sécurité go-live** : mot de passe admin par défaut **changé**, clé Stripe **secrète** (`sk_test_…`, et non publiable `pk_`), SMTP OVH (`ssl0.ovh.net:465`) opérationnel.
+
+> Historique complet : `git log` ; pièces techniques : dossier **`dossier/`** (modèle de données MCD/MLD, jeu d'essai, couverture OWASP Top 10).
 
 ---
 
