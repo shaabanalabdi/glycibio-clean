@@ -7,6 +7,10 @@
 // flottante (ex: 0.1 + 0.2) sur les sommes d'euros.
 const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100
 
+// Seuil (EUR) au-dela duquel la livraison GRATUITE est autorisee. Doit rester
+// coherent avec FREE_SHIPPING_THRESHOLD cote client (client/src/Utils/constants.js).
+export const FREE_SHIPPING_THRESHOLD = 50
+
 export const computeOrderTotals = (items, shippingCost = 0) => {
     const safeShipping = Number.isFinite(Number(shippingCost)) ? Number(shippingCost) : 0
 

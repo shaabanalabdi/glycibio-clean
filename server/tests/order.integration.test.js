@@ -108,6 +108,29 @@ test("createPendingFromCart : stock insuffisant -> rejet, stock inchange (rollba
     assert.equal(product.stock, 10, "le stock ne doit PAS avoir bouge (transaction annulee)")
 })
 
+test("createPendingFromCart : livraison gratuite refusee sous 50 EUR, acceptee au seuil", { skip }, async () => {
+    const [[freeMethod]] = await db.query("SELECT id FROM shipping_methods WHERE price = 0 LIMIT 1")
+    assert.ok(freeMethod, "une methode de livraison gratuite (prix 0) existe dans le seed")
+
+    // 2 x 5.00 = 10 EUR < 50 -> la livraison gratuite doit etre REFUSEE
+    await addToCart(2)
+    await assert.rejects(
+        () => orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", freeMethod.id),
+        /livraison gratuite/i
+    )
+    const [[p]] = await db.query("SELECT stock FROM products WHERE id = ?", [fx.productId])
+    assert.equal(p.stock, 10, "stock inchange apres refus (rollback)")
+
+    // 10 x 5.00 = 50 EUR >= 50 -> livraison gratuite ACCEPTEE
+    await db.query("DELETE FROM cart_items WHERE user_id = ?", [fx.userId])
+    await addToCart(10)
+    const res = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", freeMethod.id)
+    assert.ok(res.orderId, "au seuil de 50 EUR la livraison gratuite est acceptee")
+    const [[order]] = await db.query("SELECT shipping_cost, total FROM orders WHERE id = ?", [res.orderId])
+    assert.equal(Number(order.shipping_cost), 0, "livraison gratuite = 0 EUR")
+    assert.equal(Number(order.total), 50, "total = 50 (sous-total, livraison offerte)")
+})
+
 test("markPaid : transition atomique exactly-once + vide le panier au paiement", { skip }, async () => {
     await addToCart(2)
     const { orderId } = await orderRepo.createPendingFromCart(fx.userId, "12 rue de Test, 75001 Paris", null)

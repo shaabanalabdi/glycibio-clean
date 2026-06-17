@@ -245,6 +245,14 @@
       background: rgba($primary, 0.06);
     }
 
+    // Livraison gratuite indisponible sous le seuil : option grisee, non cliquable.
+    &--disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      @include hover { border-color: $border; }
+      input[type="radio"] { cursor: not-allowed; }
+    }
+
     input[type="radio"] {
       accent-color: $primary;
       width: 1.125rem;
@@ -265,6 +273,14 @@
     color: $price;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+  }
+
+  // Condition de la livraison gratuite ("Dès 50€ d'achat")
+  &__shipping-note {
+    color: $primary;
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+    margin-top: 0.25rem;
   }
 
   // Recap

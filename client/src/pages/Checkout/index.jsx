@@ -13,6 +13,7 @@ import {
     composeShippingAddress
 } from "@utils/address.js"
 import { formatPrice } from "@utils/formatPrice.js"
+import { FREE_SHIPPING_THRESHOLD } from "@utils/constants.js"
 
 const emptyCart = { items: [], total: "0.00" }
 
@@ -46,6 +47,11 @@ export const Checkout = () => {
     const shippingCost = selectedShipping ? parseFloat(selectedShipping.price) : 0
     const total = (parseFloat(cart.total) + shippingCost).toFixed(2)
 
+    const subtotalNum = parseFloat(cart.total) || 0
+    // Livraison gratuite (cout 0) indisponible sous le seuil minimum d'achat.
+    const isFreeMethodBlocked = (method) =>
+        parseFloat(method.price) === 0 && subtotalNum < FREE_SHIPPING_THRESHOLD
+
     const handleAddressChange = (field) => (e) =>
         setAddress((prev) => ({ ...prev, [field]: e.target.value }))
 
@@ -69,6 +75,7 @@ export const Checkout = () => {
         const addrErr = validateAddress(address, { phone: identity.phone })
         if (addrErr && !errs.street && !errs.postal_code && !errs.city && !errs.phone) errs.street = addrErr
         if (!shippingMethodId) errs.shipping = "Sélectionnez un mode de livraison"
+        else if (selectedShipping && isFreeMethodBlocked(selectedShipping)) errs.shipping = `La livraison gratuite nécessite un minimum de ${FREE_SHIPPING_THRESHOLD}€ d'achat`
         if (!cgvAccepted) errs.cgv = "Vous devez accepter les CGV pour commander"
         return errs
     }
@@ -317,28 +324,37 @@ export const Checkout = () => {
                     <section className="checkout__step">
                         <h2><Truck size={20} /> Mode de livraison</h2>
                         <div className="checkout__shipping-options">
-                            {shippingMethods.map((method) => (
+                            {shippingMethods.map((method) => {
+                                const blocked = isFreeMethodBlocked(method)
+                                return (
                                 <label
                                     key={method.id}
                                     className={`checkout__shipping-option ${
                                         shippingMethodId === method.id ? "checkout__shipping-option--selected" : ""
-                                    }`}
+                                    } ${blocked ? "checkout__shipping-option--disabled" : ""}`}
                                 >
                                     <input
                                         type="radio"
                                         name="shipping"
-                                        checked={shippingMethodId === method.id}
+                                        checked={shippingMethodId === method.id && !blocked}
+                                        disabled={blocked}
                                         onChange={() => setShippingMethodId(method.id)}
                                     />
                                     <div>
                                         <strong>{method.name}</strong>
                                         <p>{method.description}</p>
+                                        {blocked && (
+                                            <p className="checkout__shipping-note">
+                                                Dès {FREE_SHIPPING_THRESHOLD}&euro; d&apos;achat
+                                            </p>
+                                        )}
                                     </div>
                                     <span className="checkout__shipping-price">
                                         {parseFloat(method.price) === 0 ? "Gratuit" : formatPrice(method.price)}
                                     </span>
                                 </label>
-                            ))}
+                                )
+                            })}
                         </div>
                         {fieldErrors.shipping && <small className="checkout__field-error" role="alert">{fieldErrors.shipping}</small>}
                     </section>

@@ -3,7 +3,7 @@ import {db, withTransaction} from "../core/database.js";
 import {Order} from "../entity/Order.js";
 import {ValidationException} from "../error/HttpException.js";
 import {Logger} from "../services/Logger.js";
-import {computeOrderTotals} from "../services/OrderPricing.js";
+import {computeOrderTotals, FREE_SHIPPING_THRESHOLD} from "../services/OrderPricing.js";
 
 class OrderRepository extends Repository {
 
@@ -171,6 +171,10 @@ class OrderRepository extends Repository {
                 }
             }
 
+            // Sous-total d'abord (sans livraison) : necessaire pour valider
+            // l'eligibilite a la livraison gratuite avant de fixer le cout.
+            const { subtotal } = computeOrderTotals(cartItems, 0)
+
             let shippingCost = 0
             let shippingName = "Livraison standard"
             if (shippingMethodId) {
@@ -184,9 +188,16 @@ class OrderRepository extends Repository {
                 }
             }
 
-            // Calcul des montants delegue a une fonction pure (testable + arrondi
-            // centimes coherent). Cf. services/OrderPricing.js.
-            const { subtotal, total } = computeOrderTotals(cartItems, shippingCost)
+            // Regle metier : la livraison GRATUITE (cout 0) n'est autorisee qu'au-dela
+            // d'un sous-total minimum. Verifie cote SERVEUR (le client est contournable).
+            if (shippingMethodId && shippingCost === 0 && subtotal < FREE_SHIPPING_THRESHOLD) {
+                throw new ValidationException(
+                    `La livraison gratuite necessite un minimum de ${FREE_SHIPPING_THRESHOLD} EUR d'achat (sous-total : ${subtotal.toFixed(2)} EUR).`
+                )
+            }
+
+            // Total final avec le cout de livraison retenu (fonction pure, arrondi centimes).
+            const { total } = computeOrderTotals(cartItems, shippingCost)
 
             const [orderResult] = await connection.query(
                 `INSERT INTO orders (user_id, shipping_address, shipping_method_id, shipping_cost, subtotal, total, status)
