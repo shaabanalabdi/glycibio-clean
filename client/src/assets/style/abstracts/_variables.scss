@@ -150,8 +150,8 @@ $shadow-up-md: 0 -2px 4px rgba(15, 23, 42, 0.04),
                0 -8px 24px rgba(15, 23, 42, 0.10);
 
 // -- Layout ---------------------------------------------------
-$container-max:    82.5rem;                       // 1320px (mieux occuper les grands ecrans)
-$container-pad:    clamp(1rem, 4vw, 1.5rem);     // 16 → 24 fluid
+$container-max:    110rem;                        // 1760px — remplit mieux les grands ecrans
+$container-pad:    clamp(1rem, 4vw, 2rem);       // 16 → 32 (gouttieres plus genereuses)
 $navbar-min-h:     3.5rem;                        // 56px mobile
 $navbar-min-h-md:  4rem;                          // 64px desktop
 $tap-target:       2.75rem;                       // 44px (WCAG 2.5.5)
