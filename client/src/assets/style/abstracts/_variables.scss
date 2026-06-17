@@ -53,14 +53,9 @@ $warning: #ffc107;
 $info:    #17a2b8;
 
 // -- Typography ------------------------------------------------
-// Note : on utilise une stack systeme par defaut (zero FOIT, zero requete
-// reseau, conforme RGPD - pas d'IP envoyee a Google Fonts CDN).
-// Pour activer Inter/Poppins en self-hosted, ajouter dans index.html :
-//   <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
-//   <link rel="preload" href="/fonts/Poppins-Variable.woff2" as="font" type="font/woff2" crossorigin>
-// puis declarer les @font-face avec font-display: swap, et basculer ici :
-//   $font-primary: 'Inter', <stack ci-dessous>;
-//   $font-heading: 'Poppins', <stack ci-dessous>;
+// Paire typographique auto-hebergee (cf. base/_fonts.scss) : zero requete
+// reseau, conforme RGPD (aucune IP envoyee a un CDN de polices). Fallback sur
+// la stack systeme ci-dessous si le woff2 n'est pas charge.
 $font-system:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
                  Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
 // Refonte 2026 — paire typographique auto-hebergee (cf. base/_fonts.scss).
