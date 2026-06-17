@@ -193,6 +193,9 @@
     @include breakpoint(lg) {
       grid-template-columns: repeat(3, minmax(0, 1fr));   // 3-col catalog grid
     }
+    @include breakpoint(xl) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));   // 4-col sur grands ecrans
+    }
   }
 
   &__loading,
