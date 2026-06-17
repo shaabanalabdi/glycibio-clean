@@ -164,13 +164,11 @@
   // ----- Nutrition : 3 stat cards -----
   &__nutrition-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    // Cartes stats compactes qui s'adaptent (~3 col mobile, plus au-delà) au lieu
+    // d'empiler en une seule colonne trop haute (ancien comportement < 576px).
+    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
     gap: $space-2xs;
     margin-bottom: $space-md;
-
-    @include responsive(sm) {
-      grid-template-columns: 1fr;
-    }
   }
 
   &__stat {
@@ -254,6 +252,7 @@
 
     &--available { color: $accent; font-weight: $fw-semibold; }
     &--out       { color: $error;   font-weight: $fw-semibold; }
+    &--low       { color: $warning-fg; font-weight: $fw-bold; }
   }
 
   &__cart {

@@ -98,7 +98,9 @@
     a {
       color: $gray-300;                    // contrast bump from gray-400
       font-size: $fs-sm;
-      padding: $space-3xs 0;               // larger tap area
+      min-height: $tap-target;             // cible tactile 44px (WCAG 2.5.5)
+      display: inline-flex;
+      align-items: center;
       transition: color $t-fast $ease;
       text-decoration: none;
 

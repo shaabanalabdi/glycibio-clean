@@ -12,6 +12,7 @@ import { useCart } from "@hooks/useCart.js"
 import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
 import { useGetProductQuery, useGetRelatedProductsQuery } from "@slices/productApiSlice.js"
 import { formatPrice } from "@utils/formatPrice.js"
+import { FREE_SHIPPING_THRESHOLD } from "@utils/constants.js"
 
 const SITE_BASE = "https://glycibio.fr"
 
@@ -251,7 +252,11 @@ export const Product = () => {
                             <span className="product-page__price">{formatPrice(product.price)}</span>
                             <span className="product-page__stock">
                                 {product.stock > 0 ? (
-                                    <span className="product-page__stock--available">En stock ({product.stock} disponibles)</span>
+                                    product.stock <= 5 ? (
+                                        <span className="product-page__stock--low">Plus que {product.stock} en stock !</span>
+                                    ) : (
+                                        <span className="product-page__stock--available">En stock ({product.stock} disponibles)</span>
+                                    )
                                 ) : (
                                     <span className="product-page__stock--out">Rupture de stock</span>
                                 )}
@@ -293,7 +298,7 @@ export const Product = () => {
 
                     {/* Ligne de confiance : livraison + stock */}
                     <ul className="product-page__trust">
-                        <li><Truck size={18} aria-hidden="true" /> Livraison rapide en 24/48h</li>
+                        <li><Truck size={18} aria-hidden="true" /> Livraison rapide 24/48h · offerte dès {FREE_SHIPPING_THRESHOLD}&nbsp;€</li>
                         <li><ShieldCheck size={18} aria-hidden="true" /> Paiement sécurisé · Bio certifié</li>
                     </ul>
                 </div>

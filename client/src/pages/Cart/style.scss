@@ -20,6 +20,10 @@
 // Cart page
 // ============================================================
 .cart {
+  // Espace bas pour ne pas masquer le contenu derrière la barre collante mobile
+  padding-bottom: 5rem;
+  @include breakpoint(lg) { padding-bottom: 0; }
+
   // -- 3-step stepper header (white panel) -----------------
   &__stepper {
     display: grid;
@@ -245,6 +249,38 @@
 
   &__checkout {
     box-shadow: 0 6px 16px rgba($primary, 0.32);
+  }
+
+  // ----- Barre de paiement collante (mobile uniquement) -----
+  &__sticky-bar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    padding: $space-2xs $space-sm;
+    padding-bottom: max(#{$space-2xs}, env(safe-area-inset-bottom));
+    background: $surface-elevated;
+    border-top: 1px solid $border;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+
+    @include breakpoint(lg) { display: none; }   // desktop : résumé latéral sticky
+  }
+
+  &__sticky-total {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+
+    span   { font-size: $fs-xs; color: $text-muted; }
+    strong { font-size: $fs-lg; color: $text-strong; font-family: $font-heading; font-variant-numeric: tabular-nums; }
+  }
+
+  &__sticky-checkout {
+    flex: 1;
+    min-height: $tap-target;
+    white-space: nowrap;
   }
 
   // Continue shopping (text button under the items list)

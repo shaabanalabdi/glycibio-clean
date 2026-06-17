@@ -537,6 +537,17 @@ export const Cart = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Barre de paiement collante — mobile uniquement (CTA toujours accessible) */}
+            <div className="cart__sticky-bar">
+                <div className="cart__sticky-total">
+                    <span>Total</span>
+                    <strong>{formatPrice(cart.total)}</strong>
+                </div>
+                <button type="button" className="btn btn--primary cart__sticky-checkout" onClick={handleCheckoutClick}>
+                    {isGuest ? "Se connecter" : "Commander"}
+                </button>
+            </div>
         </div>
     )
 }
