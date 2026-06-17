@@ -88,10 +88,17 @@ class OrderRepository extends Repository {
         await db.query("UPDATE orders SET confirmation_email_sent = 0 WHERE id = ?", [orderId])
     }
 
+    // "Mes commandes" : on n'affiche QUE les commandes reellement payees (et leurs
+    // etats ulterieurs : preparation/expediee/livree/remboursee). Les commandes
+    // 'en_attente' (tunnel de paiement non finalise) et 'annulee' sont des
+    // artefacts de panier/checkout abandonne et ne doivent pas polluer l'historique.
     findByUser = async (userId) => {
         const [rows] = await db.query(
             `SELECT id, subtotal, shipping_cost, total, status, shipping_address, created_at
-             FROM orders WHERE user_id = ? ORDER BY created_at DESC`,
+             FROM orders
+             WHERE user_id = ?
+               AND status IN ('payee','en_preparation','expediee','livree','remboursee')
+             ORDER BY created_at DESC`,
             [userId]
         )
         return rows
