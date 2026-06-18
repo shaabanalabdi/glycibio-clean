@@ -26,6 +26,8 @@ async function run() {
         const catLaitiers = categoryMap["Produits laitiers"];
         const catEpicerieSalee = categoryMap["Epicerie salee"];
         const catFruitsLegumes = categoryMap["Fruits et legumes"];
+        const catCompl = categoryMap["Complements alimentaires"];
+        const catSnacks = categoryMap["Snacks et en-cas"];
 
         if (!catEpicerieSucree) {
             throw new Error("Required category 'Epicerie sucree' not found. Please run base schema import first.");
@@ -106,6 +108,42 @@ async function run() {
                 allergens: JSON.stringify([]),
                 nutritional_info: JSON.stringify({ calories: 95, proteines: 1.8, glucides: 21, lipides: 0.2, fibres: 3.2 }),
                 category_id: catFruitsLegumes
+            },
+            {
+                name: "Yaourt de Brebis Bio IG Bas",
+                slug: "yaourt-de-brebis-bio-ig-bas-demo",
+                description: "Yaourts au lait de brebis biologique, cremeux et onctueux. Tres digeste, riche en proteines et calcium, sans sucre ajoute pour un IG tres bas (IG 15).",
+                price: 3.50,
+                image: "/uploads/products/yaourt-brebis-ig-bas.webp",
+                stock: 45,
+                glycemic_index: 15,
+                allergens: JSON.stringify(["lactose"]),
+                nutritional_info: JSON.stringify({ calories: 90, proteines: 6, glucides: 4, lipides: 5.5, fibres: 0 }),
+                category_id: catLaitiers
+            },
+            {
+                name: "Graines de Chia Bio",
+                slug: "graines-de-chia-bio-demo",
+                description: "Graines de chia biologiques de haute qualite, riches en acides gras Omega-3, en fibres et en proteines. Ideales pour preparer des puddings sains a IG tres bas (IG 1).",
+                price: 4.90,
+                image: "/uploads/products/graines-chia-ig-bas.webp",
+                stock: 110,
+                glycemic_index: 1,
+                allergens: JSON.stringify([]),
+                nutritional_info: JSON.stringify({ calories: 486, proteines: 17, glucides: 42, lipides: 31, fibres: 34 }),
+                category_id: catCompl
+            },
+            {
+                name: "Galettes de Riz Souffle Bio",
+                slug: "galettes-de-riz-souffle-bio-demo",
+                description: "Galettes de riz souffle biologique croustillantes. Bien qu'appreciees en collation legere, elles possedent un index glycemique eleve (IG 85) a consommer avec moderation ou a associer avec des graisses saines.",
+                price: 1.90,
+                image: "/uploads/products/galettes-riz-ig-eleve.webp",
+                stock: 130,
+                glycemic_index: 85,
+                allergens: JSON.stringify([]),
+                nutritional_info: JSON.stringify({ calories: 380, proteines: 8, glucides: 80, lipides: 3, fibres: 4 }),
+                category_id: catSnacks
             }
         ];
 

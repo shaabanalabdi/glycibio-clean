@@ -60,6 +60,18 @@ const files = [
     {
         input: path.join(brainDir, "xylitol_1781740883170.png"),
         output: path.join(uploadDir, "xylitol.webp")
+    },
+    {
+        input: path.join(brainDir, "yaourt_brebis_1781741281991.png"),
+        output: path.join(uploadDir, "yaourt-brebis-ig-bas.webp")
+    },
+    {
+        input: path.join(brainDir, "graines_chia_1781741291645.png"),
+        output: path.join(uploadDir, "graines-chia-ig-bas.webp")
+    },
+    {
+        input: path.join(brainDir, "galettes_riz_1781741301452.png"),
+        output: path.join(uploadDir, "galettes-riz-ig-eleve.webp")
     }
 ];
 
