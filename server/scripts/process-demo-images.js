@@ -28,6 +28,38 @@ const files = [
     {
         input: path.join(brainDir, "puree_patates_1781740589443.png"),
         output: path.join(uploadDir, "puree-patates-ig-moyen.webp")
+    },
+    {
+        input: path.join(brainDir, "sauce_tomate_1781740815384.png"),
+        output: path.join(uploadDir, "sauce-tomate.webp")
+    },
+    {
+        input: path.join(brainDir, "proteine_pois_1781740824121.png"),
+        output: path.join(uploadDir, "proteine-pois.webp")
+    },
+    {
+        input: path.join(brainDir, "farine_coco_1781740833201.png"),
+        output: path.join(uploadDir, "farine-coco.webp")
+    },
+    {
+        input: path.join(brainDir, "stevia_poudre_1781740844864.png"),
+        output: path.join(uploadDir, "stevia-poudre.webp")
+    },
+    {
+        input: path.join(brainDir, "erythritol_1781740853809.png"),
+        output: path.join(uploadDir, "erythritol.webp")
+    },
+    {
+        input: path.join(brainDir, "monk_fruit_1781740862550.png"),
+        output: path.join(uploadDir, "monk-fruit.webp")
+    },
+    {
+        input: path.join(brainDir, "stevia_erythritol_1781740873058.png"),
+        output: path.join(uploadDir, "stevia-erythritol.webp")
+    },
+    {
+        input: path.join(brainDir, "xylitol_1781740883170.png"),
+        output: path.join(uploadDir, "xylitol.webp")
     }
 ];
 
