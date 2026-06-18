@@ -93,7 +93,7 @@ export const Navbar = () => {
                 <ul className="top-bar__rotator">
                     <li>
                         <Truck size={14} strokeWidth={2.25} aria-hidden="true" />
-                        <span>Livraison gratuite d&egrave;s 49&nbsp;&euro; en France</span>
+                        <span>Livraison gratuite d&egrave;s 50&nbsp;&euro; en France</span>
                     </li>
                     <li>
                         <Undo2 size={14} strokeWidth={2.25} aria-hidden="true" />

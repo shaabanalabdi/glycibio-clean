@@ -2,34 +2,14 @@
 # GlyciBio — Dockerfile pour le Frontend React (Nginx)
 # ============================================================
 
-# Etape 1 : Build de l'application React
-FROM node:20-alpine AS build
-
-WORKDIR /app
-
-# Copier les fichiers de dependances
-COPY client/package*.json ./
-
-# Installer toutes les dependances
-RUN npm ci --legacy-peer-deps
-
-# Copier le code source du client
-COPY client/ ./
-
-# Definir l'URL de l'API pour le build (par defaut relative /api)
-ENV VITE_API_URL=/api
-
-# Compiler l'application pour la production
-RUN npm run build
-
-# Etape 2 : Serveur Nginx de production
+# Serveur Nginx de production
 FROM nginx:1.25-alpine
 
 # Copier la configuration Nginx personnalisee
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copier les fichiers compiles depuis l'etape de build
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copier les fichiers compiles (pre-built sur l'hote)
+COPY client/dist /usr/share/nginx/html
 
 EXPOSE 80
 

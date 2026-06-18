@@ -3,7 +3,7 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 // Base commune a tous les apiSlices :
 //   - credentials: "include" -> envoie le cookie HttpOnly d'authentification
 //   - timeout 15s (meme garde-fou que l'ancien services/api.js)
-export const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000/api"
+export const API_URL = import.meta.env?.VITE_API_URL || (import.meta.env?.DEV ? "http://localhost:5000/api" : "/api")
 
 // Lit un cookie non-httpOnly cote client (ici : le jeton CSRF depose par l'API).
 const readCookie = (name) => {

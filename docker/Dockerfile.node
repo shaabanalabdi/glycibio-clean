@@ -1,15 +1,15 @@
 # ============================================================
 # GlyciBio — Dockerfile pour l'API Node.js
 # ============================================================
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
 # Copier les fichiers de dependances
 COPY server/package*.json ./
 
-# Installer uniquement les dependances de production
-RUN npm ci --omit=dev && npm cache clean --force
+# Installer uniquement les dependances de production avec yarn (strict-ssl desactive pour le reseau local)
+RUN yarn config set strict-ssl false && yarn install --production
 
 # Copier le code source
 COPY server/src ./src
