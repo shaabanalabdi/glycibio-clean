@@ -297,11 +297,11 @@
 
   &__grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: $space-md;
+    // 2x2 des le mobile (au lieu d'une seule colonne empilee = 4 lignes hautes)
+    grid-template-columns: repeat(2, 1fr);
+    gap: $space-sm;
 
-    @include breakpoint(sm) { grid-template-columns: repeat(2, 1fr); }
-    @include breakpoint(lg) { grid-template-columns: repeat(4, 1fr); }
+    @include breakpoint(lg) { grid-template-columns: repeat(4, 1fr); gap: $space-md; }
   }
 
   &__item {
@@ -353,7 +353,30 @@
   margin-bottom: $space-fluid-xl;
 
   &__grid {
-    @include auto-grid(13rem, $space-md);
+    // Mobile/petit ecran : carrousel horizontal (scroll-snap, sans JS) — evite
+    // une longue pile verticale de cartes ; grille auto a partir de md.
+    display: flex;
+    gap: $space-md;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-block: 0.25rem 0.5rem;     // n'ampute pas l'ombre des cartes
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+
+    > * {
+      flex: 0 0 62%;                    // ~1,6 carte visible (telephone)
+      scroll-snap-align: start;
+    }
+    @include breakpoint(sm) { > * { flex-basis: 40%; } }   // ~2,5 cartes
+
+    // A partir de md : grille auto classique (plus de carrousel)
+    @include breakpoint(md) {
+      @include auto-grid(13rem, $space-md);
+      overflow: visible;
+      scroll-snap-type: none;
+      > * { flex: initial; }
+    }
   }
 }
 
@@ -495,5 +518,20 @@
       > * { flex: initial; }
     }
   }
+}
+
+// ============================================================
+// Compactage mobile — reduit la hauteur de l'accueil sur telephone :
+// espacement inter-sections resserre + masque les descriptions
+// secondaires de la trust-strip (tuiles 2x2 plus compactes).
+// ============================================================
+@media (max-width: 47.99em) {
+  .hero,
+  .trust-strip,
+  .home-categories,
+  .home-products { margin-bottom: $space-lg; }
+}
+@media (max-width: 35.99em) {
+  .trust-strip__copy p:not(.trust-strip__title) { display: none; }
 }
 
