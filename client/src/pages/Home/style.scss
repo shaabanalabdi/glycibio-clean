@@ -533,5 +533,20 @@
 }
 @media (max-width: 35.99em) {
   .trust-strip__copy p:not(.trust-strip__title) { display: none; }
+
+  // Hero plus compact sur telephone : titre + interlignes + marges resserres
+  // (on garde tout le contenu, on reduit seulement la hauteur).
+  .hero { padding-block: $space-md; }
+  .hero__eyebrow { margin-bottom: $space-sm; }
+  .hero__title {
+    font-size: clamp(1.875rem, 1.35rem + 2.6vw, 2.25rem);   // ~30 -> 36 (au lieu de 38)
+    margin-bottom: $space-sm;
+  }
+  .hero__text {
+    font-size: $fs-base;          // 16 (au lieu de ~17-18)
+    line-height: $lh-base;        // 1.6 (au lieu de 1.75)
+    margin-bottom: $space-md;
+  }
+  .hero__actions { margin-bottom: $space-md; }
 }
 
