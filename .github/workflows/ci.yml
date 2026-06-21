@@ -1,100 +1,112 @@
 name: CI
 
-# Pipeline d'integration continue GlyciBio.
-# Se declenche sur push/PR vers main. Deux jobs paralleles : API et Front.
+# ============================================================
+# Integration continue GlyciBio (DWWM) — Node 20
+#   1) quality        : lint (ESLint) + build (Vite) + npm audit (non bloquant)
+#   2) client-tests   : tests unitaires front (node --test)
+#   3) server-tests   : tests unitaires back  (node --test, sans base)
+#   4) integration    : tests d'integration back contre une VRAIE base MySQL 8
+#   5) web-audit      : Lighthouse + Pa11y sur le build (NON bloquant)
+# ============================================================
+
 on:
   push:
-    branches: [ main ]
+    branches: [main, hardening]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
-# Annule les runs precedents encore en cours sur la meme ref (economise du CI).
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ----------------------------------------------------------------
-  # API Node/Express : install -> tests (node:test) -> audit securite
-  # ----------------------------------------------------------------
-  server:
-    name: API (server)
+  # ----------------------------------------------------------
+  # 1) Qualite : lint + build + audit de securite des dependances
+  # ----------------------------------------------------------
+  quality:
+    name: Lint - Build - Audit (Node 20)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: server
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: server/package-lock.json
+          node-version: "20"
 
-      - name: Install (npm ci)
+      - name: Install client deps
+        working-directory: client
         run: npm ci
 
-      - name: Tests (node:test)
-        run: npm test
-        env:
-          NODE_ENV: test
-          DISABLE_CRON: "1"
-          JWT_SECRET: ci_test_secret_de_32_caracteres_minimum_xx
-
-      - name: Audit securite (dependances de prod, niveau high+)
-        run: npm audit --omit=dev --audit-level=high
-        continue-on-error: true
-
-  # ----------------------------------------------------------------
-  # Front React/Vite : install -> lint -> build -> audit securite
-  # ----------------------------------------------------------------
-  client:
-    name: Front (client)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
+      - name: Lint client (ESLint)
         working-directory: client
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        run: npm run lint
 
+      - name: Build client (Vite)
+        working-directory: client
+        run: npm run build
+
+      - name: Install server deps
+        working-directory: server
+        run: npm ci
+
+      - name: npm audit (non bloquant)
+        continue-on-error: true
+        run: |
+          echo "::group::client audit"
+          npm audit --omit=dev --audit-level=high --prefix client || true
+          echo "::endgroup::"
+          echo "::group::server audit"
+          npm audit --omit=dev --audit-level=high --prefix server || true
+          echo "::endgroup::"
+
+  # ----------------------------------------------------------
+  # 2) Tests unitaires front (node --test)
+  # ----------------------------------------------------------
+  client-tests:
+    name: Tests front (Node 20)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: client/package-lock.json
-
-      # --legacy-peer-deps : aligne sur docker/Dockerfile.client (conflits de
-      # peer-deps autour de React 19 / react-router 7).
-      - name: Install (npm ci)
-        run: npm ci --legacy-peer-deps
-
-      - name: Lint (eslint)
-        run: npm run lint
-
-      - name: Tests (node:test)
+          node-version: "20"
+      - name: Install client deps
+        working-directory: client
+        run: npm ci
+      - name: Run client unit tests
+        working-directory: client
         run: npm test
 
-      - name: Build (vite)
-        run: npm run build
-        env:
-          VITE_API_URL: /api
+  # ----------------------------------------------------------
+  # 3) Tests unitaires back (sans base ; l'integration est ignoree)
+  # ----------------------------------------------------------
+  server-tests:
+    name: Tests back unitaires (Node 20)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install server deps
+        working-directory: server
+        run: npm ci
+      - name: Run server unit tests
+        working-directory: server
+        run: npm test
 
-      - name: Audit securite (dependances de prod, niveau high+)
-        run: npm audit --omit=dev --audit-level=high
-        continue-on-error: true
-
-  # ----------------------------------------------------------------
-  # Tests d'INTEGRATION : MySQL reel (service conteneurise) -> verifie le code
-  # transactionnel (creation de commande, decrement de stock, idempotence du
-  # marquage paye, restauration de stock). Job separe car il a besoin d'une BDD.
-  # ----------------------------------------------------------------
+  # ----------------------------------------------------------
+  # 4) Tests d'integration back contre une vraie base MySQL 8
+  #    (active par les variables TEST_DB_* ; cf. order.integration.test.js)
+  # ----------------------------------------------------------
   integration:
-    name: API (integration MySQL)
+    name: Tests integration MySQL 8 (Node 20)
     runs-on: ubuntu-latest
     services:
       mysql:
@@ -109,87 +121,73 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=15
-    defaults:
-      run:
-        working-directory: server
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: server/package-lock.json
+          node-version: "20"
 
-      - name: Install (npm ci)
+      - name: Wait for MySQL
+        run: |
+          for i in $(seq 1 30); do
+            if mysqladmin ping -h 127.0.0.1 -P 3306 -uroot -proot --silent; then
+              echo "MySQL is up"; break
+            fi
+            echo "waiting for mysql ($i)..."; sleep 2
+          done
+
+      - name: Load production schema
+        run: mysql -h 127.0.0.1 -P 3306 -uroot -proot glycibio_test < database/glycibio-database-production.sql
+
+      - name: Install server deps
+        working-directory: server
         run: npm ci
 
-      - name: Charger le schema dans MySQL
-        run: mysql -h 127.0.0.1 -P 3306 -u root -proot glycibio_test < ../database/glycibio-database-production.sql
-
-      - name: Tests (unitaires + integration)
-        run: npm test
+      - name: Run integration tests
+        working-directory: server
         env:
-          NODE_ENV: test
-          DISABLE_CRON: "1"
-          JWT_SECRET: ci_test_secret_de_32_caracteres_minimum_xx
           TEST_DB_HOST: 127.0.0.1
           TEST_DB_PORT: "3306"
           TEST_DB_USER: root
           TEST_DB_PASSWORD: root
           TEST_DB_NAME: glycibio_test
+        run: npm test
 
-  # ----------------------------------------------------------------
-  # Audit web NON BLOQUANT : performance + accessibilite (Lighthouse CI
-  # + Pa11y) sur le build du front. Remplace l'execution locale (ces outils
-  # sont absents de l'environnement de dev). Toutes les etapes tolerent les
-  # erreurs (continue-on-error) -> informatif, ne bloque jamais la CI.
-  # ----------------------------------------------------------------
-  audit-web:
-    name: Audit web (Lighthouse + Pa11y, non bloquant)
+  # ----------------------------------------------------------
+  # 5) Audit web Lighthouse + Pa11y sur le build — NON bloquant
+  # ----------------------------------------------------------
+  web-audit:
+    name: Audit web (Lighthouse + Pa11y) - non bloquant
     runs-on: ubuntu-latest
-    needs: client
-    defaults:
-      run:
-        working-directory: client
+    needs: quality
+    continue-on-error: true
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: client/package-lock.json
+          node-version: "20"
 
-      - name: Install (npm ci)
-        run: npm ci --legacy-peer-deps
-        continue-on-error: true
+      - name: Install client deps
+        working-directory: client
+        run: npm ci
 
-      - name: Build (vite)
+      - name: Build client
+        working-directory: client
         run: npm run build
-        env:
-          VITE_API_URL: /api
-        continue-on-error: true
 
-      - name: Lighthouse CI (perf / a11y / SEO / best-practices)
-        run: npx --yes @lhci/cli@0.14.x autorun --collect.staticDistDir=./dist --collect.numberOfRuns=1 --upload.target=filesystem --upload.outputDir=./.lighthouseci
+      - name: Serve build + run audits
+        working-directory: client
         continue-on-error: true
-
-      - name: Pa11y (accessibilite WCAG2AA)
         run: |
-          npx --yes serve -s dist -l 4173 &
-          npx --yes wait-on http://127.0.0.1:4173 -t 30000
-          npx --yes pa11y --standard WCAG2AA http://127.0.0.1:4173/
-        continue-on-error: true
-
-      - name: Publier le rapport Lighthouse (artifact)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-report
-          path: client/.lighthouseci
-          if-no-files-found: ignore
+          npx --yes vite preview --port 4173 --host 127.0.0.1 &
+          npx --yes wait-on http://127.0.0.1:4173 --timeout 60000
+          echo "::group::Lighthouse"
+          npx --yes @lhci/cli@0.13.x collect --url=http://127.0.0.1:4173 --numberOfRuns=1 || true
+          echo "::endgroup::"
+          echo "::group::Pa11y"
+          npx --yes pa11y http://127.0.0.1:4173 || true
+          echo "::endgroup::"
