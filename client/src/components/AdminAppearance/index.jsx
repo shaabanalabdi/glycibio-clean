@@ -44,6 +44,9 @@ export const AdminAppearance = () => {
         if (!settings) return
         const next = {}
         for (const f of HERO_FIELDS) next[f.key] = settings[f.key] ?? ""
+        // Synchronisation volontaire de l'etat local avec les settings charges
+        // (RTK Query, donnee asynchrone) : reset du formulaire au chargement.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setForm(next)
     }, [settings])
 

@@ -106,9 +106,10 @@ export const Home = () => {
                             )}
                         </div>
                         <ul className="hero__trust" aria-label="Garanties GlyciBio">
-                            {heroTrust.map(({ Icon, label }, i) => (
-                                <li key={i}><Icon size={16} aria-hidden="true" /> {label}</li>
-                            ))}
+                            {heroTrust.map((trust, i) => {
+                                const Icon = trust.Icon
+                                return <li key={i}><Icon size={16} aria-hidden="true" /> {trust.label}</li>
+                            })}
                         </ul>
                     </div>
                 </div>
