@@ -78,7 +78,7 @@ DEPLOY_BRANCH=main PM2_APP=glycibio-api bash deploy/deploy.sh
   `openssl rand -base64 48` ; clés **Stripe LIVE** ; SMTP (`noreply@glycibio.fr`).
 - [ ] **Webhook Stripe** → `https://glycibio.fr/api/webhooks/stripe`
   (events : `checkout.session.completed/expired/async_payment_failed`,
-  `payment_intent.payment_failed/canceled`) → copier le `whsec_…` dans `.env` →
+  `payment_intent.payment_failed/canceled`, `charge.refunded`) → copier le `whsec_…` dans `.env` →
   `pm2 reload glycibio-api --update-env`.
 - [ ] **Vérifs externes** : [SSL Labs](https://www.ssllabs.com/ssltest/),
   [securityheaders.com](https://securityheaders.com) (CSP/HSTS), parcours d'achat test

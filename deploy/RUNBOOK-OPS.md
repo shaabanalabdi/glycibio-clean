@@ -52,7 +52,7 @@ Symptôme : avertissement navigateur. Voir §4 (renouvellement + secours manuel)
 pm2 logs glycibio-api --lines 200 --nostream | grep -i "429\|csrf\|locked"
 sudo tail -200 /var/log/nginx/access.log | awk '{print $1}' | sort | uniq -c | sort -rn | head
 ```
-- Rate-limiting applicatif (login/admin/global) actif. Pic depuis une IP → bloquer au pare-feu : `sudo ufw deny from <IP>`.
+- Rate-limiting applicatif (4 zones : global 300/min, login 5/min, contact 5/h, admin 200/min) actif. Pic depuis une IP → bloquer au pare-feu : `sudo ufw deny from <IP>`.
 
 ### 1.5 Perte du VPS (sinistre majeur)
 Voir §2.4 (reconstruction complète depuis snapshot + sauvegarde hors-site).
@@ -95,7 +95,7 @@ rclone ls ovh:glycibio-backups        # le dernier dump doit apparaître
 cd ~/glycibio/server/backups
 ls -lt *.sql.gz | head                      # choisir le dump
 # (hors-site : rclone copy ovh:glycibio-backups ./ --max-age 24h)
-gunzip -c glycibio-YYYY-MM-DD.sql.gz | sudo mysql glycibio
+gunzip -c glycibio_YYYY-MM-DD_HHMM.sql.gz | sudo mysql glycibio
 pm2 restart glycibio-api --update-env
 curl -s https://glycibio.fr/api/health
 ```
