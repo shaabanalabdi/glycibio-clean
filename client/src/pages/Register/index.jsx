@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useAuthenticated } from "@hooks/useAuthenticated.js"
 import { useDocumentMeta } from "@hooks/useDocumentMeta.js"
+import { checkPassword, isPasswordStrong } from "@utils/passwordPolicy.js"
 
 export const Register = () => {
     useDocumentMeta({
@@ -30,6 +31,9 @@ export const Register = () => {
         ? nextParam
         : "/"
 
+    // Etat, en direct, de chaque regle de la politique de mot de passe (retour visuel).
+    const passwordChecks = checkPassword(form.password)
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target
         setForm({ ...form, [name]: type === "checkbox" ? checked : value })
@@ -42,6 +46,12 @@ export const Register = () => {
         if (!form.cgv) {
             setError("Vous devez accepter les CGV et la politique de confidentialite")
             document.querySelector('[name="cgv"]')?.focus()
+            return
+        }
+
+        if (!isPasswordStrong(form.password)) {
+            setError("Le mot de passe ne respecte pas la politique de securite (voir les regles sous le champ)")
+            document.querySelector('[name="password"]')?.focus()
             return
         }
 
@@ -136,7 +146,17 @@ export const Register = () => {
                         minLength={12}
                         aria-describedby="reg-password-hint"
                     />
-                    <small id="reg-password-hint" className="auth-form__hint">Min. 12 caracteres, 1 majuscule, 1 chiffre, 1 caractere special</small>
+                    <small id="reg-password-hint" className="auth-form__hint">Min. 12 caracteres, 1 minuscule, 1 majuscule, 1 chiffre, 1 caractere special</small>
+                    {form.password.length > 0 && (
+                        <ul className="pwd-rules" aria-label="Exigences du mot de passe" aria-live="polite">
+                            {passwordChecks.map((c) => (
+                                <li key={c.key} className={`pwd-rules__item ${c.ok ? "is-valid" : "is-invalid"}`}>
+                                    <span className="pwd-rules__icon" role="img" aria-label={c.ok ? "satisfait" : "non satisfait"}>{c.ok ? "✓" : "○"}</span>
+                                    {c.label}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
 
                 <div className="auth-form__field">

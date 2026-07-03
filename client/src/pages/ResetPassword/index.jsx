@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useResetPasswordMutation } from "@slices/authApiSlice.js"
+import { checkPassword, isPasswordStrong } from "@utils/passwordPolicy.js"
 
 export const ResetPassword = () => {
     const [searchParams] = useSearchParams()
@@ -26,10 +27,19 @@ export const ResetPassword = () => {
         )
     }
 
+    // Etat, en direct, de chaque regle de la politique de mot de passe (retour visuel).
+    const passwordChecks = checkPassword(passwords.new_password)
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError("")
         setMsg("")
+
+        if (!isPasswordStrong(passwords.new_password)) {
+            setError("Le mot de passe ne respecte pas la politique de securite (voir les regles sous le champ)")
+            document.getElementById("new_password")?.focus()
+            return
+        }
 
         if (passwords.new_password !== passwords.confirm_password) {
             setError("Les mots de passe ne correspondent pas")
@@ -79,7 +89,17 @@ export const ResetPassword = () => {
                                 autoComplete="new-password"
                                 aria-describedby="reset-password-hint"
                             />
-                            <small id="reset-password-hint">Min. 12 caracteres, 1 majuscule, 1 chiffre, 1 caractere special</small>
+                            <small id="reset-password-hint">Min. 12 caracteres, 1 minuscule, 1 majuscule, 1 chiffre, 1 caractere special</small>
+                            {passwords.new_password.length > 0 && (
+                                <ul className="pwd-rules" aria-label="Exigences du mot de passe" aria-live="polite">
+                                    {passwordChecks.map((c) => (
+                                        <li key={c.key} className={`pwd-rules__item ${c.ok ? "is-valid" : "is-invalid"}`}>
+                                            <span className="pwd-rules__icon" role="img" aria-label={c.ok ? "satisfait" : "non satisfait"}>{c.ok ? "✓" : "○"}</span>
+                                            {c.label}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
 
                         <div className="auth__field">

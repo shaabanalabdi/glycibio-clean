@@ -368,7 +368,7 @@ export const Cart = () => {
                                     <div className="cart-item__ig">
                                         <IgMeter ig={item.glycemic_index} size="sm" />
                                         {item.ig_category && (
-                                            <span className={`badge-ig badge-ig--${item.ig_category}`}>
+                                            <span className={`ig-badge ig-badge--${item.ig_category}`}>
                                                 IG {item.glycemic_index}
                                             </span>
                                         )}

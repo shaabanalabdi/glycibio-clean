@@ -112,7 +112,7 @@ export const ProductCard = ({ product }) => {
                 )}
 
                 <span
-                    className={`product-card__badge badge-ig badge-ig--${igClass}`}
+                    className={`product-card__badge ig-badge ig-badge--${igClass}`}
                 >
                     IG {product.glycemic_index}
                 </span>
