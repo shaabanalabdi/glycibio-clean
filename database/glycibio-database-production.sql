@@ -46,9 +46,15 @@ SET sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 -- ============================================================
 -- CREATE DATABASE IF NOT EXISTS glycibio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- USE glycibio;
--- CREATE USER IF NOT EXISTS 'glycibio_app'@'%' IDENTIFIED BY 'CHANGER_CE_MOT_DE_PASSE';
--- GRANT ALL PRIVILEGES ON glycibio.* TO 'glycibio_app'@'%';
+-- -- Utilisateur applicatif au MOINDRE PRIVILEGE (droits DML uniquement) : c'est
+-- -- le compte avec lequel l'API se connecte au runtime (JAMAIS root).
+-- CREATE USER IF NOT EXISTS 'glycibio_app'@'localhost' IDENTIFIED BY 'CHANGER_CE_MOT_DE_PASSE';
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON glycibio.* TO 'glycibio_app'@'localhost';
 -- FLUSH PRIVILEGES;
+-- -- /!\ IMPORT DU SCHEMA : ce fichier cree une PROCEDURE + des TRIGGERS, ce qui
+-- --     exige des privileges (CREATE ROUTINE/TRIGGER). L'import doit donc etre
+-- --     fait par un compte PRIVILEGIE (root : `mysql -u root -p < ...`, cf. B).
+-- --     glycibio_app (DML seul) sert a la connexion applicative, pas a l'import.
 
 -- ============================================================
 -- Nettoyage (re-import propre) — ordre inverse des dependances

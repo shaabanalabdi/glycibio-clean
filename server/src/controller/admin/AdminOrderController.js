@@ -1,5 +1,5 @@
 import {orderRepository} from "../../repository/OrderRepository.js";
-import {ValidationException, NotFoundException} from "../../error/HttpException.js";
+import {ValidationException, ConflictException, NotFoundException} from "../../error/HttpException.js";
 import {VALID_STATUSES, isValidStatusTransition} from "../../services/OrderStatus.js";
 
 export class AdminOrderController {
@@ -40,7 +40,10 @@ export class AdminOrderController {
             // Machine à états : refuse les transitions illogiques (ex. en_attente ->
             // livree sans paiement). No-op accepté si le statut est inchangé.
             if (!isValidStatusTransition(order.status, status)) {
-                throw new ValidationException(`Transition de statut invalide : ${order.status} -> ${status}`)
+                // Transition illogique sur une ressource existante = conflit d'etat (409),
+                // et non une requete malformee (400) : le statut demande est valide en soi,
+                // mais incompatible avec l'etat courant de la commande.
+                throw new ConflictException(`Transition de statut invalide : ${order.status} -> ${status}`)
             }
 
             // 'remboursee' : meme chemin que le webhook Stripe (restaure le stock si
