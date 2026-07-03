@@ -65,7 +65,7 @@ Projet conçu, développé, sécurisé, testé et déployé **intégralement en 
 | **Paiement** | **Stripe Checkout** (page hébergée) + **webhook signé** (idempotence exactly-once) |
 | **Tests** | Runner natif **`node:test`** (zéro dépendance) — unitaires + intégration MySQL réelle |
 | **CI** | **GitHub Actions** — 5 jobs (lint+build+audit, tests front, tests back, intégration MySQL, audit web) |
-| **Production** | VPS OVH (Ubuntu 24.04), **Nginx** (reverse-proxy + TLS), **PM2**, HTTPS **Let's Encrypt**, **Docker** |
+| **Production** | VPS OVH (Ubuntu 24.04), **Nginx** (reverse-proxy + TLS), **PM2** (`glycibio-api`), HTTPS **Let's Encrypt** — *Docker : environnement de **développement** reproductible uniquement (cf. Option C), pas en production* |
 
 ## 3. Architecture
 
