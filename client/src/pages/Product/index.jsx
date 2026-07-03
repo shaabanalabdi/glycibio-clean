@@ -14,6 +14,7 @@ import { useGetProductQuery, useGetRelatedProductsQuery } from "@slices/productA
 import { formatPrice } from "@utils/formatPrice.js"
 import { FREE_SHIPPING_THRESHOLD } from "@utils/constants.js"
 import { RatingStars } from "@components/RatingStars/index.jsx"
+import { NotFound } from "@pages/NotFound/index.jsx"
 
 const SITE_BASE = "https://glycibio.fr"
 
@@ -153,6 +154,9 @@ export const Product = () => {
         </div>
     )
     if (!product) {
+        // 404 renvoyee par l'API : on affiche la page dediee "introuvable" (meme
+        // rendu que la route catch-all *), plutot qu'un simple message en ligne.
+        if (loadError === "notfound") return <NotFound />
         return (
             <div className="product-page">
                 <Link to="/catalogue" className="product-page__back">
@@ -193,7 +197,7 @@ export const Product = () => {
             <div className="product-page__content">
                 {/* Galerie (image principale + images supplementaires) */}
                 <div className="product-page__image">
-                    <span className={`product-page__ig-pill badge-ig badge-ig--${igClass}`}>
+                    <span className={`product-page__ig-pill ig-badge ig-badge--${igClass}`}>
                         IG {product.glycemic_index} · {igLabel}
                     </span>
                     <ProductGallery

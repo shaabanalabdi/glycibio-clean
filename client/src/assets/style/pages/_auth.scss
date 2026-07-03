@@ -183,3 +183,33 @@
   padding: $space-sm;
   font-size: $fs-base;
 }
+
+// ============================================================
+// Politique de mot de passe — retour visuel EN DIRECT, regle par regle.
+// Utilise par l'inscription et la reinitialisation. Chaque regle passe au vert
+// des qu'elle est satisfaite. La validation finale reste cote serveur.
+// ============================================================
+.pwd-rules {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: $fs-xs;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: $text-muted;
+    transition: color 0.15s ease;
+
+    &.is-valid { color: $success-fg; }
+  }
+
+  &__icon {
+    width: 1rem;
+    text-align: center;
+    font-weight: $fw-bold;
+  }
+}
