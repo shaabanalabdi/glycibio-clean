@@ -19,11 +19,6 @@ Projet fil rouge — Titre professionnel **Développeur Web et Web Mobile (DWWM)
 
 </div>
 
-> **Note pour le jury.** Ce dépôt contient le **code source complet** du projet. L'application est **réellement déployée** ;
-> le moyen le plus rapide d'évaluer le fonctionnel est de visiter **[glycibio.fr](https://glycibio.fr)**. Pour la revue de code,
-> ce README explique la structure du dépôt et propose **trois façons de lancer le projet** (production, local, Docker).
-> Le *Dossier de Projet* (PDF) est fourni séparément.
-
 ---
 
 ## Sommaire
