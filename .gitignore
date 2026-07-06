@@ -56,10 +56,7 @@ desktop.ini
 *.sw?
 
 # ============================================================
-# Outils IA / assistants locaux
+# Secrets (fichiers locaux)
 # ============================================================
-.claude/
-.agents/
-.mcp.json
 *.secret
 secrets.*
